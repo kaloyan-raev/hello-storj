@@ -2,21 +2,30 @@ package name.raev.kaloyan.hellostorj;
 
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class MainActivityFragment extends Fragment {
+public class MainActivityFragment extends ListFragment {
 
-    public MainActivityFragment() {
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        String[] values = new String[] { "Generate Mnemonic", "Get Timestamp", "Native Libraries" };
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_list_item_1, values);
+        setListAdapter(adapter);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_main, container, false);
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // TODO implement some logic
     }
+
 }
