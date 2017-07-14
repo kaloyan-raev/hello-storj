@@ -1,4 +1,4 @@
-package name.raev.kaloyan.hellostorj;
+package name.raev.kaloyan.hellostorj.jni;
 
 /**
  * Created by kraev on 7/14/17.

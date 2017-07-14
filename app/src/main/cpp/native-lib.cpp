@@ -6,7 +6,7 @@
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_name_raev_kaloyan_hellostorj_Storj_getTimestamp(
+Java_name_raev_kaloyan_hellostorj_jni_Storj_getTimestamp(
         JNIEnv *env,
         jclass /* clazz */) {
     return storj_util_timestamp();
@@ -14,7 +14,7 @@ Java_name_raev_kaloyan_hellostorj_Storj_getTimestamp(
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_name_raev_kaloyan_hellostorj_Storj_generateMnemonic(
+Java_name_raev_kaloyan_hellostorj_jni_Storj_generateMnemonic(
         JNIEnv *env,
         jclass /* clazz */,
         jint strength) {
@@ -25,7 +25,7 @@ Java_name_raev_kaloyan_hellostorj_Storj_generateMnemonic(
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_name_raev_kaloyan_hellostorj_NativeLibraries_getJsonCVersion(
+Java_name_raev_kaloyan_hellostorj_jni_NativeLibraries_getJsonCVersion(
         JNIEnv *env,
         jclass /* clazz */) {
     return env->NewStringUTF(json_c_version());
@@ -33,7 +33,7 @@ Java_name_raev_kaloyan_hellostorj_NativeLibraries_getJsonCVersion(
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_name_raev_kaloyan_hellostorj_NativeLibraries_getCurlVersion(
+Java_name_raev_kaloyan_hellostorj_jni_NativeLibraries_getCurlVersion(
         JNIEnv *env,
         jclass /* clazz */) {
     return env->NewStringUTF(curl_version());
@@ -41,7 +41,7 @@ Java_name_raev_kaloyan_hellostorj_NativeLibraries_getCurlVersion(
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_name_raev_kaloyan_hellostorj_NativeLibraries_getLibuvVersion(
+Java_name_raev_kaloyan_hellostorj_jni_NativeLibraries_getLibuvVersion(
         JNIEnv *env,
         jclass /* clazz */) {
     return env->NewStringUTF(uv_version_string());
@@ -49,7 +49,7 @@ Java_name_raev_kaloyan_hellostorj_NativeLibraries_getLibuvVersion(
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_name_raev_kaloyan_hellostorj_NativeLibraries_getNettleVersion(
+Java_name_raev_kaloyan_hellostorj_jni_NativeLibraries_getNettleVersion(
         JNIEnv *env,
         jclass /* clazz */) {
     char version[5];
@@ -59,7 +59,7 @@ Java_name_raev_kaloyan_hellostorj_NativeLibraries_getNettleVersion(
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_name_raev_kaloyan_hellostorj_NativeLibraries_getMHDVersion(
+Java_name_raev_kaloyan_hellostorj_jni_NativeLibraries_getMHDVersion(
         JNIEnv *env,
         jclass /* clazz */) {
     return env->NewStringUTF(MHD_get_version());

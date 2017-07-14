@@ -1,4 +1,4 @@
-package name.raev.kaloyan.hellostorj;
+package name.raev.kaloyan.hellostorj.jni;
 
 import java.util.HashMap;
 import java.util.Map;

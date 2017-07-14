@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import name.raev.kaloyan.hellostorj.jni.Storj;
+
 /**
  * A placeholder fragment containing a simple view.
  */

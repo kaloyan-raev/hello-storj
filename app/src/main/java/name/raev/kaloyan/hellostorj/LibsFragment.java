@@ -12,6 +12,8 @@ import android.widget.TextView;
 import java.util.Map;
 import java.util.TreeMap;
 
+import name.raev.kaloyan.hellostorj.jni.NativeLibraries;
+
 /**
  * A placeholder fragment containing a simple view.
  */
