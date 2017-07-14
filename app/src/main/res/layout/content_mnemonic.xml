@@ -11,6 +11,7 @@
         style="?android:attr/textAppearanceMedium"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16px"
         android:text="@string/description_mnemonic"
         tools:context="name.raev.kaloyan.hellostorj.MnemonicActivity" />
 
