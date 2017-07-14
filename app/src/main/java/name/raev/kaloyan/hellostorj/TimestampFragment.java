@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -30,6 +31,17 @@ public class TimestampFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.content_timestamp, container, false);
+
+        final TextView valueView = (TextView) rootView.findViewById(R.id.value);
+        valueView.setText(Long.toString(Storj.getTimestamp()));
+
+        final Button button = (Button) rootView.findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                valueView.setText(Long.toString(Storj.getTimestamp()));
+            }
+        });
+
         return rootView;
     }
 
