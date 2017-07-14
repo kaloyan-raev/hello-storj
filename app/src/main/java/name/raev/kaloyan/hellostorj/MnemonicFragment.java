@@ -5,6 +5,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -22,6 +24,17 @@ public class MnemonicFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.content_mnemonic, container, false);
+
+        final TextView valueView = (TextView) rootView.findViewById(R.id.value);
+        valueView.setText(Storj.generateMnemonic());
+
+        final Button button = (Button) rootView.findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                valueView.setText(Storj.generateMnemonic());
+            }
+        });
+
         return rootView;
     }
 

@@ -3,4 +3,8 @@
     <string name="title_mnemonic">Generate Mnemonic</string>
     <string name="title_timestamp">Get Timestamp</string>
     <string name="title_libs">Native Libraries</string>
+    <string name="description_mnemonic">Mnemonic generated with the storj_mnemonic_generate() native function:</string>
+    <string name="description_timestamp">Current UNIX timestamp retrieved with the storj_util_timestamp() native function:</string>
+    <string name="button_mnemonic">Regenerate</string>
+    <string name="button_timestamp">Update</string>
 </resources>
