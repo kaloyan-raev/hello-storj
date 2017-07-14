@@ -26,12 +26,12 @@ public class MnemonicFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.content_mnemonic, container, false);
 
         final TextView valueView = (TextView) rootView.findViewById(R.id.value);
-        valueView.setText(Storj.generateMnemonic());
+        valueView.setText(Storj.generateMnemonic(256));
 
         final Button button = (Button) rootView.findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                valueView.setText(Storj.generateMnemonic());
+                valueView.setText(Storj.generateMnemonic(256));
             }
         });
 
