@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">HelloStorj</string>
+    <string name="title_mnemonic">Generate Mnemonic</string>
+    <string name="title_timestamp">Get Timestamp</string>
+    <string name="title_libs">Native Libraries</string>
 </resources>
