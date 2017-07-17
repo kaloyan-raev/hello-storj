@@ -8,7 +8,7 @@ The app can be installed from Google Play: https://play.google.com/store/apps/de
 ## Features
 
 * [x] Build the libstorj native library and its dependencies for Android (armeabi-v7a only)
-* [x] `storj_util_features()`
+* [x] `storj_util_timestamp()`
 * [x] `storj_mnemonic_generate()`
 
 ## TODO
