@@ -20,6 +20,106 @@
 #include <nettle/version.h>
 #include <microhttpd/microhttpd.h>
 
+typedef struct {
+    JNIEnv *env;
+    jobject callbackObject;
+} jcallback_t;
+
+static void get_info_callback(uv_work_t *work_req, int status)
+{
+    assert(status == 0);
+    json_request_t *req = (json_request_t *) work_req->data;
+
+    if (req->error_code || req->response == NULL) {
+        free(req);
+        free(work_req);
+        if (req->error_code) {
+            // TODO call the callback with an error
+            printf("Request failed, reason: %s\n",
+                   curl_easy_strerror((CURLcode) req->error_code));
+        } else {
+            // TODO call the callback with an error
+            printf("Failed to get info.\n");
+        }
+        exit(1);
+    }
+
+    struct json_object *info;
+    json_object_object_get_ex(req->response, "info", &info);
+
+    struct json_object *title;
+    json_object_object_get_ex(info, "title", &title);
+    struct json_object *description;
+    json_object_object_get_ex(info, "description", &description);
+    struct json_object *version;
+    json_object_object_get_ex(info, "version", &version);
+    struct json_object *host;
+    json_object_object_get_ex(req->response, "host", &host);
+
+    jcallback_t *jcallback = (jcallback_t *) req->handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
+    jclass callbackClass = env->GetObjectClass(callbackObject);
+    jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                             "onInfoReceived",
+                                             "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+
+    env->CallVoidMethod(callbackObject,
+                        callbackMethod,
+                        env->NewStringUTF(json_object_get_string(title)),
+                        env->NewStringUTF(json_object_get_string(description)),
+                        env->NewStringUTF(json_object_get_string(version)),
+                        env->NewStringUTF(json_object_get_string(host)));
+
+    json_object_put(req->response);
+    free(req);
+    free(work_req);
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
+        JNIEnv *env,
+        jclass /* clazz */,
+        jobject callbackObject) {
+    storj_bridge_options_t options = {
+            .proto = "https",
+            .host  = "api.storj.io",
+            .port  = 443,
+            .user  = NULL,
+            .pass  = NULL
+    };
+
+    storj_http_options_t http_options = {
+            .user_agent = "Hello Storj",
+            .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
+            .low_speed_time = STORJ_LOW_SPEED_TIME,
+            .timeout = STORJ_HTTP_TIMEOUT
+    };
+
+    storj_log_options_t log_options = {
+            .logger = NULL,
+            .level = 0
+    };
+
+    storj_env_t *storj_env = NULL;
+    storj_env = storj_init_env(&options, NULL, &http_options, &log_options);
+    if (!storj_env) {
+        // TODO call the callback with an error
+        return 1;
+    }
+
+    jcallback_t jcallback = {
+            .env = env,
+            .callbackObject = callbackObject
+    };
+    storj_bridge_get_info(storj_env, &jcallback, get_info_callback);
+
+    uv_run(storj_env->loop, UV_RUN_DEFAULT);
+
+    return 0;
+}
+
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_getTimestamp(

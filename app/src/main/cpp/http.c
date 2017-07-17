@@ -629,6 +629,9 @@ int fetch_json(storj_http_options_t *http_options,
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_list);
     }
 
+    // TODO workaround for CURLE_SSL_CACERT error
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+
     int ret = 0;
     int req = curl_easy_perform(curl);
 

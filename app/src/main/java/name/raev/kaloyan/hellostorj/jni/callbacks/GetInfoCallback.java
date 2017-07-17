@@ -14,21 +14,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***************************************************************************/
-package name.raev.kaloyan.hellostorj.jni;
+package name.raev.kaloyan.hellostorj.jni.callbacks;
 
-import name.raev.kaloyan.hellostorj.jni.callbacks.GetInfoCallback;
+public interface GetInfoCallback {
 
-public class Storj {
-
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
-
-    public static native int getInfo(GetInfoCallback callback);
-
-    public static native long getTimestamp();
-
-    public static native String generateMnemonic(int strength);
+    void onInfoReceived(String title, String description, String version, String host);
 
 }

@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">Hello Storj</string>
+    <string name="title_bridge_info">Bridge Info</string>
     <string name="title_mnemonic">Generate Mnemonic</string>
     <string name="title_timestamp">Get Timestamp</string>
     <string name="title_libs">Native Libraries</string>
+    <string name="description_bridge_info">Storj bridge info retrieved with the storj_bridge_get_info() native function.</string>
     <string name="description_mnemonic">Mnemonic generated with the storj_mnemonic_generate() native function:</string>
     <string name="description_timestamp">Current UNIX timestamp retrieved with the storj_util_timestamp() native function:</string>
     <string name="button_mnemonic">Regenerate</string>

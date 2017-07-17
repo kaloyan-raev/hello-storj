@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:orientation="vertical">
+
+    <TextView
+        style="?android:attr/textAppearanceMedium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16px"
+        android:text="@string/description_bridge_info"
+        tools:context="name.raev.kaloyan.hellostorj.BridgeInfoActivity" />
+
+    <TextView
+        android:id="@+id/value"
+        style="?android:attr/textAppearanceLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32px"
+        android:layout_gravity="center"
+        tools:context="name.raev.kaloyan.hellostorj.BridgeInfoActivity" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="32px"
+        android:layout_gravity="center"
+        android:text="@string/button_timestamp" />
+
+</LinearLayout>

@@ -19,6 +19,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".BridgeInfoActivity"
+            android:label="@string/title_bridge_info"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="name.raev.kaloyan.hellostorj.MainActivity" />
+        </activity>
+        <activity
             android:name=".MnemonicActivity"
             android:label="@string/title_mnemonic"
             android:parentActivityName=".MainActivity"
@@ -46,5 +55,7 @@
                 android:value="name.raev.kaloyan.hellostorj.MainActivity" />
         </activity>
     </application>
+
+    <uses-permission android:name="android.permission.INTERNET"/>
 
 </manifest>

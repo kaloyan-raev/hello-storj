@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         ArrayList<Integer> items = new ArrayList<>(Arrays.asList(
-                R.string.title_mnemonic, R.string.title_timestamp, R.string.title_libs
+                R.string.title_bridge_info, R.string.title_mnemonic, R.string.title_timestamp, R.string.title_libs
         ));
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(items));
     }
@@ -118,10 +118,12 @@ public class MainActivity extends AppCompatActivity {
         private Class<? extends Activity> getActivity(int position) {
             switch (position) {
                 case 0:
-                    return MnemonicActivity.class;
+                    return BridgeInfoActivity.class;
                 case 1:
-                    return TimestampActivity.class;
+                    return MnemonicActivity.class;
                 case 2:
+                    return TimestampActivity.class;
+                case 3:
                 default:
                     return LibsActivity.class;
             }
@@ -130,10 +132,12 @@ public class MainActivity extends AppCompatActivity {
         private Fragment getFragment(int position) {
             switch (position) {
                 case 0:
-                    return new MnemonicFragment();
+                    return new BridgeInfoFragment();
                 case 1:
-                    return new TimestampFragment();
+                    return new MnemonicFragment();
                 case 2:
+                    return new TimestampFragment();
+                case 3:
                 default:
                     return new LibsFragment();
             }
