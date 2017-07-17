@@ -15,6 +15,7 @@ Hello Storj is a demo app for integrating the [libstorj](https://github.com/Stor
 * [ ] `storj_bridge_create_bucket()`
 * [ ] `storj_bridge_resolve_file()`
 * [ ] `storj_bridge_store_file()`
+* [ ] Build the libstorj native library and its dependencies for all CPU architectures
 
 ## JNI wrapper for libstorj
 
