@@ -16,9 +16,6 @@
  ***************************************************************************/
 package name.raev.kaloyan.hellostorj.jni;
 
-/**
- * Created by kraev on 7/14/17.
- */
 public class Storj {
 
     // Used to load the 'native-lib' library on application startup.

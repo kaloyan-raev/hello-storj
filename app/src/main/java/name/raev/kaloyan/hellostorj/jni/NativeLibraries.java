@@ -19,10 +19,6 @@ package name.raev.kaloyan.hellostorj.jni;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by kraev on 7/14/17.
- */
-
 public class NativeLibraries {
 
     // Used to load the 'native-lib' library on application startup.
