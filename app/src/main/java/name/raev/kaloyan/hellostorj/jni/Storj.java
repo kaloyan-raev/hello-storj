@@ -25,7 +25,7 @@ public class Storj {
         System.loadLibrary("native-lib");
     }
 
-    public static native int getInfo(GetInfoCallback callback);
+    public static native void getInfo(GetInfoCallback callback);
 
     public static native long getTimestamp();
 

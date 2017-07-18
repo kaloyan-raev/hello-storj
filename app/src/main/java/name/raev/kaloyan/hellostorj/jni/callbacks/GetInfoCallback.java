@@ -20,4 +20,6 @@ public interface GetInfoCallback {
 
     void onInfoReceived(String title, String description, String version, String host);
 
+    void onError(String message);
+
 }

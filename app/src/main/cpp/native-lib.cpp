@@ -25,23 +25,36 @@ typedef struct {
     jobject callbackObject;
 } jcallback_t;
 
+static void error_callback(JNIEnv *env, jobject callbackObject, const char *message) {
+    jclass callbackClass = env->GetObjectClass(callbackObject);
+    jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                "onError",
+                                                "(Ljava/lang/String;)V");
+    env->CallVoidMethod(callbackObject,
+                        callbackMethod,
+                        env->NewStringUTF(message));
+}
+
 static void get_info_callback(uv_work_t *work_req, int status)
 {
     assert(status == 0);
     json_request_t *req = (json_request_t *) work_req->data;
+    jcallback_t *jcallback = (jcallback_t *) req->handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
 
     if (req->error_code || req->response == NULL) {
         free(req);
         free(work_req);
+        char error_message[256];
         if (req->error_code) {
-            // TODO call the callback with an error
-            printf("Request failed, reason: %s\n",
+            sprintf(error_message, "Request failed, reason: %s",
                    curl_easy_strerror((CURLcode) req->error_code));
         } else {
-            // TODO call the callback with an error
-            printf("Failed to get info.\n");
+            strcpy(error_message, "Failed to get info.");
         }
-        exit(1);
+        error_callback(env, callbackObject, error_message);
+        return;
     }
 
     struct json_object *info;
@@ -56,14 +69,10 @@ static void get_info_callback(uv_work_t *work_req, int status)
     struct json_object *host;
     json_object_object_get_ex(req->response, "host", &host);
 
-    jcallback_t *jcallback = (jcallback_t *) req->handle;
-    JNIEnv *env = jcallback->env;
-    jobject callbackObject = jcallback->callbackObject;
     jclass callbackClass = env->GetObjectClass(callbackObject);
     jmethodID callbackMethod = env->GetMethodID(callbackClass,
                                              "onInfoReceived",
                                              "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-
     env->CallVoidMethod(callbackObject,
                         callbackMethod,
                         env->NewStringUTF(json_object_get_string(title)),
@@ -77,7 +86,7 @@ static void get_info_callback(uv_work_t *work_req, int status)
 }
 
 extern "C"
-JNIEXPORT jint JNICALL
+JNIEXPORT void JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
         JNIEnv *env,
         jclass /* clazz */,
@@ -105,8 +114,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
     storj_env_t *storj_env = NULL;
     storj_env = storj_init_env(&options, NULL, &http_options, &log_options);
     if (!storj_env) {
-        // TODO call the callback with an error
-        return 1;
+        error_callback(env, callbackObject, "Cannot initialize Storj environment");
     }
 
     jcallback_t jcallback = {
@@ -116,8 +124,6 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
     storj_bridge_get_info(storj_env, &jcallback, get_info_callback);
 
     uv_run(storj_env->loop, UV_RUN_DEFAULT);
-
-    return 0;
 }
 
 extern "C"

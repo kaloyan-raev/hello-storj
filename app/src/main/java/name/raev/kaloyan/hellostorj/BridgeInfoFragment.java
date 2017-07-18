@@ -73,4 +73,14 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
         });
     }
 
+    @Override
+    public void onError(final String message) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                BridgeInfoFragment.this.mValue.setText(message);
+            }
+        });
+    }
+
 }
