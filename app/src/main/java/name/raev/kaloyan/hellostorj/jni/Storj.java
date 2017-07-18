@@ -16,8 +16,6 @@
  ***************************************************************************/
 package name.raev.kaloyan.hellostorj.jni;
 
-import android.support.annotation.Keep;
-
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetInfoCallback;
 
 public class Storj {
