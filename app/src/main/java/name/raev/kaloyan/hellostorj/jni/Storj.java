@@ -16,6 +16,8 @@
  ***************************************************************************/
 package name.raev.kaloyan.hellostorj.jni;
 
+import android.support.annotation.Keep;
+
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetInfoCallback;
 
 public class Storj {
@@ -24,6 +26,8 @@ public class Storj {
     static {
         System.loadLibrary("native-lib");
     }
+
+    public static String caInfoPath;
 
     public static native void getInfo(GetInfoCallback callback);
 

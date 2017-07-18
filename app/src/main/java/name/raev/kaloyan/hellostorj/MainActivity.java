@@ -19,21 +19,27 @@ package name.raev.kaloyan.hellostorj;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import name.raev.kaloyan.hellostorj.jni.Storj;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -63,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
             // activity should be in two-pane mode.
             mTwoPane = true;
         }
+
+        copyPem();
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -70,6 +78,26 @@ public class MainActivity extends AppCompatActivity {
                 R.string.title_bridge_info, R.string.title_mnemonic, R.string.title_timestamp, R.string.title_libs
         ));
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(items));
+    }
+
+    private void copyPem() {
+        String filename = "cacert.pem";
+        AssetManager assetManager = getAssets();
+        try (InputStream in = assetManager.open(filename);
+             OutputStream out = openFileOutput(filename, Context.MODE_PRIVATE)) {
+            copy(in, out);
+            Storj.caInfoPath = getFileStreamPath(filename).getPath();
+        } catch(IOException e) {
+            Log.e("tag", "Failed to copy asset file: " + filename, e);
+        }
+    }
+
+    private void copy(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[4096];
+        int read;
+        while((read = in.read(buffer)) != -1){
+            out.write(buffer, 0, read);
+        }
     }
 
     public class SimpleItemRecyclerViewAdapter

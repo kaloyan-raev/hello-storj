@@ -25,6 +25,12 @@ typedef struct {
     jobject callbackObject;
 } jcallback_t;
 
+const char *get_cainfo_path(JNIEnv *env, jclass clazz) {
+    jfieldID field = env->GetStaticFieldID(clazz, "caInfoPath", "Ljava/lang/String;");
+    jstring cainfo_path = (jstring) env->GetStaticObjectField(clazz, field);
+    return env->GetStringUTFChars(cainfo_path, NULL);
+}
+
 static void error_callback(JNIEnv *env, jobject callbackObject, const char *message) {
     jclass callbackClass = env->GetObjectClass(callbackObject);
     jmethodID callbackMethod = env->GetMethodID(callbackClass,
@@ -89,7 +95,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
         JNIEnv *env,
-        jclass /* clazz */,
+        jclass clazz,
         jobject callbackObject) {
     storj_bridge_options_t options = {
             .proto = "https",
@@ -101,6 +107,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
 
     storj_http_options_t http_options = {
             .user_agent = "Hello Storj",
+            .cainfo_path = get_cainfo_path(env, clazz),
             .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
             .low_speed_time = STORJ_LOW_SPEED_TIME,
             .timeout = STORJ_HTTP_TIMEOUT
