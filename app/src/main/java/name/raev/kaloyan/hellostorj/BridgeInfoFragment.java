@@ -16,6 +16,7 @@
  ***************************************************************************/
 package name.raev.kaloyan.hellostorj;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Process;
 import android.support.v4.app.Fragment;
@@ -71,27 +72,33 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
     }
 
     public void onInfoReceived(final String title, final String description, final String version, final String host) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                String info = String.format("Title: %s\nDescription: %s\nVersion: %s\nHost: %s",
-                                            title,
-                                            description,
-                                            version,
-                                            host);
-                BridgeInfoFragment.this.mValue.setText(info);
-            }
-        });
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String info = String.format("Title: %s\nDescription: %s\nVersion: %s\nHost: %s",
+                            title,
+                            description,
+                            version,
+                            host);
+                    BridgeInfoFragment.this.mValue.setText(info);
+                }
+            });
+        }
     }
 
     @Override
     public void onError(final String message) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                BridgeInfoFragment.this.mValue.setText(message);
-            }
-        });
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    BridgeInfoFragment.this.mValue.setText(message);
+                }
+            });
+        }
     }
 
 }
