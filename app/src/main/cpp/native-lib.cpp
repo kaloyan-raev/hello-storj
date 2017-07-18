@@ -28,7 +28,7 @@ typedef struct {
 const char *get_cainfo_path(JNIEnv *env, jclass clazz) {
     jfieldID field = env->GetStaticFieldID(clazz, "caInfoPath", "Ljava/lang/String;");
     jstring cainfo_path = (jstring) env->GetStaticObjectField(clazz, field);
-    return env->GetStringUTFChars(cainfo_path, NULL);
+    return (!cainfo_path) ? NULL : env->GetStringUTFChars(cainfo_path, NULL);
 }
 
 static void error_callback(JNIEnv *env, jobject callbackObject, const char *message) {

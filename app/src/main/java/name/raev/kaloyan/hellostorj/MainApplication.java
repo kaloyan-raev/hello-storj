@@ -19,6 +19,7 @@ package name.raev.kaloyan.hellostorj;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.os.Process;
 import android.util.Log;
 
 import java.io.IOException;
@@ -36,15 +37,21 @@ public class MainApplication extends Application {
     }
 
     private void copyCABundle() {
-        String filename = "cacert.pem";
-        AssetManager assetManager = getAssets();
-        try (InputStream in = assetManager.open(filename);
-             OutputStream out = openFileOutput(filename, Context.MODE_PRIVATE)) {
-            copy(in, out);
-            Storj.caInfoPath = getFileStreamPath(filename).getPath();
-        } catch(IOException e) {
-            Log.e("tag", "Failed to copy asset file: " + filename, e);
-        }
+        new Thread() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                String filename = "cacert.pem";
+                AssetManager assetManager = getAssets();
+                try (InputStream in = assetManager.open(filename);
+                     OutputStream out = openFileOutput(filename, Context.MODE_PRIVATE)) {
+                    copy(in, out);
+                    Storj.caInfoPath = getFileStreamPath(filename).getPath();
+                } catch(IOException e) {
+                    Log.e("tag", "Failed to copy asset file: " + filename, e);
+                }
+            }
+        }.start();
     }
 
     private void copy(InputStream in, OutputStream out) throws IOException {
