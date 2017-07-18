@@ -17,6 +17,7 @@
 package name.raev.kaloyan.hellostorj;
 
 import android.os.Bundle;
+import android.os.Process;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,16 +48,26 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
         View rootView = inflater.inflate(R.layout.content_bridge_info, container, false);
 
         mValue = (TextView) rootView.findViewById(R.id.value);
-        Storj.getInfo(this);
+        getBridgeInfo();
 
         final Button button = (Button) rootView.findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Storj.getInfo(BridgeInfoFragment.this);
+                getBridgeInfo();
             }
         });
 
         return rootView;
+    }
+
+    private void getBridgeInfo() {
+        new Thread() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                Storj.getInfo(BridgeInfoFragment.this);
+            }
+        }.start();
     }
 
     public void onInfoReceived(final String title, final String description, final String version, final String host) {
