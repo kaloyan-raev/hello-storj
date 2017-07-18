@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetInfoCallback;
@@ -35,6 +36,7 @@ import name.raev.kaloyan.hellostorj.jni.Storj;
 public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
 
     private TextView mValue;
+    private ProgressBar mProgress;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -49,7 +51,7 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
         View rootView = inflater.inflate(R.layout.content_bridge_info, container, false);
 
         mValue = (TextView) rootView.findViewById(R.id.value);
-        getBridgeInfo();
+        mProgress = (ProgressBar) rootView.findViewById(R.id.progress);
 
         final Button button = (Button) rootView.findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
@@ -58,10 +60,15 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
             }
         });
 
+        getBridgeInfo();
+
         return rootView;
     }
 
     private void getBridgeInfo() {
+        mProgress.setVisibility(View.VISIBLE);
+        mValue.setVisibility(View.INVISIBLE);
+
         new Thread() {
             @Override
             public void run() {
@@ -82,7 +89,9 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
                             description,
                             version,
                             host);
-                    BridgeInfoFragment.this.mValue.setText(info);
+                    mValue.setText(info);
+                    mProgress.setVisibility(View.INVISIBLE);
+                    mValue.setVisibility(View.VISIBLE);
                 }
             });
         }
@@ -95,7 +104,9 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    BridgeInfoFragment.this.mValue.setText(message);
+                    mValue.setText(message);
+                    mProgress.setVisibility(View.INVISIBLE);
+                    mValue.setVisibility(View.VISIBLE);
                 }
             });
         }
