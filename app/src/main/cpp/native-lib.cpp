@@ -134,6 +134,33 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
 }
 
 extern "C"
+JNIEXPORT jboolean JNICALL
+Java_name_raev_kaloyan_hellostorj_jni_Storj_writeAuthFile(
+        JNIEnv *env,
+        jclass /* clazz */,
+        jstring location,
+        jstring user,
+        jstring pass,
+        jstring mnemonic,
+        jstring passphrase) {
+    const char *location_c = env->GetStringUTFChars(location, NULL);
+    const char *user_c = env->GetStringUTFChars(user, NULL);
+    const char *pass_c = env->GetStringUTFChars(pass, NULL);
+    const char *mnemonic_c = env->GetStringUTFChars(mnemonic, NULL);
+    const char *passphrase_c = env->GetStringUTFChars(passphrase, NULL);
+
+    int result = storj_encrypt_write_auth(location_c, passphrase_c, user_c, pass_c, mnemonic_c);
+
+    env->ReleaseStringUTFChars(location, location_c);
+    env->ReleaseStringUTFChars(user, user_c);
+    env->ReleaseStringUTFChars(pass, pass_c);
+    env->ReleaseStringUTFChars(mnemonic, mnemonic_c);
+    env->ReleaseStringUTFChars(passphrase, passphrase_c);
+
+    return result == 0;
+}
+
+extern "C"
 JNIEXPORT jlong JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_getTimestamp(
         JNIEnv *env,

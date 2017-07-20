@@ -33,7 +33,12 @@ public class MainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        setAppDir();
         copyCABundle();
+    }
+
+    private void setAppDir() {
+        Storj.appDir = getFilesDir().getPath();
     }
 
     private void copyCABundle() {

@@ -20,6 +20,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".KeysActivity"
+            android:label="@string/title_keys"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="name.raev.kaloyan.hellostorj.MainActivity" />
+        </activity>
+        <activity
             android:name=".BridgeInfoActivity"
             android:label="@string/title_bridge_info"
             android:parentActivityName=".MainActivity"
