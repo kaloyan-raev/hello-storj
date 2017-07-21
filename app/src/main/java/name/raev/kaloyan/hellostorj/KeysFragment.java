@@ -17,15 +17,14 @@
 package name.raev.kaloyan.hellostorj;
 
 import android.os.Bundle;
-import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
+import name.raev.kaloyan.hellostorj.jni.Keys;
 import name.raev.kaloyan.hellostorj.jni.Storj;
 
 /**
@@ -55,7 +54,8 @@ public class KeysFragment extends Fragment {
                 String user = userEdit.getText().toString();
                 String pass = passEdit.getText().toString();
                 String mnemonic = mnemonicEdit.getText().toString();
-                Storj.importKeys(user, pass, mnemonic, "");
+                Keys keys = new Keys(user, pass, mnemonic);
+                Storj.importKeys(keys, "");
             }
         });
 

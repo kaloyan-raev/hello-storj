@@ -44,14 +44,12 @@ public class Storj {
 
     /**
      *
-     * @param user
-     * @param pass
-     * @param mnemonic
+     * @param keys
      * @param passphrase
      * @return <code>true</code> if importing keys was successful, <code>false</code> otherwise
      */
-    public static boolean importKeys(String user, String pass, String mnemonic, String passphrase) {
-        return writeAuthFile(getAuthFile().getPath(), user, pass, mnemonic, passphrase);
+    public static boolean importKeys(Keys keys, String passphrase) {
+        return writeAuthFile(getAuthFile().getPath(), keys.getUser(), keys.getPass(), keys.getMnemonic(), passphrase);
     }
 
     private static File getAuthFile() {
