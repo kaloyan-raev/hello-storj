@@ -53,6 +53,7 @@ public class LibsFragment extends Fragment {
 
         return rootView;
     }
+
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         Map<String, String> versions = NativeLibraries.getVersions();
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(new TreeMap<>(versions)));

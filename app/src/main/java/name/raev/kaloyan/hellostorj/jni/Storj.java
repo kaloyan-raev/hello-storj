@@ -18,6 +18,7 @@ package name.raev.kaloyan.hellostorj.jni;
 
 import java.io.File;
 
+import name.raev.kaloyan.hellostorj.jni.callbacks.GetBucketsCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetInfoCallback;
 
 public class Storj {
@@ -35,6 +36,10 @@ public class Storj {
 
     public static boolean keysExist() {
         return getAuthFile().exists();
+    }
+
+    public static Keys getKeys(String passphrase) {
+        return exportKeys(getAuthFile().getPath(), passphrase);
     }
 
     /**
@@ -57,12 +62,15 @@ public class Storj {
         return new File(appDir, HOST + ".json");
     }
 
+    public static native Keys exportKeys(String location, String passphrase);
+
     public static native boolean writeAuthFile(String location, String user, String pass, String mnemonic, String passphrase);
+
+    public static native void getBuckets(String user, String pass, String mnemonic, GetBucketsCallback callback);
 
     public static native void getInfo(GetInfoCallback callback);
 
     public static native long getTimestamp();
 
     public static native String generateMnemonic(int strength);
-
 }

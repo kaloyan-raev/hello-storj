@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         ArrayList<Integer> items = new ArrayList<>(Arrays.asList(
-                R.string.title_keys, R.string.title_bridge_info, R.string.title_mnemonic, R.string.title_timestamp, R.string.title_libs
+                R.string.title_browse, R.string.title_keys, R.string.title_bridge_info, R.string.title_mnemonic, R.string.title_timestamp, R.string.title_libs
         ));
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(items));
     }
@@ -117,14 +117,16 @@ public class MainActivity extends AppCompatActivity {
         private Class<? extends Activity> getActivity(int position) {
             switch (position) {
                 case 0:
-                    return KeysActivity.class;
+                    return BrowseActivity.class;
                 case 1:
-                    return BridgeInfoActivity.class;
+                    return KeysActivity.class;
                 case 2:
-                    return MnemonicActivity.class;
+                    return BridgeInfoActivity.class;
                 case 3:
-                    return TimestampActivity.class;
+                    return MnemonicActivity.class;
                 case 4:
+                    return TimestampActivity.class;
+                case 5:
                 default:
                     return LibsActivity.class;
             }
@@ -133,14 +135,16 @@ public class MainActivity extends AppCompatActivity {
         private Fragment getFragment(int position) {
             switch (position) {
                 case 0:
-                    return new KeysFragment();
+                    return new BrowseFragment();
                 case 1:
-                    return new BridgeInfoFragment();
+                    return new KeysFragment();
                 case 2:
-                    return new MnemonicFragment();
+                    return new BridgeInfoFragment();
                 case 3:
-                    return new TimestampFragment();
+                    return new MnemonicFragment();
                 case 4:
+                    return new TimestampFragment();
+                case 5:
                 default:
                     return new LibsFragment();
             }
