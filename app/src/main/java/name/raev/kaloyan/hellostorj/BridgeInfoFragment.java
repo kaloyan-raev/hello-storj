@@ -67,7 +67,7 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
 
     private void getBridgeInfo() {
         mProgress.setVisibility(View.VISIBLE);
-        mValue.setVisibility(View.INVISIBLE);
+        mValue.setVisibility(View.GONE);
 
         new Thread() {
             @Override
@@ -90,7 +90,7 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
                             version,
                             host);
                     mValue.setText(info);
-                    mProgress.setVisibility(View.INVISIBLE);
+                    mProgress.setVisibility(View.GONE);
                     mValue.setVisibility(View.VISIBLE);
                 }
             });
@@ -105,7 +105,7 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
                 @Override
                 public void run() {
                     mValue.setText(message);
-                    mProgress.setVisibility(View.INVISIBLE);
+                    mProgress.setVisibility(View.GONE);
                     mValue.setVisibility(View.VISIBLE);
                 }
             });

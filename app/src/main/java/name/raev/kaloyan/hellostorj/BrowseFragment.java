@@ -25,6 +25,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,7 +39,10 @@ import name.raev.kaloyan.hellostorj.jni.callbacks.GetBucketsCallback;
  */
 public class BrowseFragment extends Fragment implements GetBucketsCallback {
 
-    private SimpleItemRecyclerViewAdapter mViewAdapter;
+    private RecyclerView mList;
+    private ProgressBar mProgress;
+
+    private SimpleItemRecyclerViewAdapter mListAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -52,9 +56,10 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.content_browse, container, false);
 
-        View recyclerView = rootView.findViewById(R.id.buckets_list);
-        assert recyclerView != null;
-        setupRecyclerView((RecyclerView) recyclerView);
+        mList = (RecyclerView) rootView.findViewById(R.id.buckets_list);
+        setupRecyclerView(mList);
+
+        mProgress = (ProgressBar) rootView.findViewById(R.id.progress);
 
         getBuckets();
 
@@ -62,11 +67,14 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        mViewAdapter = new SimpleItemRecyclerViewAdapter();
-        recyclerView.setAdapter(mViewAdapter);
+        mListAdapter = new SimpleItemRecyclerViewAdapter();
+        recyclerView.setAdapter(mListAdapter);
     }
 
     private void getBuckets() {
+        mProgress.setVisibility(View.VISIBLE);
+        mList.setVisibility(View.GONE);
+
         new Thread() {
             @Override
             public void run() {
@@ -84,8 +92,10 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mViewAdapter.setBuckets(buckets);
-                    mViewAdapter.notifyDataSetChanged();
+                    mListAdapter.setBuckets(buckets);
+                    mListAdapter.notifyDataSetChanged();
+                    mProgress.setVisibility(View.GONE);
+                    mList.setVisibility(View.VISIBLE);
                 }
             });
         }
@@ -98,6 +108,8 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    mProgress.setVisibility(View.GONE);
+                    mList.setVisibility(View.VISIBLE);
                     Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
                 }
             });
