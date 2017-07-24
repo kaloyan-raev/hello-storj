@@ -316,11 +316,15 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_writeAuthFile(
 }
 
 extern "C"
-JNIEXPORT jlong JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_getTimestamp(
+JNIEXPORT jboolean JNICALL
+Java_name_raev_kaloyan_hellostorj_jni_Storj_checkMnemonic(
         JNIEnv *env,
-        jclass /* clazz */) {
-    return storj_util_timestamp();
+        jclass /* clazz */,
+        jstring mnemonic_) {
+    const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
+    bool result = storj_mnemonic_check(mnemonic);
+    env->ReleaseStringUTFChars(mnemonic_, mnemonic);
+    return result;
 }
 
 extern "C"
@@ -332,6 +336,14 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_generateMnemonic(
     char *mnemonic = NULL;
     storj_mnemonic_generate(strength, &mnemonic);
     return env->NewStringUTF(mnemonic);
+}
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_name_raev_kaloyan_hellostorj_jni_Storj_getTimestamp(
+        JNIEnv *env,
+        jclass /* clazz */) {
+    return storj_util_timestamp();
 }
 
 extern "C"

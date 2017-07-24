@@ -68,7 +68,9 @@ public class Storj {
 
     public static native void getInfo(GetInfoCallback callback);
 
-    public static native long getTimestamp();
+    public static native boolean checkMnemonic(String mnemonic);
 
     public static native String generateMnemonic(int strength);
+
+    public static native long getTimestamp();
 }

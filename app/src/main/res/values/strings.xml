@@ -16,4 +16,7 @@
     <string name="hint_keys_user">Bridge user name (email)</string>
     <string name="hint_keys_pass">Bridge password</string>
     <string name="hint_keys_mnemonic">Encryption key</string>
+    <string name="error_keys_user">Invalid email</string>
+    <string name="error_keys_pass">Password cannot be empty</string>
+    <string name="error_keys_mnemonic">Invalid mnemonic</string>
 </resources>

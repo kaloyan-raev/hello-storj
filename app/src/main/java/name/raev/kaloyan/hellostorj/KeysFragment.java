@@ -24,6 +24,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import name.raev.kaloyan.hellostorj.jni.Keys;
 import name.raev.kaloyan.hellostorj.jni.Storj;
 
@@ -54,12 +57,49 @@ public class KeysFragment extends Fragment {
                 String user = userEdit.getText().toString();
                 String pass = passEdit.getText().toString();
                 String mnemonic = mnemonicEdit.getText().toString();
-                Keys keys = new Keys(user, pass, mnemonic);
-                Storj.importKeys(keys, "");
+
+                boolean error = false;
+
+                if (!isValidEmail(user)) {
+                    userEdit.setError(getText(R.string.error_keys_user));
+                    error = true;
+                }
+
+                if (!isValidPassword(pass)) {
+                    passEdit.setError(getText(R.string.error_keys_pass));
+                    error = true;
+                }
+
+                if (!isValidMnemonic(mnemonic)) {
+                    mnemonicEdit.setError(getText(R.string.error_keys_mnemonic));
+                    error = true;
+                }
+
+                if (!error) {
+                    Storj.importKeys(new Keys(user, pass, mnemonic), "");
+                }
             }
         });
 
         return rootView;
+    }
+
+    private boolean isValidEmail(String email) {
+        String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+        Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+
+    private boolean isValidPassword(String pass) {
+        if (pass != null && pass.length() > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isValidMnemonic(String mnemonic) {
+        return Storj.checkMnemonic(mnemonic);
     }
 
 }
