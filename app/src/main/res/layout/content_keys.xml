@@ -31,7 +31,7 @@
     <EditText android:id="@+id/edit_mnemonic"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textMultiLine"
+        android:inputType="textMultiLine|textPassword"
         android:hint="@string/hint_keys_mnemonic" />
 
     <Button
