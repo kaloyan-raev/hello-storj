@@ -16,6 +16,7 @@
  ***************************************************************************/
 package name.raev.kaloyan.hellostorj;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -35,6 +36,8 @@ import name.raev.kaloyan.hellostorj.jni.Storj;
  */
 public class KeysFragment extends Fragment {
 
+    private Button button;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -51,7 +54,7 @@ public class KeysFragment extends Fragment {
         final EditText passEdit = (EditText) rootView.findViewById(R.id.edit_pass);
         final EditText mnemonicEdit = (EditText) rootView.findViewById(R.id.edit_mnemonic);
 
-        final Button button = (Button) rootView.findViewById(R.id.button);
+        button = (Button) rootView.findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String user = userEdit.getText().toString();
@@ -63,20 +66,27 @@ public class KeysFragment extends Fragment {
                 if (!isValidEmail(user)) {
                     userEdit.setError(getText(R.string.error_keys_user));
                     error = true;
+                } else {
+                    userEdit.setError(null);
                 }
 
                 if (!isValidPassword(pass)) {
                     passEdit.setError(getText(R.string.error_keys_pass));
                     error = true;
+                } else {
+                    passEdit.setError(null);
                 }
 
                 if (!isValidMnemonic(mnemonic)) {
                     mnemonicEdit.setError(getText(R.string.error_keys_mnemonic));
                     error = true;
+                } else {
+                    mnemonicEdit.setError(null);
                 }
 
                 if (!error) {
-                    Storj.importKeys(new Keys(user, pass, mnemonic), "");
+                    button.setEnabled(false);
+                    new ImportKeysTask().execute(user, pass, mnemonic);
                 }
             }
         });
@@ -100,6 +110,18 @@ public class KeysFragment extends Fragment {
 
     private boolean isValidMnemonic(String mnemonic) {
         return Storj.checkMnemonic(mnemonic);
+    }
+
+    private class ImportKeysTask extends AsyncTask<String, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(String... params) {
+            return Storj.importKeys(new Keys(params[0], params[1], params[2]), "");
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            button.setEnabled(true);
+        }
     }
 
 }
