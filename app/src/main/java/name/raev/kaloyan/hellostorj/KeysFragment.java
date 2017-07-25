@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.util.regex.Matcher;
@@ -39,6 +40,7 @@ import name.raev.kaloyan.hellostorj.jni.Storj;
 public class KeysFragment extends Fragment {
 
     private Button button;
+    private ProgressBar progress;
     private Context appContext;
 
     /**
@@ -89,10 +91,13 @@ public class KeysFragment extends Fragment {
 
                 if (!error) {
                     button.setEnabled(false);
+                    progress.setVisibility(View.VISIBLE);
                     new ImportKeysTask().execute(user, pass, mnemonic);
                 }
             }
         });
+
+        progress = (ProgressBar) rootView.findViewById(R.id.progress);
 
         appContext = getActivity().getApplicationContext();
 
@@ -126,6 +131,7 @@ public class KeysFragment extends Fragment {
         @Override
         protected void onPostExecute(Boolean success) {
             button.setEnabled(true);
+            progress.setVisibility(View.GONE);
 
             int message = (success) ? R.string.keys_success : R.string.keys_fail;
             Toast.makeText(appContext, message, Toast.LENGTH_LONG).show();
