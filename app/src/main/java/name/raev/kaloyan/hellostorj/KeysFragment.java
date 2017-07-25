@@ -16,6 +16,7 @@
  ***************************************************************************/
 package name.raev.kaloyan.hellostorj;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -24,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +39,7 @@ import name.raev.kaloyan.hellostorj.jni.Storj;
 public class KeysFragment extends Fragment {
 
     private Button button;
+    private Context appContext;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -91,6 +94,8 @@ public class KeysFragment extends Fragment {
             }
         });
 
+        appContext = getActivity().getApplicationContext();
+
         return rootView;
     }
 
@@ -119,8 +124,11 @@ public class KeysFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(Boolean aBoolean) {
+        protected void onPostExecute(Boolean success) {
             button.setEnabled(true);
+
+            int message = (success) ? R.string.keys_success : R.string.keys_fail;
+            Toast.makeText(appContext, message, Toast.LENGTH_LONG).show();
         }
     }
 

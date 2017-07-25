@@ -19,4 +19,6 @@
     <string name="error_keys_user">Invalid email</string>
     <string name="error_keys_pass">Password cannot be empty</string>
     <string name="error_keys_mnemonic">Invalid mnemonic</string>
+    <string name="keys_success">Your keys has been imported.</string>
+    <string name="keys_fail">Error while importing your keys.</string>
 </resources>
