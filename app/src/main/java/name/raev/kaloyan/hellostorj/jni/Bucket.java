@@ -16,7 +16,9 @@
  ***************************************************************************/
 package name.raev.kaloyan.hellostorj.jni;
 
-public class Bucket {
+import android.support.annotation.NonNull;
+
+public class Bucket implements Comparable<Bucket> {
 
     private String id;
     private String name;
@@ -46,4 +48,8 @@ public class Bucket {
         return decrypted;
     }
 
+    @Override
+    public int compareTo(@NonNull Bucket other) {
+        return name.compareTo(other.name);
+    }
 }

@@ -29,6 +29,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Arrays;
+
 import name.raev.kaloyan.hellostorj.jni.Bucket;
 import name.raev.kaloyan.hellostorj.jni.Keys;
 import name.raev.kaloyan.hellostorj.jni.Storj;
@@ -92,6 +94,7 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    Arrays.sort(buckets);
                     mListAdapter.setBuckets(buckets);
                     mListAdapter.notifyDataSetChanged();
                     mProgress.setVisibility(View.GONE);
