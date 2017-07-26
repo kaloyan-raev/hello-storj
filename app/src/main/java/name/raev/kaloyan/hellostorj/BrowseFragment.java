@@ -17,9 +17,12 @@
 package name.raev.kaloyan.hellostorj;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Process;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -44,6 +47,12 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
     private RecyclerView mList;
     private ProgressBar mProgress;
 
+    /**
+     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
+     * device.
+     */
+    private boolean mTwoPane;
+
     private SimpleItemRecyclerViewAdapter mListAdapter;
 
     /**
@@ -62,6 +71,14 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
         setupRecyclerView(mList);
 
         mProgress = (ProgressBar) rootView.findViewById(R.id.progress);
+
+        if (rootView.findViewById(R.id.detail_container) != null) {
+            // The detail container view will be present only in the
+            // large-screen layouts (res/values-w900dp).
+            // If this view is present, then the
+            // activity should be in two-pane mode.
+            mTwoPane = true;
+        }
 
         getBuckets();
 
@@ -82,9 +99,42 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 Keys keys = Storj.getKeys("");
-                Storj.getBuckets(keys.getUser(), keys.getPass(), keys.getMnemonic(), BrowseFragment.this);
+                if (keys == null) {
+                    showKeysError();
+                } else {
+                    Storj.getBuckets(keys.getUser(), keys.getPass(), keys.getMnemonic(), BrowseFragment.this);
+                }
             }
         }.start();
+    }
+
+    private void showKeysError() {
+        final Activity activity = getActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mProgress.setVisibility(View.GONE);
+                    Snackbar snackbar = Snackbar.make(mProgress, R.string.keys_export_fail, Snackbar.LENGTH_INDEFINITE);
+                    snackbar.setAction(R.string.keys_import_action, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (mTwoPane) {
+                                Fragment fragment = new KeysFragment();
+                                getFragmentManager().beginTransaction()
+                                        .replace(R.id.detail_container, fragment)
+                                        .commit();
+                            } else {
+                                Context context = v.getContext();
+                                Intent intent = new Intent(context, KeysActivity.class);
+                                context.startActivity(intent);
+                            }
+                        }
+                    });
+                    snackbar.show();
+                }
+            });
+        }
     }
 
     @Override

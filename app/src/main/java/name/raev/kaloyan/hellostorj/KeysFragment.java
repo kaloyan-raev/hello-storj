@@ -133,7 +133,7 @@ public class KeysFragment extends Fragment {
             button.setEnabled(true);
             progress.setVisibility(View.GONE);
 
-            int message = (success) ? R.string.keys_success : R.string.keys_fail;
+            int message = (success) ? R.string.keys_import_success : R.string.keys_import_fail;
             Toast.makeText(appContext, message, Toast.LENGTH_LONG).show();
         }
     }

@@ -259,19 +259,18 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_exportKeys(
     char *pass = NULL;
     char *mnemonic = NULL;
 
-    if (storj_decrypt_read_auth(location, passphrase, &user, &pass, &mnemonic)) {
-        // TODO error
+    jobject keysObject = NULL;
+    if (!storj_decrypt_read_auth(location, passphrase, &user, &pass, &mnemonic)) {
+        jclass keysClass = env->FindClass("name/raev/kaloyan/hellostorj/jni/Keys");
+        jmethodID keysInit = env->GetMethodID(keysClass,
+                                              "<init>",
+                                              "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+        keysObject = env->NewObject(keysClass,
+                                    keysInit,
+                                    env->NewStringUTF(user),
+                                    env->NewStringUTF(pass),
+                                    env->NewStringUTF(mnemonic));
     }
-
-    jclass keysClass = env->FindClass("name/raev/kaloyan/hellostorj/jni/Keys");
-    jmethodID keysInit = env->GetMethodID(keysClass,
-                                          "<init>",
-                                          "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-    jobject keysObject = env->NewObject(keysClass,
-                                        keysInit,
-                                        env->NewStringUTF(user),
-                                        env->NewStringUTF(pass),
-                                        env->NewStringUTF(mnemonic));
 
     if (user) {
         free(user);
