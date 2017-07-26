@@ -47,12 +47,6 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
     private RecyclerView mList;
     private ProgressBar mProgress;
 
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
-     * device.
-     */
-    private boolean mTwoPane;
-
     private SimpleItemRecyclerViewAdapter mListAdapter;
 
     /**
@@ -71,14 +65,6 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
         setupRecyclerView(mList);
 
         mProgress = (ProgressBar) rootView.findViewById(R.id.progress);
-
-        if (rootView.findViewById(R.id.detail_container) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-w900dp).
-            // If this view is present, then the
-            // activity should be in two-pane mode.
-            mTwoPane = true;
-        }
 
         getBuckets();
 
@@ -119,7 +105,7 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
                     snackbar.setAction(R.string.keys_import_action, new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if (mTwoPane) {
+                            if (getResources().getBoolean(R.bool.twoPaneMode)) {
                                 Fragment fragment = new KeysFragment();
                                 getFragmentManager().beginTransaction()
                                         .replace(R.id.detail_container, fragment)

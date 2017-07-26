@@ -36,12 +36,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
-     * device.
-     */
-    private boolean mTwoPane;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,14 +48,6 @@ public class MainActivity extends AppCompatActivity {
         View recyclerView = findViewById(R.id.main_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
-
-        if (findViewById(R.id.detail_container) != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-w900dp).
-            // If this view is present, then the
-            // activity should be in two-pane mode.
-            mTwoPane = true;
-        }
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -94,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mTwoPane) {
+                    if (getResources().getBoolean(R.bool.twoPaneMode)) {
                         Fragment fragment = getFragment(position);
                         getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.detail_container, fragment)
