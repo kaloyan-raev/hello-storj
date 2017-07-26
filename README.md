@@ -12,11 +12,11 @@ The app can be installed from Google Play: https://play.google.com/store/apps/de
 * [x] `storj_util_timestamp()`
 * [x] `storj_mnemonic_generate()`
 * [x] `storj_bridge_get_info()`
+* [x] Import keys
+* [x] `storj_bridge_get_buckets()`
 
 ## TODO
 
-* [ ] Import keys
-* [ ] `storj_bridge_get_buckets()`
 * [ ] `storj_bridge_list_files()`
 * [ ] `storj_bridge_create_bucket()`
 * [ ] `storj_bridge_resolve_file()`
