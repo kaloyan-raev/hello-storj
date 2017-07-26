@@ -101,7 +101,7 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
                 @Override
                 public void run() {
                     mProgress.setVisibility(View.GONE);
-                    Snackbar snackbar = Snackbar.make(mProgress, R.string.keys_export_fail, Snackbar.LENGTH_INDEFINITE);
+                    Snackbar snackbar = Snackbar.make(mProgress, R.string.keys_export_fail, Snackbar.LENGTH_LONG);
                     snackbar.setAction(R.string.keys_import_action, new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
