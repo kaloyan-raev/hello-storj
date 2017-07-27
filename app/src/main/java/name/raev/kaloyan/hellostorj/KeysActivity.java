@@ -28,7 +28,7 @@ public class KeysActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_keys);
+        setContentView(R.layout.activity_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -39,7 +39,7 @@ public class KeysActivity extends AppCompatActivity {
         }
 
         // savedInstanceState is non-null when there is fragment state
-        // saved from previous configurations of this activity
+        // saved from previous configurations of this activity_main
         // (e.g. when rotating the screen from portrait to landscape).
         // In this case, the fragment will automatically be re-added
         // to its container so we don't need to manually add it.
@@ -48,7 +48,7 @@ public class KeysActivity extends AppCompatActivity {
         // http://developer.android.com/guide/components/fragments.html
         //
         if (savedInstanceState == null) {
-            // Create the detail fragment and add it to the activity
+            // Create the detail fragment and add it to the activity_main
             // using a fragment transaction.
             KeysFragment fragment = new KeysFragment();
             getSupportFragmentManager().beginTransaction()
@@ -62,7 +62,7 @@ public class KeysActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == android.R.id.home) {
             // This ID represents the Home or Up button. In the case of this
-            // activity, the Up button is shown. For
+            // activity_main, the Up button is shown. For
             // more details, see the Navigation pattern on Android Design:
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
