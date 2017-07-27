@@ -51,9 +51,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        ArrayList<Integer> items = new ArrayList<>(Arrays.asList(
-                R.string.title_browse, R.string.title_keys, R.string.title_bridge_info, R.string.title_mnemonic, R.string.title_timestamp, R.string.title_libs
-        ));
+        ArrayList<Integer> items = new ArrayList<>(Arrays.asList(Fragments.getTitles()));
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(items));
     }
 

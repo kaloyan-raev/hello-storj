@@ -16,26 +16,43 @@
  ***************************************************************************/
 package name.raev.kaloyan.hellostorj;
 
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
 public enum Fragments {
     
-    BROWSE(BrowseFragment.class),
-    KEYS(KeysFragment.class),
-    INFO(BridgeInfoFragment.class),
-    MNEMONIC(MnemonicFragment.class),
-    TIMESTAMP(TimestampFragment.class),
-    LIBS(LibsFragment.class);
+    BROWSE(R.string.title_browse, BrowseFragment.class),
+    KEYS(R.string.title_keys, KeysFragment.class),
+    BRIDGE_INFO(R.string.title_bridge_info, BridgeInfoFragment.class),
+    MNEMONIC(R.string.title_mnemonic, MnemonicFragment.class),
+    TIMESTAMP(R.string.title_timestamp, TimestampFragment.class),
+    LIBS(R.string.title_libs, LibsFragment.class);
 
     private static final String TAG = "Fragments";
 
+    private int title;
     private Class<? extends Fragment> clazz;
     
-    Fragments(Class<? extends Fragment> clazz) {
+    Fragments(int title, Class<? extends Fragment> clazz) {
+        this.title = title;
         this.clazz = clazz;
     }
+
+    public static Integer[] getTitles() {
+        Fragments[] fragments = values();
+        Integer[] titles = new Integer[fragments.length];
+        for (int i = 0; i < titles.length; i++) {
+            titles[i] = fragments[i].getTitle();
+        }
+        return titles;
+    }
+
+    public int getTitle() {
+        return title;
+    }
     
+    @Nullable
     public Fragment newInstance() {
         try {
             return clazz.newInstance();
