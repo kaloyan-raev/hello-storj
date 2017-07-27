@@ -112,7 +112,8 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
                                         .commit();
                             } else {
                                 Context context = v.getContext();
-                                Intent intent = new Intent(context, KeysActivity.class);
+                                Intent intent = new Intent(context, DetailActivity.class);
+                                intent.putExtra(DetailActivity.EXTRA_INDEX, Fragments.KEYS.ordinal());
                                 context.startActivity(intent);
                             }
                         }

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="16dp"
@@ -12,8 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16px"
-        android:text="@string/description_timestamp"
-        tools:context="name.raev.kaloyan.hellostorj.TimestampActivity" />
+        android:text="@string/description_timestamp" />
 
     <TextView
         android:id="@+id/value"
@@ -21,8 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32px"
-        android:layout_gravity="center"
-        tools:context="name.raev.kaloyan.hellostorj.TimestampActivity" />
+        android:layout_gravity="center" />
 
     <Button
         android:id="@+id/button"

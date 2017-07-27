@@ -18,12 +18,15 @@ package name.raev.kaloyan.hellostorj;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-public class BrowseActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity {
+
+    public static final String EXTRA_INDEX = "index";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,10 +53,14 @@ public class BrowseActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             // Create the detail fragment and add it to the activity_main
             // using a fragment transaction.
-            BrowseFragment fragment = new BrowseFragment();
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.detail_container, fragment)
-                    .commit();
+            Bundle extras = getIntent().getExtras();
+            if (extras != null) {
+                int index = extras.getInt(EXTRA_INDEX);
+                Fragment fragment = Fragments.values()[index].newInstance();
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.detail_container, fragment)
+                        .commit();
+            }
         }
     }
 

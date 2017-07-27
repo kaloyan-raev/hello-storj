@@ -81,14 +81,14 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     if (getResources().getBoolean(R.bool.twoPaneMode)) {
-                        Fragment fragment = getFragment(position);
+                        Fragment fragment = Fragments.values()[position].newInstance();
                         getSupportFragmentManager().beginTransaction()
                                 .replace(R.id.detail_container, fragment)
                                 .commit();
                     } else {
                         Context context = v.getContext();
-                        Intent intent = new Intent(context, getActivity(position));
-
+                        Intent intent = new Intent(context, DetailActivity.class);
+                        intent.putExtra(DetailActivity.EXTRA_INDEX, position);
                         context.startActivity(intent);
                     }
                 }
@@ -98,42 +98,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return mValues.size();
-        }
-
-        private Class<? extends Activity> getActivity(int position) {
-            switch (position) {
-                case 0:
-                    return BrowseActivity.class;
-                case 1:
-                    return KeysActivity.class;
-                case 2:
-                    return BridgeInfoActivity.class;
-                case 3:
-                    return MnemonicActivity.class;
-                case 4:
-                    return TimestampActivity.class;
-                case 5:
-                default:
-                    return LibsActivity.class;
-            }
-        }
-
-        private Fragment getFragment(int position) {
-            switch (position) {
-                case 0:
-                    return new BrowseFragment();
-                case 1:
-                    return new KeysFragment();
-                case 2:
-                    return new BridgeInfoFragment();
-                case 3:
-                    return new MnemonicFragment();
-                case 4:
-                    return new TimestampFragment();
-                case 5:
-                default:
-                    return new LibsFragment();
-            }
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {

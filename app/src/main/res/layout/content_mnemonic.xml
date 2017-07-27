@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="16dp"
@@ -12,16 +11,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16px"
-        android:text="@string/description_mnemonic"
-        tools:context="name.raev.kaloyan.hellostorj.MnemonicActivity" />
+        android:text="@string/description_mnemonic" />
 
     <TextView
         android:id="@+id/value"
         style="?android:attr/textAppearanceLarge"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32px"
-        tools:context="name.raev.kaloyan.hellostorj.MnemonicActivity" />
+        android:layout_marginTop="32px" />
 
     <Button
         android:id="@+id/button"

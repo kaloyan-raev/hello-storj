@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".BrowseActivity"
+            android:name=".DetailActivity"
             android:label="@string/title_browse"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" >
