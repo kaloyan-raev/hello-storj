@@ -56,6 +56,7 @@ public class DetailActivity extends AppCompatActivity {
             Bundle extras = getIntent().getExtras();
             if (extras != null) {
                 int index = extras.getInt(EXTRA_INDEX);
+                setTitle(Fragments.values()[index].getTitle());
                 Fragment fragment = Fragments.values()[index].newInstance();
                 getSupportFragmentManager().beginTransaction()
                         .add(R.id.detail_container, fragment)
