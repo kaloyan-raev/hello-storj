@@ -20,6 +20,7 @@ import java.io.File;
 
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetBucketsCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetInfoCallback;
+import name.raev.kaloyan.hellostorj.jni.callbacks.ListFilesCallback;
 
 public class Storj {
 
@@ -65,6 +66,8 @@ public class Storj {
     public static native boolean writeAuthFile(String location, String user, String pass, String mnemonic, String passphrase);
 
     public static native void getBuckets(String user, String pass, String mnemonic, GetBucketsCallback callback);
+
+    public static native void listFiles(String user, String pass, String mnemonic, String bucketId, ListFilesCallback callback);
 
     public static native void getInfo(GetInfoCallback callback);
 

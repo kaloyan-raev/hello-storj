@@ -42,7 +42,7 @@ import name.raev.kaloyan.hellostorj.jni.callbacks.GetBucketsCallback;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class BrowseFragment extends Fragment implements GetBucketsCallback {
+public class BucketsFragment extends Fragment implements GetBucketsCallback {
 
     private RecyclerView mList;
     private ProgressBar mProgress;
@@ -53,7 +53,7 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public BrowseFragment() {
+    public BucketsFragment() {
     }
 
     @Override
@@ -88,7 +88,7 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
                 if (keys == null) {
                     showKeysError();
                 } else {
-                    Storj.getBuckets(keys.getUser(), keys.getPass(), keys.getMnemonic(), BrowseFragment.this);
+                    Storj.getBuckets(keys.getUser(), keys.getPass(), keys.getMnemonic(), BucketsFragment.this);
                 }
             }
         }.start();
@@ -157,7 +157,8 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
     }
 
     public class SimpleItemRecyclerViewAdapter
-            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
+            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>
+            implements View.OnClickListener {
 
         private Bucket[] mBuckets;
 
@@ -170,6 +171,7 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(android.R.layout.simple_list_item_2, parent, false);
+            view.setOnClickListener(this);
             return new ViewHolder(view);
         }
 
@@ -187,6 +189,26 @@ public class BrowseFragment extends Fragment implements GetBucketsCallback {
 
         public void setBuckets(Bucket[] buckets) {
             mBuckets = buckets;
+        }
+
+        @Override
+        public void onClick(View v) {
+            ViewHolder holder = (ViewHolder) mList.getChildViewHolder(v);
+            String bucketId = holder.mId.getText().toString();
+            if (getResources().getBoolean(R.bool.twoPaneMode)) {
+                FilesFragment fragment = new FilesFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString(FilesFragment.BUCKET_ID, bucketId);
+                fragment.setArguments(bundle);
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.detail_container, fragment)
+                        .commit();
+            } else {
+                Context context = v.getContext();
+                Intent intent = new Intent(context, FilesActivity.class);
+                intent.putExtra(FilesFragment.BUCKET_ID, bucketId);
+                context.startActivity(intent);
+            }
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {

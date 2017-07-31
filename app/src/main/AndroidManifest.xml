@@ -21,8 +21,15 @@
         </activity>
         <activity
             android:name=".DetailActivity"
-            android:label="@string/title_browse"
             android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="name.raev.kaloyan.hellostorj.MainActivity" />
+        </activity>
+        <activity
+            android:name=".FilesActivity"
+            android:parentActivityName=".DetailActivity"
             android:theme="@style/AppTheme.NoActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
