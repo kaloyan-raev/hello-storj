@@ -22,5 +22,8 @@
     <string name="keys_import_success">Your keys has been imported.</string>
     <string name="keys_import_fail">Error while importing your keys.</string>
     <string name="keys_import_action">Import</string>
-    <string name="keys_export_fail">Failed decrypting keys. Have you imported your keys yet?</string>
+    <string name="keys_export_fail">Failed decrypting keys.</string>
+    <string name="keys_imported">Have you imported your keys yet?</string>
+    <string name="browse_no_buckets">No buckets in this account.</string>
+    <string name="browse_no_files">No files in this bucket.</string>
 </resources>

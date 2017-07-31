@@ -30,7 +30,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.Arrays;
 
@@ -49,6 +48,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
 
     private RecyclerView mList;
     private ProgressBar mProgress;
+    private TextView mStatus;
 
     private SimpleItemRecyclerViewAdapter mListAdapter;
 
@@ -68,6 +68,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
         setupRecyclerView(mList);
 
         mProgress = (ProgressBar) rootView.findViewById(R.id.progress);
+        mStatus = (TextView) rootView.findViewById(R.id.status);
 
         Bundle bundle = getArguments();
         Bucket bucket = (Bucket) bundle.getSerializable(BUCKET);
@@ -85,6 +86,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
     private void listFiles(final Bucket bucket) {
         mProgress.setVisibility(View.VISIBLE);
         mList.setVisibility(View.GONE);
+        mStatus.setVisibility(View.GONE);
 
         new Thread() {
             @Override
@@ -107,7 +109,9 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
                 @Override
                 public void run() {
                     mProgress.setVisibility(View.GONE);
-                    Snackbar snackbar = Snackbar.make(mProgress, R.string.keys_export_fail, Snackbar.LENGTH_LONG);
+                    mStatus.setText(R.string.keys_export_fail);
+                    mStatus.setVisibility(View.VISIBLE);
+                    Snackbar snackbar = Snackbar.make(mProgress, R.string.keys_imported, Snackbar.LENGTH_LONG);
                     snackbar.setAction(R.string.keys_import_action, new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -137,11 +141,16 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    mProgress.setVisibility(View.GONE);
+                    if (files.length == 0) {
+                        mStatus.setText(R.string.browse_no_files);
+                        mStatus.setVisibility(View.VISIBLE);
+                    } else {
+                        mList.setVisibility(View.VISIBLE);
+                    }
                     Arrays.sort(files);
                     mListAdapter.setFiles(files);
                     mListAdapter.notifyDataSetChanged();
-                    mProgress.setVisibility(View.GONE);
-                    mList.setVisibility(View.VISIBLE);
                 }
             });
         }
@@ -155,8 +164,8 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
                 @Override
                 public void run() {
                     mProgress.setVisibility(View.GONE);
-                    mList.setVisibility(View.VISIBLE);
-                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                    mStatus.setText(message);
+                    mStatus.setVisibility(View.VISIBLE);
                 }
             });
         }

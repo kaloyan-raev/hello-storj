@@ -30,7 +30,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.Arrays;
 
@@ -46,6 +45,7 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
 
     private RecyclerView mList;
     private ProgressBar mProgress;
+    private TextView mStatus;
 
     private SimpleItemRecyclerViewAdapter mListAdapter;
 
@@ -65,6 +65,7 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
         setupRecyclerView(mList);
 
         mProgress = (ProgressBar) rootView.findViewById(R.id.progress);
+        mStatus = (TextView) rootView.findViewById(R.id.status);
 
         getBuckets();
 
@@ -79,6 +80,7 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
     private void getBuckets() {
         mProgress.setVisibility(View.VISIBLE);
         mList.setVisibility(View.GONE);
+        mStatus.setVisibility(View.GONE);
 
         new Thread() {
             @Override
@@ -101,7 +103,9 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
                 @Override
                 public void run() {
                     mProgress.setVisibility(View.GONE);
-                    Snackbar snackbar = Snackbar.make(mProgress, R.string.keys_export_fail, Snackbar.LENGTH_LONG);
+                    mStatus.setText(R.string.keys_export_fail);
+                    mStatus.setVisibility(View.VISIBLE);
+                    Snackbar snackbar = Snackbar.make(mProgress, R.string.keys_imported, Snackbar.LENGTH_LONG);
                     snackbar.setAction(R.string.keys_import_action, new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -131,11 +135,16 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    mProgress.setVisibility(View.GONE);
+                    if (buckets.length == 0) {
+                        mStatus.setText(R.string.browse_no_buckets);
+                        mStatus.setVisibility(View.VISIBLE);
+                    } else {
+                        mList.setVisibility(View.VISIBLE);
+                    }
                     Arrays.sort(buckets);
                     mListAdapter.setBuckets(buckets);
                     mListAdapter.notifyDataSetChanged();
-                    mProgress.setVisibility(View.GONE);
-                    mList.setVisibility(View.VISIBLE);
                 }
             });
         }
@@ -149,8 +158,8 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
                 @Override
                 public void run() {
                     mProgress.setVisibility(View.GONE);
-                    mList.setVisibility(View.VISIBLE);
-                    Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                    mStatus.setText(message);
+                    mStatus.setVisibility(View.VISIBLE);
                 }
             });
         }
