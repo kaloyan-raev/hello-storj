@@ -23,6 +23,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+import name.raev.kaloyan.hellostorj.jni.Bucket;
+
 public class FilesActivity extends AppCompatActivity {
 
     @Override
@@ -52,9 +54,12 @@ public class FilesActivity extends AppCompatActivity {
             // using a fragment transaction.
             Bundle extras = getIntent().getExtras();
             if (extras != null) {
+                Bucket bucket = (Bucket) extras.getSerializable(FilesFragment.BUCKET);
+                setTitle(bucket.getName());
+
                 FilesFragment fragment = new FilesFragment();
                 Bundle bundle = new Bundle();
-                bundle.putString(FilesFragment.BUCKET_ID, extras.getString(FilesFragment.BUCKET_ID));
+                bundle.putSerializable(FilesFragment.BUCKET, bucket);
                 fragment.setArguments(bundle);
                 getSupportFragmentManager().beginTransaction()
                         .add(R.id.detail_container, fragment)

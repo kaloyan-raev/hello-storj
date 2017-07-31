@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import java.util.Arrays;
 
+import name.raev.kaloyan.hellostorj.jni.Bucket;
 import name.raev.kaloyan.hellostorj.jni.File;
 import name.raev.kaloyan.hellostorj.jni.Keys;
 import name.raev.kaloyan.hellostorj.jni.Storj;
@@ -44,7 +45,7 @@ import name.raev.kaloyan.hellostorj.jni.callbacks.ListFilesCallback;
  */
 public class FilesFragment extends Fragment implements ListFilesCallback {
 
-    public static final String BUCKET_ID = "bucketId";
+    public static final String BUCKET = "bucket";
 
     private RecyclerView mList;
     private ProgressBar mProgress;
@@ -69,9 +70,9 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
         mProgress = (ProgressBar) rootView.findViewById(R.id.progress);
 
         Bundle bundle = getArguments();
-        String bucketId = bundle.getString(BUCKET_ID);
+        Bucket bucket = (Bucket) bundle.getSerializable(BUCKET);
 
-        listFiles(bucketId);
+        listFiles(bucket);
 
         return rootView;
     }
@@ -81,7 +82,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
         recyclerView.setAdapter(mListAdapter);
     }
 
-    private void listFiles(final String bucketId) {
+    private void listFiles(final Bucket bucket) {
         mProgress.setVisibility(View.VISIBLE);
         mList.setVisibility(View.GONE);
 
@@ -93,7 +94,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
                 if (keys == null) {
                     showKeysError();
                 } else {
-                    Storj.listFiles(keys.getUser(), keys.getPass(), keys.getMnemonic(), bucketId, FilesFragment.this);
+                    Storj.listFiles(keys.getUser(), keys.getPass(), keys.getMnemonic(), bucket.getId(), FilesFragment.this);
                 }
             }
         }.start();

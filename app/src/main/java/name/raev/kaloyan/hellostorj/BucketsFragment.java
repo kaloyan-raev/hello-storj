@@ -193,21 +193,23 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
 
         @Override
         public void onClick(View v) {
-            ViewHolder holder = (ViewHolder) mList.getChildViewHolder(v);
-            String bucketId = holder.mId.getText().toString();
-            if (getResources().getBoolean(R.bool.twoPaneMode)) {
-                FilesFragment fragment = new FilesFragment();
-                Bundle bundle = new Bundle();
-                bundle.putString(FilesFragment.BUCKET_ID, bucketId);
-                fragment.setArguments(bundle);
-                getFragmentManager().beginTransaction()
-                        .replace(R.id.detail_container, fragment)
-                        .commit();
-            } else {
-                Context context = v.getContext();
-                Intent intent = new Intent(context, FilesActivity.class);
-                intent.putExtra(FilesFragment.BUCKET_ID, bucketId);
-                context.startActivity(intent);
+            int position = mList.getChildAdapterPosition(v);
+            if (position != RecyclerView.NO_POSITION) {
+                Bucket bucket = mBuckets[position];
+                if (getResources().getBoolean(R.bool.twoPaneMode)) {
+                    FilesFragment fragment = new FilesFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable(FilesFragment.BUCKET, bucket);
+                    fragment.setArguments(bundle);
+                    getFragmentManager().beginTransaction()
+                            .replace(R.id.detail_container, fragment)
+                            .commit();
+                } else {
+                    Context context = v.getContext();
+                    Intent intent = new Intent(context, FilesActivity.class);
+                    intent.putExtra(FilesFragment.BUCKET, bucket);
+                    context.startActivity(intent);
+                }
             }
         }
 

@@ -18,7 +18,9 @@ package name.raev.kaloyan.hellostorj.jni;
 
 import android.support.annotation.NonNull;
 
-public class Bucket implements Comparable<Bucket> {
+import java.io.Serializable;
+
+public class Bucket implements Serializable, Comparable<Bucket> {
 
     private String id;
     private String name;
