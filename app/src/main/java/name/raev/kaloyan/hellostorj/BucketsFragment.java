@@ -86,7 +86,7 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Keys keys = Storj.getKeys("");
+                Keys keys = Storj.getInstance().getKeys("");
                 if (keys == null) {
                     showKeysError();
                 } else {

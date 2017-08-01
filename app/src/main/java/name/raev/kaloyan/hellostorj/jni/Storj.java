@@ -35,12 +35,30 @@ public class Storj {
 
     public static String caInfoPath;
 
-    public static boolean keysExist() {
+    private static Storj instance;
+
+    private Keys keys;
+
+    private Storj() {
+        keys = null;
+    }
+
+    public static Storj getInstance() {
+        if (instance == null) {
+            instance = new Storj();
+        }
+        return instance;
+    }
+
+    public boolean keysExist() {
         return getAuthFile().exists();
     }
 
-    public static Keys getKeys(String passphrase) {
-        return exportKeys(getAuthFile().getPath(), passphrase);
+    public Keys getKeys(String passphrase) {
+        if (keys == null) {
+            keys = exportKeys(getAuthFile().getPath(), passphrase);
+        }
+        return keys;
     }
 
     /**
@@ -49,11 +67,15 @@ public class Storj {
      * @param passphrase
      * @return <code>true</code> if importing keys was successful, <code>false</code> otherwise
      */
-    public static boolean importKeys(Keys keys, String passphrase) {
-        return writeAuthFile(getAuthFile().getPath(), keys.getUser(), keys.getPass(), keys.getMnemonic(), passphrase);
+    public boolean importKeys(Keys keys, String passphrase) {
+        boolean success = writeAuthFile(getAuthFile().getPath(), keys.getUser(), keys.getPass(), keys.getMnemonic(), passphrase);
+        if (success) {
+            this.keys = keys;
+        }
+        return success;
     }
 
-    private static File getAuthFile() {
+    private File getAuthFile() {
         if (appDir == null) {
             throw new IllegalStateException("appDir is not set");
         }

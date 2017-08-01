@@ -125,7 +125,7 @@ public class KeysFragment extends Fragment {
     private class ImportKeysTask extends AsyncTask<String, Void, Boolean> {
         @Override
         protected Boolean doInBackground(String... params) {
-            return Storj.importKeys(new Keys(params[0], params[1], params[2]), "");
+            return Storj.getInstance().importKeys(new Keys(params[0], params[1], params[2]), "");
         }
 
         @Override
