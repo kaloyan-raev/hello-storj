@@ -14,12 +14,12 @@ The app can be installed from Google Play: https://play.google.com/store/apps/de
 * [x] `storj_bridge_get_info()`
 * [x] Import keys
 * [x] `storj_bridge_get_buckets()`
+* [x] `storj_bridge_list_files()`
 
 ## TODO
 
-* [ ] `storj_bridge_list_files()`
-* [ ] `storj_bridge_create_bucket()`
 * [ ] `storj_bridge_resolve_file()`
+* [ ] `storj_bridge_create_bucket()`
 * [ ] `storj_bridge_store_file()`
 * [ ] Build the libstorj native library and its dependencies for all CPU architectures
 
