@@ -70,13 +70,23 @@ static void get_buckets_callback(uv_work_t *work_req, int status)
 
     for (int i = 0; i < req->total_buckets; i++) {
         storj_bucket_meta_t *bucket = &req->buckets[i];
+
+        jstring id = env->NewStringUTF(bucket->id);
+        jstring name = env->NewStringUTF(bucket->name);
+        jstring created = env->NewStringUTF(bucket->created);
+
         jobject bucketObject = env->NewObject(bucketClass,
                                               bucketInit,
-                                              env->NewStringUTF(bucket->id),
-                                              env->NewStringUTF(bucket->name),
-                                              env->NewStringUTF(bucket->created),
+                                              id,
+                                              name,
+                                              created,
                                               bucket->decrypted);
         env->SetObjectArrayElement(bucketArray, i, bucketObject);
+
+        env->DeleteLocalRef(bucketObject);
+        env->DeleteLocalRef(id);
+        env->DeleteLocalRef(name);
+        env->DeleteLocalRef(created);
     }
 
     jclass callbackClass = env->GetObjectClass(callbackObject);
@@ -183,18 +193,30 @@ static void list_files_callback(uv_work_t *work_req, int status)
 
     for (int i = 0; i < req->total_files; i++) {
         storj_file_meta_t *file = &req->files[i];
+
+        jstring id = env->NewStringUTF(file->id);
+        jstring filename = env->NewStringUTF(file->filename);
+        jstring created = env->NewStringUTF(file->created);
+        jstring mimetype = env->NewStringUTF(file->mimetype);
+
         jobject fileObject = env->NewObject(fileClass,
                                             fileInit,
-                                            env->NewStringUTF(file->id),
-                                            env->NewStringUTF(file->filename),
-                                            env->NewStringUTF(file->created),
+                                            id,
+                                            filename,
+                                            created,
                                             file->decrypted,
                                             file->size,
-                                            env->NewStringUTF(file->mimetype),
+                                            mimetype,
                                             NULL, //env->NewStringUTF(file->erasure),
                                             NULL, //env->NewStringUTF(file->index),
                                             NULL); //env->NewStringUTF(file->hmac));
         env->SetObjectArrayElement(fileArray, i, fileObject);
+
+        env->DeleteLocalRef(fileObject);
+        env->DeleteLocalRef(id);
+        env->DeleteLocalRef(filename);
+        env->DeleteLocalRef(created);
+        env->DeleteLocalRef(mimetype);
     }
 
     jclass callbackClass = env->GetObjectClass(callbackObject);
