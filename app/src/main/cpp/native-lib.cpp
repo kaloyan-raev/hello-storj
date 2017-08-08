@@ -20,7 +20,7 @@
 #include <nettle/version.h>
 #include <microhttpd/microhttpd.h>
 
-static const char *cainfo_path;
+static char cainfo_path[256];
 
 typedef struct {
     JNIEnv *env;
@@ -33,7 +33,9 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_setCAInfoPath(
         JNIEnv *env,
         jclass /* clazz */,
         jstring path_) {
-    cainfo_path = env->GetStringUTFChars(path_, NULL);
+    const char *path = env->GetStringUTFChars(path_, NULL);
+    strcpy(cainfo_path, path);
+    env->ReleaseStringUTFChars(path_, path);
 }
 
 static void error_callback(JNIEnv *env, jobject callbackObject, const char *message) {
