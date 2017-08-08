@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -70,9 +71,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
         mProgress = (ProgressBar) rootView.findViewById(R.id.progress);
         mStatus = (TextView) rootView.findViewById(R.id.status);
 
-        Bundle bundle = getArguments();
-        Bucket bucket = (Bucket) bundle.getSerializable(BUCKET);
-
+        Bucket bucket = (Bucket) getArguments().getSerializable(BUCKET);
         listFiles(bucket);
 
         return rootView;
@@ -172,7 +171,8 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
     }
 
     public class SimpleItemRecyclerViewAdapter
-            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
+            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>
+            implements View.OnClickListener {
 
         private File[] mFiles;
 
@@ -185,6 +185,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(android.R.layout.simple_list_item_2, parent, false);
+            view.setOnClickListener(this);
             return new ViewHolder(view);
         }
 
@@ -202,6 +203,20 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
 
         public void setFiles(File[] files) {
             mFiles = files;
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = mList.getChildAdapterPosition(v);
+            if (position != RecyclerView.NO_POSITION) {
+                File file = mFiles[position];
+                Bundle args = new Bundle();
+                args.putSerializable(FileInfoFragment.FILE, file);
+
+                DialogFragment dialog = new FileInfoFragment();
+                dialog.setArguments(args);
+                dialog.show(getFragmentManager(), FileInfoFragment.class.getName());
+            }
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {

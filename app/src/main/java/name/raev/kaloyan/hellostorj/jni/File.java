@@ -19,7 +19,9 @@ package name.raev.kaloyan.hellostorj.jni;
 
 import android.support.annotation.NonNull;
 
-public class File implements Comparable<File> {
+import java.io.Serializable;
+
+public class File implements Serializable, Comparable<File> {
 
     private String id;
     private String name;
