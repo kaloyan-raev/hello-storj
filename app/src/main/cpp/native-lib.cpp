@@ -20,14 +20,12 @@
 #include <nettle/version.h>
 #include <microhttpd/microhttpd.h>
 
-static JavaVM *jvm;
 static const char *cainfo_path;
 
-jint JNI_OnLoad(JavaVM* vm, void* reserved)
-{
-    jvm = vm;
-    return JNI_VERSION_1_6;
-}
+typedef struct {
+    JNIEnv *env;
+    jobject callbackObject;
+} jcallback_t;
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -52,11 +50,9 @@ static void get_buckets_callback(uv_work_t *work_req, int status)
 {
     assert(status == 0);
     get_buckets_request_t *req = (get_buckets_request_t *) work_req->data;
-
-    JNIEnv *env;
-    jint rs = jvm->AttachCurrentThread(&env, NULL);
-    assert (rs == 0);
-    jobject callbackObject = (jobject) req->handle;
+    jcallback_t *jcallback = (jcallback_t *) req->handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
 
     if (req->error_code || req->response == NULL) {
         storj_free_get_buckets_request(req);
@@ -68,7 +64,6 @@ static void get_buckets_callback(uv_work_t *work_req, int status)
             sprintf(error_message, "Request failed with status code: %i", req->status_code);
         }
         error_callback(env, callbackObject, error_message);
-        env->DeleteGlobalRef(callbackObject);
         return;
     }
 
@@ -104,8 +99,6 @@ static void get_buckets_callback(uv_work_t *work_req, int status)
                                                 "onBucketsReceived",
                                                 "([Lname/raev/kaloyan/hellostorj/jni/Bucket;)V");
     env->CallVoidMethod(callbackObject, callbackMethod, bucketArray);
-
-    env->DeleteGlobalRef(callbackObject);
 
     json_object_put(req->response);
     storj_free_get_buckets_request(req);
@@ -156,9 +149,11 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getBuckets(
         error_callback(env, callbackObject, "Cannot initialize Storj environment");
     }
 
-    storj_bridge_get_buckets(storj_env,
-                             env->NewGlobalRef(callbackObject),
-                             get_buckets_callback);
+    jcallback_t jcallback = {
+            .env = env,
+            .callbackObject = callbackObject
+    };
+    storj_bridge_get_buckets(storj_env, &jcallback, get_buckets_callback);
 
     uv_run(storj_env->loop, UV_RUN_DEFAULT);
 
@@ -174,11 +169,9 @@ static void list_files_callback(uv_work_t *work_req, int status)
 {
     assert(status == 0);
     list_files_request_t *req = (list_files_request_t *) work_req->data;
-
-    JNIEnv *env;
-    jint rs = jvm->AttachCurrentThread(&env, NULL);
-    assert (rs == 0);
-    jobject callbackObject = (jobject) req->handle;
+    jcallback_t *jcallback = (jcallback_t *) req->handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
 
     if (req->status_code != 200) {
         storj_free_list_files_request(req);
@@ -194,7 +187,6 @@ static void list_files_callback(uv_work_t *work_req, int status)
             sprintf(error_message, "Request failed with status code: %i", req->status_code);
         }
         error_callback(env, callbackObject, error_message);
-        env->DeleteGlobalRef(callbackObject);
         return;
     }
 
@@ -237,8 +229,6 @@ static void list_files_callback(uv_work_t *work_req, int status)
                                                 "onFilesReceived",
                                                 "([Lname/raev/kaloyan/hellostorj/jni/File;)V");
     env->CallVoidMethod(callbackObject, callbackMethod, fileArray);
-
-    env->DeleteGlobalRef(callbackObject);
 
     json_object_put(req->response);
     storj_free_list_files_request(req);
@@ -291,10 +281,11 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_listFiles(
         error_callback(env, callbackObject, "Cannot initialize Storj environment");
     }
 
-    storj_bridge_list_files(storj_env,
-                            bucketId,
-                            env->NewGlobalRef(callbackObject),
-                            list_files_callback);
+    jcallback_t jcallback = {
+            .env = env,
+            .callbackObject = callbackObject
+    };
+    storj_bridge_list_files(storj_env, bucketId, &jcallback, list_files_callback);
 
     uv_run(storj_env->loop, UV_RUN_DEFAULT);
 
@@ -312,11 +303,9 @@ static void get_info_callback(uv_work_t *work_req, int status)
 {
     assert(status == 0);
     json_request_t *req = (json_request_t *) work_req->data;
-
-    JNIEnv *env;
-    jint rs = jvm->AttachCurrentThread(&env, NULL);
-    assert (rs == 0);
-    jobject callbackObject = (jobject) req->handle;
+    jcallback_t *jcallback = (jcallback_t *) req->handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
 
     if (req->error_code || req->response == NULL) {
         free(req);
@@ -329,7 +318,6 @@ static void get_info_callback(uv_work_t *work_req, int status)
             strcpy(error_message, "Failed to get info.");
         }
         error_callback(env, callbackObject, error_message);
-        env->DeleteGlobalRef(callbackObject);
         return;
     }
 
@@ -355,8 +343,6 @@ static void get_info_callback(uv_work_t *work_req, int status)
                         env->NewStringUTF(json_object_get_string(description)),
                         env->NewStringUTF(json_object_get_string(version)),
                         env->NewStringUTF(json_object_get_string(host)));
-
-    env->DeleteGlobalRef(callbackObject);
 
     json_object_put(req->response);
     free(req);
@@ -396,9 +382,11 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
         error_callback(env, callbackObject, "Cannot initialize Storj environment");
     }
 
-    storj_bridge_get_info(storj_env,
-                          env->NewGlobalRef(callbackObject),
-                          get_info_callback);
+    jcallback_t jcallback = {
+            .env = env,
+            .callbackObject = callbackObject
+    };
+    storj_bridge_get_info(storj_env, &jcallback, get_info_callback);
 
     uv_run(storj_env->loop, UV_RUN_DEFAULT);
 
