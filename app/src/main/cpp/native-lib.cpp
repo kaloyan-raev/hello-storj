@@ -31,7 +31,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_setCAInfoPath(
         JNIEnv *env,
-        jclass /* type */,
+        jclass /* clazz */,
         jstring path_) {
     cainfo_path = env->GetStringUTFChars(path_, NULL);
 }
@@ -55,8 +55,6 @@ static void get_buckets_callback(uv_work_t *work_req, int status)
     jobject callbackObject = jcallback->callbackObject;
 
     if (req->error_code || req->response == NULL) {
-        storj_free_get_buckets_request(req);
-        free(work_req);
         char error_message[256];
         if (req->status_code == 401) {
             strcpy(error_message, "Invalid user credentials");
@@ -64,41 +62,40 @@ static void get_buckets_callback(uv_work_t *work_req, int status)
             sprintf(error_message, "Request failed with status code: %i", req->status_code);
         }
         error_callback(env, callbackObject, error_message);
-        return;
+    } else {
+        jclass bucketClass = env->FindClass("name/raev/kaloyan/hellostorj/jni/Bucket");
+        jobjectArray bucketArray = env->NewObjectArray(req->total_buckets, bucketClass, NULL);
+        jmethodID bucketInit = env->GetMethodID(bucketClass,
+                                                "<init>",
+                                                "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
+
+        for (int i = 0; i < req->total_buckets; i++) {
+            storj_bucket_meta_t *bucket = &req->buckets[i];
+
+            jstring id = env->NewStringUTF(bucket->id);
+            jstring name = env->NewStringUTF(bucket->name);
+            jstring created = env->NewStringUTF(bucket->created);
+
+            jobject bucketObject = env->NewObject(bucketClass,
+                                                  bucketInit,
+                                                  id,
+                                                  name,
+                                                  created,
+                                                  bucket->decrypted);
+            env->SetObjectArrayElement(bucketArray, i, bucketObject);
+
+            env->DeleteLocalRef(bucketObject);
+            env->DeleteLocalRef(id);
+            env->DeleteLocalRef(name);
+            env->DeleteLocalRef(created);
+        }
+
+        jclass callbackClass = env->GetObjectClass(callbackObject);
+        jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                    "onBucketsReceived",
+                                                    "([Lname/raev/kaloyan/hellostorj/jni/Bucket;)V");
+        env->CallVoidMethod(callbackObject, callbackMethod, bucketArray);
     }
-
-    jclass bucketClass = env->FindClass("name/raev/kaloyan/hellostorj/jni/Bucket");
-    jobjectArray bucketArray = env->NewObjectArray(req->total_buckets, bucketClass, NULL);
-    jmethodID bucketInit = env->GetMethodID(bucketClass,
-                                            "<init>",
-                                            "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
-
-    for (int i = 0; i < req->total_buckets; i++) {
-        storj_bucket_meta_t *bucket = &req->buckets[i];
-
-        jstring id = env->NewStringUTF(bucket->id);
-        jstring name = env->NewStringUTF(bucket->name);
-        jstring created = env->NewStringUTF(bucket->created);
-
-        jobject bucketObject = env->NewObject(bucketClass,
-                                              bucketInit,
-                                              id,
-                                              name,
-                                              created,
-                                              bucket->decrypted);
-        env->SetObjectArrayElement(bucketArray, i, bucketObject);
-
-        env->DeleteLocalRef(bucketObject);
-        env->DeleteLocalRef(id);
-        env->DeleteLocalRef(name);
-        env->DeleteLocalRef(created);
-    }
-
-    jclass callbackClass = env->GetObjectClass(callbackObject);
-    jmethodID callbackMethod = env->GetMethodID(callbackClass,
-                                                "onBucketsReceived",
-                                                "([Lname/raev/kaloyan/hellostorj/jni/Bucket;)V");
-    env->CallVoidMethod(callbackObject, callbackMethod, bucketArray);
 
     json_object_put(req->response);
     storj_free_get_buckets_request(req);
@@ -109,146 +106,14 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_getBuckets(
         JNIEnv *env,
-        jclass clazz,
-        jstring user,
-        jstring pass,
-        jstring mnemonic,
-        jobject callbackObject) {
-    const char *user_c = env->GetStringUTFChars(user, NULL);
-    const char *pass_c = env->GetStringUTFChars(pass, NULL);
-    const char *mnemonic_c = env->GetStringUTFChars(mnemonic, NULL);
-
-    storj_http_options_t http_options = {
-            .user_agent = "Hello Storj",
-            .cainfo_path = cainfo_path,
-            .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
-            .low_speed_time = STORJ_LOW_SPEED_TIME,
-            .timeout = STORJ_HTTP_TIMEOUT
-    };
-
-    storj_bridge_options_t options = {
-            .proto = "https",
-            .host  = "api.storj.io",
-            .port  = 443,
-            .user  = user_c,
-            .pass  = pass_c
-    };
-
-    storj_encrypt_options_t encrypt_options = {
-            .mnemonic = mnemonic_c
-    };
-
-    storj_log_options_t log_options = {
-            .logger = NULL,
-            .level = 0
-    };
-
-    storj_env_t *storj_env = NULL;
-    storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
-    if (!storj_env) {
-        error_callback(env, callbackObject, "Cannot initialize Storj environment");
-    }
-
-    jcallback_t jcallback = {
-            .env = env,
-            .callbackObject = callbackObject
-    };
-    storj_bridge_get_buckets(storj_env, &jcallback, get_buckets_callback);
-
-    uv_run(storj_env->loop, UV_RUN_DEFAULT);
-
-    if (storj_env) {
-        storj_destroy_env(storj_env);
-    }
-    env->ReleaseStringUTFChars(user, user_c);
-    env->ReleaseStringUTFChars(pass, pass_c);
-    env->ReleaseStringUTFChars(mnemonic, mnemonic_c);
-}
-
-static void list_files_callback(uv_work_t *work_req, int status)
-{
-    assert(status == 0);
-    list_files_request_t *req = (list_files_request_t *) work_req->data;
-    jcallback_t *jcallback = (jcallback_t *) req->handle;
-    JNIEnv *env = jcallback->env;
-    jobject callbackObject = jcallback->callbackObject;
-
-    if (req->status_code != 200) {
-        storj_free_list_files_request(req);
-        free(work_req);
-        char error_message[256];
-        if (req->status_code == 404) {
-            sprintf(error_message, "Bucket id [%s] does not exist", req->bucket_id);
-        } else if (req->status_code == 400) {
-            sprintf(error_message, "Bucket id [%s] is invalid", req->bucket_id);
-        } else if (req->status_code == 401) {
-            strcpy(error_message, "Invalid user credentials");
-        } else {
-            sprintf(error_message, "Request failed with status code: %i", req->status_code);
-        }
-        error_callback(env, callbackObject, error_message);
-        return;
-    }
-
-    jclass fileClass = env->FindClass("name/raev/kaloyan/hellostorj/jni/File");
-    jobjectArray fileArray = env->NewObjectArray(req->total_files, fileClass, NULL);
-    jmethodID fileInit = env->GetMethodID(fileClass,
-                                          "<init>",
-                                          "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZJLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-
-    for (int i = 0; i < req->total_files; i++) {
-        storj_file_meta_t *file = &req->files[i];
-
-        jstring id = env->NewStringUTF(file->id);
-        jstring filename = env->NewStringUTF(file->filename);
-        jstring created = env->NewStringUTF(file->created);
-        jstring mimetype = env->NewStringUTF(file->mimetype);
-
-        jobject fileObject = env->NewObject(fileClass,
-                                            fileInit,
-                                            id,
-                                            filename,
-                                            created,
-                                            file->decrypted,
-                                            file->size,
-                                            mimetype,
-                                            NULL, //env->NewStringUTF(file->erasure),
-                                            NULL, //env->NewStringUTF(file->index),
-                                            NULL); //env->NewStringUTF(file->hmac));
-        env->SetObjectArrayElement(fileArray, i, fileObject);
-
-        env->DeleteLocalRef(fileObject);
-        env->DeleteLocalRef(id);
-        env->DeleteLocalRef(filename);
-        env->DeleteLocalRef(created);
-        env->DeleteLocalRef(mimetype);
-    }
-
-    jclass callbackClass = env->GetObjectClass(callbackObject);
-    jmethodID callbackMethod = env->GetMethodID(callbackClass,
-                                                "onFilesReceived",
-                                                "([Lname/raev/kaloyan/hellostorj/jni/File;)V");
-    env->CallVoidMethod(callbackObject, callbackMethod, fileArray);
-
-    json_object_put(req->response);
-    storj_free_list_files_request(req);
-    free(work_req);
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_listFiles(
-        JNIEnv *env,
-        jclass clazz,
+        jclass /* clazz */,
         jstring user_,
         jstring pass_,
         jstring mnemonic_,
-        jstring bucketId_,
         jobject callbackObject) {
-    const char *user = env->GetStringUTFChars(user_, 0);
-    const char *pass = env->GetStringUTFChars(pass_, 0);
-    const char *mnemonic = env->GetStringUTFChars(mnemonic_, 0);
-    const char *bucketId = env->GetStringUTFChars(bucketId_, 0);
+    const char *user = env->GetStringUTFChars(user_, NULL);
+    const char *pass = env->GetStringUTFChars(pass_, NULL);
+    const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
 
     storj_http_options_t http_options = {
             .user_agent = "Hello Storj",
@@ -275,21 +140,147 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_listFiles(
             .level = 0
     };
 
-    storj_env_t *storj_env = NULL;
-    storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
+    storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
+
     if (!storj_env) {
         error_callback(env, callbackObject, "Cannot initialize Storj environment");
+    } else {
+        jcallback_t jcallback = {
+                .env = env,
+                .callbackObject = callbackObject
+        };
+        storj_bridge_get_buckets(storj_env, &jcallback, get_buckets_callback);
+
+        uv_run(storj_env->loop, UV_RUN_DEFAULT);
+
+        storj_destroy_env(storj_env);
     }
 
-    jcallback_t jcallback = {
-            .env = env,
-            .callbackObject = callbackObject
+    env->ReleaseStringUTFChars(user_, user);
+    env->ReleaseStringUTFChars(pass_, pass);
+    env->ReleaseStringUTFChars(mnemonic_, mnemonic);
+}
+
+static void list_files_callback(uv_work_t *work_req, int status)
+{
+    assert(status == 0);
+    list_files_request_t *req = (list_files_request_t *) work_req->data;
+    jcallback_t *jcallback = (jcallback_t *) req->handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
+
+    if (req->status_code != 200) {
+        char error_message[256];
+        if (req->status_code == 404) {
+            sprintf(error_message, "Bucket id [%s] does not exist", req->bucket_id);
+        } else if (req->status_code == 400) {
+            sprintf(error_message, "Bucket id [%s] is invalid", req->bucket_id);
+        } else if (req->status_code == 401) {
+            strcpy(error_message, "Invalid user credentials");
+        } else {
+            sprintf(error_message, "Request failed with status code: %i", req->status_code);
+        }
+        error_callback(env, callbackObject, error_message);
+    } else {
+        jclass fileClass = env->FindClass("name/raev/kaloyan/hellostorj/jni/File");
+        jobjectArray fileArray = env->NewObjectArray(req->total_files, fileClass, NULL);
+        jmethodID fileInit = env->GetMethodID(fileClass,
+                                              "<init>",
+                                              "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZJLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+
+        for (int i = 0; i < req->total_files; i++) {
+            storj_file_meta_t *file = &req->files[i];
+
+            jstring id = env->NewStringUTF(file->id);
+            jstring filename = env->NewStringUTF(file->filename);
+            jstring created = env->NewStringUTF(file->created);
+            jstring mimetype = env->NewStringUTF(file->mimetype);
+
+            jobject fileObject = env->NewObject(fileClass,
+                                                fileInit,
+                                                id,
+                                                filename,
+                                                created,
+                                                file->decrypted,
+                                                file->size,
+                                                mimetype,
+                                                NULL, //env->NewStringUTF(file->erasure),
+                                                NULL, //env->NewStringUTF(file->index),
+                                                NULL); //env->NewStringUTF(file->hmac));
+            env->SetObjectArrayElement(fileArray, i, fileObject);
+
+            env->DeleteLocalRef(fileObject);
+            env->DeleteLocalRef(id);
+            env->DeleteLocalRef(filename);
+            env->DeleteLocalRef(created);
+            env->DeleteLocalRef(mimetype);
+        }
+
+        jclass callbackClass = env->GetObjectClass(callbackObject);
+        jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                    "onFilesReceived",
+                                                    "([Lname/raev/kaloyan/hellostorj/jni/File;)V");
+        env->CallVoidMethod(callbackObject, callbackMethod, fileArray);
+    }
+
+    json_object_put(req->response);
+    storj_free_list_files_request(req);
+    free(work_req);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_name_raev_kaloyan_hellostorj_jni_Storj_listFiles(
+        JNIEnv *env,
+        jclass /* clazz */,
+        jstring user_,
+        jstring pass_,
+        jstring mnemonic_,
+        jstring bucketId_,
+        jobject callbackObject) {
+    const char *user = env->GetStringUTFChars(user_, NULL);
+    const char *pass = env->GetStringUTFChars(pass_, NULL);
+    const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
+    const char *bucketId = env->GetStringUTFChars(bucketId_, NULL);
+
+    storj_http_options_t http_options = {
+            .user_agent = "Hello Storj",
+            .cainfo_path = cainfo_path,
+            .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
+            .low_speed_time = STORJ_LOW_SPEED_TIME,
+            .timeout = STORJ_HTTP_TIMEOUT
     };
-    storj_bridge_list_files(storj_env, bucketId, &jcallback, list_files_callback);
 
-    uv_run(storj_env->loop, UV_RUN_DEFAULT);
+    storj_bridge_options_t options = {
+            .proto = "https",
+            .host  = "api.storj.io",
+            .port  = 443,
+            .user  = user,
+            .pass  = pass
+    };
 
-    if (storj_env) {
+    storj_encrypt_options_t encrypt_options = {
+            .mnemonic = mnemonic
+    };
+
+    storj_log_options_t log_options = {
+            .logger = NULL,
+            .level = 0
+    };
+
+    storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
+
+    if (!storj_env) {
+        error_callback(env, callbackObject, "Cannot initialize Storj environment");
+    } else {
+        jcallback_t jcallback = {
+                .env = env,
+                .callbackObject = callbackObject
+        };
+        storj_bridge_list_files(storj_env, bucketId, &jcallback, list_files_callback);
+
+        uv_run(storj_env->loop, UV_RUN_DEFAULT);
+
         storj_destroy_env(storj_env);
     }
 
@@ -308,8 +299,6 @@ static void get_info_callback(uv_work_t *work_req, int status)
     jobject callbackObject = jcallback->callbackObject;
 
     if (req->error_code || req->response == NULL) {
-        free(req);
-        free(work_req);
         char error_message[256];
         if (req->error_code) {
             sprintf(error_message, "Request failed, reason: %s",
@@ -318,31 +307,29 @@ static void get_info_callback(uv_work_t *work_req, int status)
             strcpy(error_message, "Failed to get info.");
         }
         error_callback(env, callbackObject, error_message);
-        return;
+    } else {
+        struct json_object *info;
+        json_object_object_get_ex(req->response, "info", &info);
+        struct json_object *title;
+        json_object_object_get_ex(info, "title", &title);
+        struct json_object *description;
+        json_object_object_get_ex(info, "description", &description);
+        struct json_object *version;
+        json_object_object_get_ex(info, "version", &version);
+        struct json_object *host;
+        json_object_object_get_ex(req->response, "host", &host);
+
+        jclass callbackClass = env->GetObjectClass(callbackObject);
+        jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                    "onInfoReceived",
+                                                    "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+        env->CallVoidMethod(callbackObject,
+                            callbackMethod,
+                            env->NewStringUTF(json_object_get_string(title)),
+                            env->NewStringUTF(json_object_get_string(description)),
+                            env->NewStringUTF(json_object_get_string(version)),
+                            env->NewStringUTF(json_object_get_string(host)));
     }
-
-    struct json_object *info;
-    json_object_object_get_ex(req->response, "info", &info);
-
-    struct json_object *title;
-    json_object_object_get_ex(info, "title", &title);
-    struct json_object *description;
-    json_object_object_get_ex(info, "description", &description);
-    struct json_object *version;
-    json_object_object_get_ex(info, "version", &version);
-    struct json_object *host;
-    json_object_object_get_ex(req->response, "host", &host);
-
-    jclass callbackClass = env->GetObjectClass(callbackObject);
-    jmethodID callbackMethod = env->GetMethodID(callbackClass,
-                                             "onInfoReceived",
-                                             "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-    env->CallVoidMethod(callbackObject,
-                        callbackMethod,
-                        env->NewStringUTF(json_object_get_string(title)),
-                        env->NewStringUTF(json_object_get_string(description)),
-                        env->NewStringUTF(json_object_get_string(version)),
-                        env->NewStringUTF(json_object_get_string(host)));
 
     json_object_put(req->response);
     free(req);
@@ -353,7 +340,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
         JNIEnv *env,
-        jclass clazz,
+        jclass /* clazz */,
         jobject callbackObject) {
     storj_bridge_options_t options = {
             .proto = "https",
@@ -380,17 +367,15 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
     storj_env = storj_init_env(&options, NULL, &http_options, &log_options);
     if (!storj_env) {
         error_callback(env, callbackObject, "Cannot initialize Storj environment");
-    }
+    } else {
+        jcallback_t jcallback = {
+                .env = env,
+                .callbackObject = callbackObject
+        };
+        storj_bridge_get_info(storj_env, &jcallback, get_info_callback);
 
-    jcallback_t jcallback = {
-            .env = env,
-            .callbackObject = callbackObject
-    };
-    storj_bridge_get_info(storj_env, &jcallback, get_info_callback);
+        uv_run(storj_env->loop, UV_RUN_DEFAULT);
 
-    uv_run(storj_env->loop, UV_RUN_DEFAULT);
-
-    if (storj_env) {
         storj_destroy_env(storj_env);
     }
 }
@@ -402,8 +387,8 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_exportKeys(
         jclass type,
         jstring location_,
         jstring passphrase_) {
-    const char *location = env->GetStringUTFChars(location_, 0);
-    const char *passphrase = env->GetStringUTFChars(passphrase_, 0);
+    const char *location = env->GetStringUTFChars(location_, NULL);
+    const char *passphrase = env->GetStringUTFChars(passphrase_, NULL);
     char *user = NULL;
     char *pass = NULL;
     char *mnemonic = NULL;
@@ -441,24 +426,24 @@ JNIEXPORT jboolean JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_writeAuthFile(
         JNIEnv *env,
         jclass /* clazz */,
-        jstring location,
-        jstring user,
-        jstring pass,
-        jstring mnemonic,
-        jstring passphrase) {
-    const char *location_c = env->GetStringUTFChars(location, NULL);
-    const char *user_c = env->GetStringUTFChars(user, NULL);
-    const char *pass_c = env->GetStringUTFChars(pass, NULL);
-    const char *mnemonic_c = env->GetStringUTFChars(mnemonic, NULL);
-    const char *passphrase_c = env->GetStringUTFChars(passphrase, NULL);
+        jstring location_,
+        jstring user_,
+        jstring pass_,
+        jstring mnemonic_,
+        jstring passphrase_) {
+    const char *location = env->GetStringUTFChars(location_, NULL);
+    const char *user = env->GetStringUTFChars(user_, NULL);
+    const char *pass = env->GetStringUTFChars(pass_, NULL);
+    const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
+    const char *passphrase = env->GetStringUTFChars(passphrase_, NULL);
 
-    int result = storj_encrypt_write_auth(location_c, passphrase_c, user_c, pass_c, mnemonic_c);
+    int result = storj_encrypt_write_auth(location, passphrase, user, pass, mnemonic);
 
-    env->ReleaseStringUTFChars(location, location_c);
-    env->ReleaseStringUTFChars(user, user_c);
-    env->ReleaseStringUTFChars(pass, pass_c);
-    env->ReleaseStringUTFChars(mnemonic, mnemonic_c);
-    env->ReleaseStringUTFChars(passphrase, passphrase_c);
+    env->ReleaseStringUTFChars(location_, location);
+    env->ReleaseStringUTFChars(user_, user);
+    env->ReleaseStringUTFChars(pass_, pass);
+    env->ReleaseStringUTFChars(mnemonic_, mnemonic);
+    env->ReleaseStringUTFChars(passphrase_, passphrase);
 
     return result == 0;
 }
@@ -489,7 +474,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_generateMnemonic(
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_getTimestamp(
-        JNIEnv *env,
+        JNIEnv * /* env */,
         jclass /* clazz */) {
     return storj_util_timestamp();
 }
