@@ -51,7 +51,7 @@ public class MainApplication extends Application {
                 try (InputStream in = assetManager.open(filename);
                      OutputStream out = openFileOutput(filename, Context.MODE_PRIVATE)) {
                     copy(in, out);
-                    Storj.caInfoPath = getFileStreamPath(filename).getPath();
+                    Storj.setCAInfoPath(getFileStreamPath(filename).getPath());
                 } catch(IOException e) {
                     Log.e("tag", "Failed to copy asset file: " + filename, e);
                 }

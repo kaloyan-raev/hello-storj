@@ -21,6 +21,7 @@
 #include <microhttpd/microhttpd.h>
 
 static JavaVM *jvm;
+static const char *cainfo_path;
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
@@ -28,10 +29,13 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
     return JNI_VERSION_1_6;
 }
 
-const char *get_cainfo_path(JNIEnv *env, jclass clazz) {
-    jfieldID field = env->GetStaticFieldID(clazz, "caInfoPath", "Ljava/lang/String;");
-    jstring cainfo_path = (jstring) env->GetStaticObjectField(clazz, field);
-    return (!cainfo_path) ? NULL : env->GetStringUTFChars(cainfo_path, NULL);
+extern "C"
+JNIEXPORT void JNICALL
+Java_name_raev_kaloyan_hellostorj_jni_Storj_setCAInfoPath(
+        JNIEnv *env,
+        jclass /* type */,
+        jstring path_) {
+    cainfo_path = env->GetStringUTFChars(path_, NULL);
 }
 
 static void error_callback(JNIEnv *env, jobject callbackObject, const char *message) {
@@ -123,7 +127,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getBuckets(
 
     storj_http_options_t http_options = {
             .user_agent = "Hello Storj",
-            .cainfo_path = get_cainfo_path(env, clazz),
+            .cainfo_path = cainfo_path,
             .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
             .low_speed_time = STORJ_LOW_SPEED_TIME,
             .timeout = STORJ_HTTP_TIMEOUT
@@ -258,7 +262,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_listFiles(
 
     storj_http_options_t http_options = {
             .user_agent = "Hello Storj",
-            .cainfo_path = get_cainfo_path(env, clazz),
+            .cainfo_path = cainfo_path,
             .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
             .low_speed_time = STORJ_LOW_SPEED_TIME,
             .timeout = STORJ_HTTP_TIMEOUT
@@ -375,7 +379,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
 
     storj_http_options_t http_options = {
             .user_agent = "Hello Storj",
-            .cainfo_path = get_cainfo_path(env, clazz),
+            .cainfo_path = cainfo_path,
             .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
             .low_speed_time = STORJ_LOW_SPEED_TIME,
             .timeout = STORJ_HTTP_TIMEOUT

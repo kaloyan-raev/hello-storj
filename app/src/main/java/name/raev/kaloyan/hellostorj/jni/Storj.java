@@ -33,8 +33,6 @@ public class Storj {
 
     public static String appDir;
 
-    public static String caInfoPath;
-
     private static Storj instance;
 
     private Keys keys;
@@ -92,6 +90,8 @@ public class Storj {
     public static native void listFiles(String user, String pass, String mnemonic, String bucketId, ListFilesCallback callback);
 
     public static native void getInfo(GetInfoCallback callback);
+
+    public static native void setCAInfoPath(String path);
 
     public static native boolean checkMnemonic(String mnemonic);
 
