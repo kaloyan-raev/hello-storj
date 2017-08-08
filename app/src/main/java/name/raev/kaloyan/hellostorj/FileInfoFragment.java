@@ -19,6 +19,7 @@ package name.raev.kaloyan.hellostorj;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.format.Formatter;
@@ -47,7 +48,9 @@ public class FileInfoFragment extends DialogFragment {
                                           file.getHMAC()))
                 .setPositiveButton(R.string.fileinfo_download, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // FIRE ZE MISSILES!
+                        Snackbar.make(getActivity().findViewById(R.id.browse_list),
+                                      R.string.fileinfo_download_in_progress,
+                                      Snackbar.LENGTH_LONG).show();
                     }
                 });
         // Create the AlertDialog object and return it

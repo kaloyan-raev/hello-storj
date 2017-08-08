@@ -28,4 +28,5 @@
     <string name="browse_no_files">No files in this bucket.</string>
     <string name="fileinfo_title">File Info</string>
     <string name="fileinfo_download">Download</string>
+    <string name="fileinfo_download_in_progress">The file will be downloaded. See notification for details.</string>
 </resources>

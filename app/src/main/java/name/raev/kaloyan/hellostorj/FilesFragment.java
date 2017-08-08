@@ -65,7 +65,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.content_browse, container, false);
 
-        mList = (RecyclerView) rootView.findViewById(R.id.buckets_list);
+        mList = (RecyclerView) rootView.findViewById(R.id.browse_list);
         setupRecyclerView(mList);
 
         mProgress = (ProgressBar) rootView.findViewById(R.id.progress);
