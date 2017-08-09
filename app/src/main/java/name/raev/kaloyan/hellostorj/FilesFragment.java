@@ -51,6 +51,8 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
     private ProgressBar mProgress;
     private TextView mStatus;
 
+    private Bucket mBucket;
+
     private SimpleItemRecyclerViewAdapter mListAdapter;
 
     /**
@@ -71,8 +73,8 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
         mProgress = (ProgressBar) rootView.findViewById(R.id.progress);
         mStatus = (TextView) rootView.findViewById(R.id.status);
 
-        Bucket bucket = (Bucket) getArguments().getSerializable(BUCKET);
-        listFiles(bucket);
+        mBucket = (Bucket) getArguments().getSerializable(BUCKET);
+        listFiles(mBucket);
 
         return rootView;
     }
@@ -211,6 +213,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
             if (position != RecyclerView.NO_POSITION) {
                 File file = mFiles[position];
                 Bundle args = new Bundle();
+                args.putSerializable(BUCKET, mBucket);
                 args.putSerializable(FileInfoFragment.FILE, file);
 
                 DialogFragment dialog = new FileInfoFragment();

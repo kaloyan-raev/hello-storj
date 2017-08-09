@@ -292,6 +292,140 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_listFiles(
     env->ReleaseStringUTFChars(bucketId_, bucketId);
 }
 
+static void download_file_progress_callback(double progress, uint64_t bytes, uint64_t total_bytes, void *handle)
+{
+    printf("p: %f, d: %d, t: %d", progress, bytes, total_bytes);
+}
+
+static void download_file_complete_callback(int status, FILE *fd, void *handle)
+{
+    fclose(fd);
+    printf("status: %d", status);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
+        JNIEnv *env,
+        jclass /* clazz */,
+        jstring bucketId_,
+        jstring fileId_,
+        jstring path_,
+        jstring user_,
+        jstring pass_,
+        jstring mnemonic_,
+        jobject callbackObject) {
+    const char *bucket_id = env->GetStringUTFChars(bucketId_, NULL);
+    const char *file_id = env->GetStringUTFChars(fileId_, NULL);
+    const char *path = env->GetStringUTFChars(path_, NULL);
+    const char *user = env->GetStringUTFChars(user_, NULL);
+    const char *pass = env->GetStringUTFChars(pass_, NULL);
+    const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
+
+    storj_http_options_t http_options = {
+            .user_agent = "Hello Storj",
+            .cainfo_path = cainfo_path,
+            .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
+            .low_speed_time = STORJ_LOW_SPEED_TIME,
+            .timeout = STORJ_HTTP_TIMEOUT
+    };
+
+    storj_bridge_options_t options = {
+            .proto = "https",
+            .host  = "api.storj.io",
+            .port  = 443,
+            .user  = user,
+            .pass  = pass
+    };
+
+    storj_encrypt_options_t encrypt_options = {
+            .mnemonic = mnemonic
+    };
+
+    storj_log_options_t log_options = {
+            .logger = NULL,
+            .level = 0
+    };
+
+    storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
+
+    if (!storj_env) {
+        error_callback(env, callbackObject, "Cannot initialize Storj environment");
+    } else {
+        jcallback_t jcallback = {
+                .env = env,
+                .callbackObject = callbackObject
+        };
+
+        FILE *fd = NULL;
+
+        if (path) {
+            char user_input[BUFSIZ];
+            memset(user_input, '\0', BUFSIZ);
+
+            if (access(path, F_OK) != -1) {
+//            printf("Warning: File already exists at path [%s].\n", path);
+//            while (strcmp(user_input, "y") != 0 && strcmp(user_input, "n") != 0)
+//            {
+//                memset(user_input, '\0', BUFSIZ);
+//                printf("Would you like to overwrite [%s]: [y/n] ", path);
+//                get_input(user_input);
+//            }
+//
+//            if (strcmp(user_input, "n") == 0) {
+//                printf("\nCanceled overwriting of [%s].\n", path);
+//                return 1;
+//            }
+
+                unlink(path);
+            }
+
+            fd = fopen(path, "w+");
+            assert (fd != NULL);
+        } else {
+            fd = stdout;
+        }
+
+        if (fd == NULL) {
+            // TODO send to stderr
+            printf("Unable to open %s: %s\n", path, strerror(errno));
+//            return 1;
+        }
+
+        uv_signal_t *sig = (uv_signal_t *) malloc(sizeof(uv_signal_t));
+        uv_signal_init(storj_env->loop, sig);
+//        uv_signal_start(sig, download_signal_handler, SIGINT);
+
+        storj_download_state_t *state = (storj_download_state_t *) malloc(sizeof(storj_download_state_t));
+        if (!state) {
+//            return 1;
+        }
+
+        sig->data = state;
+
+        int status = storj_bridge_resolve_file(storj_env,
+                                               state,
+                                               bucket_id,
+                                               file_id,
+                                               fd,
+                                               &jcallback,
+                                               download_file_progress_callback,
+                                               download_file_complete_callback);
+        assert(status == 0);
+
+        uv_run(storj_env->loop, UV_RUN_DEFAULT);
+
+        storj_destroy_env(storj_env);
+    }
+
+    env->ReleaseStringUTFChars(bucketId_, bucket_id);
+    env->ReleaseStringUTFChars(fileId_, file_id);
+    env->ReleaseStringUTFChars(path_, path);
+    env->ReleaseStringUTFChars(user_, user);
+    env->ReleaseStringUTFChars(pass_, pass);
+    env->ReleaseStringUTFChars(mnemonic_, mnemonic);
+}
+
 static void get_info_callback(uv_work_t *work_req, int status)
 {
     assert(status == 0);

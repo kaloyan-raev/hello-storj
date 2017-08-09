@@ -16,8 +16,9 @@
  ***************************************************************************/
 package name.raev.kaloyan.hellostorj.jni;
 
-import java.io.File;
+import android.os.Environment;
 
+import name.raev.kaloyan.hellostorj.jni.callbacks.DownloadFileCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetBucketsCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetInfoCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.ListFilesCallback;
@@ -73,13 +74,22 @@ public class Storj {
         return success;
     }
 
-    private File getAuthFile() {
+    private java.io.File getAuthFile() {
         if (appDir == null) {
             throw new IllegalStateException("appDir is not set");
         }
 
-        return new File(appDir, HOST + ".json");
+        return new java.io.File(appDir, HOST + ".json");
     }
+
+    public void download(Bucket bucket, File file, DownloadFileCallback callback) {
+        java.io.File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        String path = new java.io.File(downloads, file.getName()).getPath();
+        Keys keys = getKeys("");
+        downloadFile(bucket.getId(), file.getId(), path, keys.getUser(), keys.getPass(), keys.getMnemonic(), callback);
+    }
+
+    public static native void downloadFile(String bucketId, String fileId, String path, String user, String pass, String mnemonic, DownloadFileCallback callback);
 
     public static native Keys exportKeys(String location, String passphrase);
 

@@ -6,7 +6,7 @@ android {
     defaultConfig {
         applicationId "name.raev.kaloyan.hellostorj"
         minSdkVersion 21
-        targetSdkVersion 25
+        targetSdkVersion 21
         versionCode 5
         versionName "0.4.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

@@ -19,20 +19,25 @@ package name.raev.kaloyan.hellostorj;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Process;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.format.Formatter;
 
+import name.raev.kaloyan.hellostorj.jni.Bucket;
 import name.raev.kaloyan.hellostorj.jni.File;
+import name.raev.kaloyan.hellostorj.jni.Storj;
+import name.raev.kaloyan.hellostorj.jni.callbacks.DownloadFileCallback;
 
-public class FileInfoFragment extends DialogFragment {
+public class FileInfoFragment extends DialogFragment implements DownloadFileCallback {
 
     public static final String FILE = "file";
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        File file = (File) getArguments().getSerializable(FILE);
+        final Bucket bucket = (Bucket) getArguments().getSerializable(FilesFragment.BUCKET);
+        final File file = (File) getArguments().getSerializable(FILE);
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.fileinfo_title)
@@ -49,11 +54,33 @@ public class FileInfoFragment extends DialogFragment {
                 .setPositiveButton(R.string.fileinfo_download, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Snackbar.make(getActivity().findViewById(R.id.browse_list),
-                                      R.string.fileinfo_download_in_progress,
-                                      Snackbar.LENGTH_LONG).show();
+                                R.string.fileinfo_download_in_progress,
+                                Snackbar.LENGTH_LONG).show();
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                                Storj.getInstance().download(bucket, file, FileInfoFragment.this);
+                            }
+                        }.start();
                     }
                 });
         // Create the AlertDialog object and return it
         return builder.create();
+    }
+
+    @Override
+    public void onProgress(double progress, long downloadedBytes, long totalBytes) {
+
+    }
+
+    @Override
+    public void onComplete() {
+
+    }
+
+    @Override
+    public void onError(String message) {
+
     }
 }
