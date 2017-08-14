@@ -18,12 +18,14 @@ package name.raev.kaloyan.hellostorj;
 
 import android.app.Dialog;
 import android.app.DownloadManager;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Process;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.format.Formatter;
 
@@ -36,12 +38,18 @@ public class FileInfoFragment extends DialogFragment implements DownloadFileCall
 
     public static final String FILE = "file";
 
+    private Context mContext;
+    private NotificationManager mNotifyManager;
+    private NotificationCompat.Builder mBuilder;
+    private int mNotificationId = 1;
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final Bucket bucket = (Bucket) getArguments().getSerializable(FilesFragment.BUCKET);
         final File file = (File) getArguments().getSerializable(FILE);
         // Use the Builder class for convenient dialog construction
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        mContext = getActivity();
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setTitle(R.string.fileinfo_title)
                 .setMessage(String.format("ID: %s\nName: %s\nCreated: %s\nDecrypted: %b\nSize: %s\nMIME Type: %s\nErasure: %s\nIndex: %s\nHMAC: %s",
                                           file.getId(),
@@ -55,9 +63,19 @@ public class FileInfoFragment extends DialogFragment implements DownloadFileCall
                                           file.getHMAC()))
                 .setPositiveButton(R.string.fileinfo_download, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
+                        // show snackbar for user to watch for download notifications
                         Snackbar.make(getActivity().findViewById(R.id.browse_list),
                                 R.string.fileinfo_download_in_progress,
                                 Snackbar.LENGTH_LONG).show();
+                        // init the download notification
+                        mNotifyManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                        mBuilder = new NotificationCompat.Builder(mContext)
+                                .setSmallIcon(android.R.drawable.stat_sys_download)
+                                .setContentTitle(file.getName())
+                                .setContentText(mContext.getResources().getString(R.string.app_name))
+                                .setProgress(0, 0, true);
+                        mNotifyManager.notify(mNotificationId, mBuilder.build());
+                        // trigger the download
                         new Thread() {
                             @Override
                             public void run() {
@@ -78,9 +96,12 @@ public class FileInfoFragment extends DialogFragment implements DownloadFileCall
 
     @Override
     public void onComplete(File file, String localPath) {
-        DownloadManager dm = (DownloadManager) App.getContext().getSystemService(Context.DOWNLOAD_SERVICE);
+        // hide the "download in progress" notification
+        mNotifyManager.cancel(mNotificationId);
+        // show the "download completed" notification
+        DownloadManager dm = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
         dm.addCompletedDownload(file.getName(),
-                                App.getContext().getResources().getString(R.string.app_name),
+                                mContext.getResources().getString(R.string.app_name),
                                 true,
                                 file.getMimeType(),
                                 localPath,
