@@ -20,6 +20,7 @@ package name.raev.kaloyan.hellostorj.jni;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
+import java.net.URLConnection;
 
 public class File implements Serializable, Comparable<File> {
 
@@ -74,7 +75,13 @@ public class File implements Serializable, Comparable<File> {
     }
 
     public String getMimeType() {
-        return mimeType;
+        // prefer the Java util as libstorj returns always 'application/octet-stream'
+        String mime = URLConnection.guessContentTypeFromName(name);
+        if (mime == null || mime.isEmpty()) {
+            // fallback to libstorj
+            mime = mimeType;
+        }
+        return mime;
     }
 
     public String getErasure() {

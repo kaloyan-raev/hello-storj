@@ -82,7 +82,7 @@ public class FileInfoFragment extends DialogFragment implements DownloadFileCall
         dm.addCompletedDownload(file.getName(),
                                 App.getContext().getResources().getString(R.string.app_name),
                                 true,
-                                file.getMimeType(), // TODO use Android utils
+                                file.getMimeType(),
                                 localPath,
                                 file.getSize(),
                                 true);
