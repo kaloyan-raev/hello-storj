@@ -22,7 +22,7 @@ public interface DownloadFileCallback {
 
     void onProgress(double progress, long downloadedBytes, long totalBytes);
 
-    void onComplete();
+    void onComplete(File file, String localPath);
 
     void onError(String message);
 

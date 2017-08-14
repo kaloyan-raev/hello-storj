@@ -27,6 +27,13 @@ typedef struct {
     jobject callbackObject;
 } jcallback_t;
 
+typedef struct {
+    jcallback_t base;
+
+    jobject file;
+    jstring localPath;
+} jdownload_callback_t;
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_setCAInfoPath(
@@ -300,7 +307,21 @@ static void download_file_progress_callback(double progress, uint64_t bytes, uin
 static void download_file_complete_callback(int status, FILE *fd, void *handle)
 {
     fclose(fd);
-    printf("status: %d", status);
+
+    jcallback_t *jcallback = (jcallback_t *) handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
+
+    jclass callbackClass = env->GetObjectClass(callbackObject);
+    jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                "onComplete",
+                                                "(Lname/raev/kaloyan/hellostorj/jni/File;Ljava/lang/String;)V");
+
+    jdownload_callback_t *cb_extension = (jdownload_callback_t *) handle;
+    env->CallVoidMethod(callbackObject,
+                        callbackMethod,
+                        cb_extension->file,
+                        cb_extension->localPath);
 }
 
 extern "C"
@@ -309,12 +330,16 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
         JNIEnv *env,
         jclass /* clazz */,
         jstring bucketId_,
-        jstring fileId_,
+        jobject file_,
         jstring path_,
         jstring user_,
         jstring pass_,
         jstring mnemonic_,
         jobject callbackObject) {
+    jclass fileClass = env->GetObjectClass(file_);
+    jmethodID mid = env->GetMethodID(fileClass, "getId", "()Ljava/lang/String;");
+    jstring fileId_ = (jstring) env->CallObjectMethod(file_, mid);
+
     const char *bucket_id = env->GetStringUTFChars(bucketId_, NULL);
     const char *file_id = env->GetStringUTFChars(fileId_, NULL);
     const char *path = env->GetStringUTFChars(path_, NULL);
@@ -355,6 +380,12 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
         jcallback_t jcallback = {
                 .env = env,
                 .callbackObject = callbackObject
+        };
+
+        jdownload_callback_t cb_extension = {
+                .base = jcallback,
+                .file = file_,
+                .localPath = path_
         };
 
         FILE *fd = NULL;
@@ -408,7 +439,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
                                                bucket_id,
                                                file_id,
                                                fd,
-                                               &jcallback,
+                                               &cb_extension,
                                                download_file_progress_callback,
                                                download_file_complete_callback);
         assert(status == 0);

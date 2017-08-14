@@ -28,13 +28,20 @@ import java.io.OutputStream;
 
 import name.raev.kaloyan.hellostorj.jni.Storj;
 
-public class MainApplication extends Application {
+public class App extends Application {
+
+    private static Context mContext;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        mContext = getApplicationContext();
         setAppDir();
         copyCABundle();
+    }
+
+    public static Context getContext() {
+        return mContext;
     }
 
     private void setAppDir() {

@@ -17,6 +17,8 @@
 package name.raev.kaloyan.hellostorj;
 
 import android.app.Dialog;
+import android.app.DownloadManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Process;
@@ -75,8 +77,15 @@ public class FileInfoFragment extends DialogFragment implements DownloadFileCall
     }
 
     @Override
-    public void onComplete() {
-
+    public void onComplete(File file, String localPath) {
+        DownloadManager dm = (DownloadManager) App.getContext().getSystemService(Context.DOWNLOAD_SERVICE);
+        dm.addCompletedDownload(file.getName(),
+                                App.getContext().getResources().getString(R.string.app_name),
+                                true,
+                                file.getMimeType(), // TODO use Android utils
+                                localPath,
+                                file.getSize(),
+                                true);
     }
 
     @Override

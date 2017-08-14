@@ -86,10 +86,10 @@ public class Storj {
         java.io.File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         String path = new java.io.File(downloads, file.getName()).getPath();
         Keys keys = getKeys("");
-        downloadFile(bucket.getId(), file.getId(), path, keys.getUser(), keys.getPass(), keys.getMnemonic(), callback);
+        downloadFile(bucket.getId(), file, path, keys.getUser(), keys.getPass(), keys.getMnemonic(), callback);
     }
 
-    public static native void downloadFile(String bucketId, String fileId, String path, String user, String pass, String mnemonic, DownloadFileCallback callback);
+    public static native void downloadFile(String bucketId, File file, String path, String user, String pass, String mnemonic, DownloadFileCallback callback);
 
     public static native Keys exportKeys(String location, String passphrase);
 
