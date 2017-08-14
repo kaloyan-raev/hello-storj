@@ -301,7 +301,14 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_listFiles(
 
 static void download_file_progress_callback(double progress, uint64_t bytes, uint64_t total_bytes, void *handle)
 {
-    printf("p: %f, d: %d, t: %d", progress, bytes, total_bytes);
+    jcallback_t *jcallback = (jcallback_t *) handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
+
+    jclass callbackClass = env->GetObjectClass(callbackObject);
+    jmethodID callbackMethod = env->GetMethodID(callbackClass, "onProgress", "(DJJ)V");
+
+    env->CallVoidMethod(callbackObject, callbackMethod, progress, bytes, total_bytes);
 }
 
 static void download_file_complete_callback(int status, FILE *fd, void *handle)

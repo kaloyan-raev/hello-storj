@@ -91,7 +91,8 @@ public class FileInfoFragment extends DialogFragment implements DownloadFileCall
 
     @Override
     public void onProgress(double progress, long downloadedBytes, long totalBytes) {
-
+        mBuilder.setProgress(100, (int) (progress * 100), false);
+        mNotifyManager.notify(mNotificationId, mBuilder.build());
     }
 
     @Override
