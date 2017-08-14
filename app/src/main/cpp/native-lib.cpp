@@ -309,6 +309,10 @@ static void download_file_progress_callback(double progress, uint64_t bytes, uin
     jmethodID callbackMethod = env->GetMethodID(callbackClass, "onProgress", "(DJJ)V");
 
     env->CallVoidMethod(callbackObject, callbackMethod, progress, bytes, total_bytes);
+
+    // this function is called multiple times during file download
+    // cleanup is necessary to avoid local reference table overflow
+    env->DeleteLocalRef(callbackClass);
 }
 
 static void download_file_complete_callback(int status, FILE *fd, void *handle)
