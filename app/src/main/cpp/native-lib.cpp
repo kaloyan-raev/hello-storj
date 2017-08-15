@@ -55,6 +55,17 @@ static void error_callback(JNIEnv *env, jobject callbackObject, const char *mess
                         env->NewStringUTF(message));
 }
 
+static void error_callback(JNIEnv *env, jobject callbackObject, jobject file, const char *message) {
+    jclass callbackClass = env->GetObjectClass(callbackObject);
+    jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                "onError",
+                                                "(Lname/raev/kaloyan/hellostorj/jni/File;Ljava/lang/String;)V");
+    env->CallVoidMethod(callbackObject,
+                        callbackMethod,
+                        file,
+                        env->NewStringUTF(message));
+}
+
 static void get_buckets_callback(uv_work_t *work_req, int status)
 {
     assert(status == 0);
@@ -152,7 +163,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getBuckets(
     storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
 
     if (!storj_env) {
-        error_callback(env, callbackObject, "Cannot initialize Storj environment");
+        error_callback(env, callbackObject, "Failed to initialize Storj environment");
     } else {
         jcallback_t jcallback = {
                 .env = env,
@@ -280,7 +291,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_listFiles(
     storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
 
     if (!storj_env) {
-        error_callback(env, callbackObject, "Cannot initialize Storj environment");
+        error_callback(env, callbackObject, "Failed to initialize Storj environment");
     } else {
         jcallback_t jcallback = {
                 .env = env,
@@ -330,17 +341,24 @@ static void download_file_complete_callback(int status, FILE *fd, void *handle)
     jcallback_t *jcallback = (jcallback_t *) handle;
     JNIEnv *env = jcallback->env;
     jobject callbackObject = jcallback->callbackObject;
-
-    jclass callbackClass = env->GetObjectClass(callbackObject);
-    jmethodID callbackMethod = env->GetMethodID(callbackClass,
-                                                "onComplete",
-                                                "(Lname/raev/kaloyan/hellostorj/jni/File;Ljava/lang/String;)V");
-
     jdownload_callback_t *cb_extension = (jdownload_callback_t *) handle;
-    env->CallVoidMethod(callbackObject,
-                        callbackMethod,
-                        cb_extension->file,
-                        cb_extension->localPath);
+
+    if (status) {
+        char error_message[256];
+        sprintf(error_message, "Download failed (status: %d)", status);
+        error_callback(env, callbackObject, cb_extension->file, error_message);
+    } else {
+
+        jclass callbackClass = env->GetObjectClass(callbackObject);
+        jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                    "onComplete",
+                                                    "(Lname/raev/kaloyan/hellostorj/jni/File;Ljava/lang/String;)V");
+
+        env->CallVoidMethod(callbackObject,
+                            callbackMethod,
+                            cb_extension->file,
+                            cb_extension->localPath);
+    }
 }
 
 extern "C"
@@ -394,7 +412,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
     storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
 
     if (!storj_env) {
-        error_callback(env, callbackObject, "Cannot initialize Storj environment");
+        error_callback(env, callbackObject, file_, "Failed to initialize Storj environment");
     } else {
         jcallback_t jcallback = {
                 .env = env,
@@ -410,23 +428,8 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
         FILE *fd = NULL;
 
         if (path) {
-            char user_input[BUFSIZ];
-            memset(user_input, '\0', BUFSIZ);
-
             if (access(path, F_OK) != -1) {
-//            printf("Warning: File already exists at path [%s].\n", path);
-//            while (strcmp(user_input, "y") != 0 && strcmp(user_input, "n") != 0)
-//            {
-//                memset(user_input, '\0', BUFSIZ);
-//                printf("Would you like to overwrite [%s]: [y/n] ", path);
-//                get_input(user_input);
-//            }
-//
-//            if (strcmp(user_input, "n") == 0) {
-//                printf("\nCanceled overwriting of [%s].\n", path);
-//                return 1;
-//            }
-
+                // TODO ask user if file should be overwritten
                 unlink(path);
             }
 
@@ -437,9 +440,9 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
         }
 
         if (fd == NULL) {
-            // TODO send to stderr
-            printf("Unable to open %s: %s\n", path, strerror(errno));
-//            return 1;
+            char error_message[256];
+            sprintf(error_message, "Unable to open %s: %s", path, strerror(errno));
+            error_callback(env, callbackObject, file_, error_message);
         }
 
         uv_signal_t *sig = (uv_signal_t *) malloc(sizeof(uv_signal_t));
@@ -448,7 +451,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
 
         storj_download_state_t *state = (storj_download_state_t *) malloc(sizeof(storj_download_state_t));
         if (!state) {
-//            return 1;
+            error_callback(env, callbackObject, file_, "Failed to allocate memory for storj_download_state_t.");
         }
 
         sig->data = state;
@@ -552,7 +555,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
     storj_env_t *storj_env = NULL;
     storj_env = storj_init_env(&options, NULL, &http_options, &log_options);
     if (!storj_env) {
-        error_callback(env, callbackObject, "Cannot initialize Storj environment");
+        error_callback(env, callbackObject, "Failed to initialize Storj environment");
     } else {
         jcallback_t jcallback = {
                 .env = env,

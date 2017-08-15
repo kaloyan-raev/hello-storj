@@ -111,6 +111,9 @@ public class FileInfoFragment extends DialogFragment implements DownloadFileCall
 
     @Override
     public void onError(File file, String message) {
-
+        mBuilder.setProgress(0, 0, false)
+                .setSmallIcon(android.R.drawable.stat_notify_error)
+                .setContentText(message);
+        mNotifyManager.notify(file.getId().hashCode(), mBuilder.build());
     }
 }
