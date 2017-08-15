@@ -454,9 +454,6 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
             }
 
             fd = fopen(path, "w+");
-            assert (fd != NULL);
-        } else {
-            fd = stdout;
         }
 
         if (fd == NULL) {
