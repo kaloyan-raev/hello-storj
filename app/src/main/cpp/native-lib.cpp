@@ -460,30 +460,30 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
             char error_message[256];
             sprintf(error_message, "Unable to open %s: %s", path, strerror(errno));
             error_callback(env, callbackObject, file_, error_message);
+        } else {
+            uv_signal_t *sig = (uv_signal_t *) malloc(sizeof(uv_signal_t));
+            uv_signal_init(storj_env->loop, sig);
+//          uv_signal_start(sig, download_signal_handler, SIGINT);
+
+            storj_download_state_t *state = (storj_download_state_t *) malloc(sizeof(storj_download_state_t));
+            if (!state) {
+                error_callback(env, callbackObject, file_, "Failed to allocate memory for storj_download_state_t.");
+            } else {
+                sig->data = state;
+
+                int status = storj_bridge_resolve_file(storj_env,
+                                                       state,
+                                                       bucket_id,
+                                                       file_id,
+                                                       fd,
+                                                       &cb_extension,
+                                                       download_file_progress_callback,
+                                                       download_file_complete_callback);
+                assert(status == 0);
+
+                uv_run(storj_env->loop, UV_RUN_DEFAULT);
+            }
         }
-
-        uv_signal_t *sig = (uv_signal_t *) malloc(sizeof(uv_signal_t));
-        uv_signal_init(storj_env->loop, sig);
-//        uv_signal_start(sig, download_signal_handler, SIGINT);
-
-        storj_download_state_t *state = (storj_download_state_t *) malloc(sizeof(storj_download_state_t));
-        if (!state) {
-            error_callback(env, callbackObject, file_, "Failed to allocate memory for storj_download_state_t.");
-        }
-
-        sig->data = state;
-
-        int status = storj_bridge_resolve_file(storj_env,
-                                               state,
-                                               bucket_id,
-                                               file_id,
-                                               fd,
-                                               &cb_extension,
-                                               download_file_progress_callback,
-                                               download_file_complete_callback);
-        assert(status == 0);
-
-        uv_run(storj_env->loop, UV_RUN_DEFAULT);
 
         storj_destroy_env(storj_env);
     }
