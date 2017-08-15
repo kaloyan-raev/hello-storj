@@ -19,7 +19,7 @@
     <string name="error_keys_user">Invalid email</string>
     <string name="error_keys_pass">Password cannot be empty</string>
     <string name="error_keys_mnemonic">Invalid mnemonic</string>
-    <string name="keys_import_success">Your keys has been imported.</string>
+    <string name="keys_import_success">Your keys have been imported.</string>
     <string name="keys_import_fail">Error while importing your keys.</string>
     <string name="keys_import_action">Import</string>
     <string name="keys_export_fail">Failed decrypting keys.</string>
