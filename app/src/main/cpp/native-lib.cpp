@@ -306,9 +306,17 @@ static void download_file_progress_callback(double progress, uint64_t bytes, uin
     jobject callbackObject = jcallback->callbackObject;
 
     jclass callbackClass = env->GetObjectClass(callbackObject);
-    jmethodID callbackMethod = env->GetMethodID(callbackClass, "onProgress", "(DJJ)V");
+    jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                "onProgress",
+                                                "(Lname/raev/kaloyan/hellostorj/jni/File;DJJ)V");
 
-    env->CallVoidMethod(callbackObject, callbackMethod, progress, bytes, total_bytes);
+    jdownload_callback_t *cb_extension = (jdownload_callback_t *) handle;
+    env->CallVoidMethod(callbackObject,
+                        callbackMethod,
+                        cb_extension->file,
+                        progress,
+                        bytes,
+                        total_bytes);
 
     // this function is called multiple times during file download
     // cleanup is necessary to avoid local reference table overflow

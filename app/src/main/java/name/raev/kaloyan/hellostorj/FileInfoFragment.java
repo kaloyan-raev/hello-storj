@@ -41,7 +41,6 @@ public class FileInfoFragment extends DialogFragment implements DownloadFileCall
     private Context mContext;
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilder;
-    private int mNotificationId = 1;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -74,7 +73,7 @@ public class FileInfoFragment extends DialogFragment implements DownloadFileCall
                                 .setContentTitle(file.getName())
                                 .setContentText(mContext.getResources().getString(R.string.app_name))
                                 .setProgress(0, 0, true);
-                        mNotifyManager.notify(mNotificationId, mBuilder.build());
+                        mNotifyManager.notify(file.getId().hashCode(), mBuilder.build());
                         // trigger the download
                         new Thread() {
                             @Override
@@ -90,15 +89,15 @@ public class FileInfoFragment extends DialogFragment implements DownloadFileCall
     }
 
     @Override
-    public void onProgress(double progress, long downloadedBytes, long totalBytes) {
+    public void onProgress(File file, double progress, long downloadedBytes, long totalBytes) {
         mBuilder.setProgress(100, (int) (progress * 100), false);
-        mNotifyManager.notify(mNotificationId, mBuilder.build());
+        mNotifyManager.notify(file.getId().hashCode(), mBuilder.build());
     }
 
     @Override
     public void onComplete(File file, String localPath) {
         // hide the "download in progress" notification
-        mNotifyManager.cancel(mNotificationId);
+        mNotifyManager.cancel(file.getId().hashCode());
         // show the "download completed" notification
         DownloadManager dm = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
         dm.addCompletedDownload(file.getName(),
@@ -111,7 +110,7 @@ public class FileInfoFragment extends DialogFragment implements DownloadFileCall
     }
 
     @Override
-    public void onError(String message) {
+    public void onError(File file, String message) {
 
     }
 }

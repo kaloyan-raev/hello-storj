@@ -20,10 +20,10 @@ import name.raev.kaloyan.hellostorj.jni.File;
 
 public interface DownloadFileCallback {
 
-    void onProgress(double progress, long downloadedBytes, long totalBytes);
+    void onProgress(File file, double progress, long downloadedBytes, long totalBytes);
 
     void onComplete(File file, String localPath);
 
-    void onError(String message);
+    void onError(File file, String message);
 
 }
