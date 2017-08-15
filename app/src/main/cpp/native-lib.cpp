@@ -211,10 +211,13 @@ static void list_files_callback(uv_work_t *work_req, int status)
         for (int i = 0; i < req->total_files; i++) {
             storj_file_meta_t *file = &req->files[i];
 
-            jstring id = env->NewStringUTF(file->id);
-            jstring filename = env->NewStringUTF(file->filename);
-            jstring created = env->NewStringUTF(file->created);
-            jstring mimetype = env->NewStringUTF(file->mimetype);
+            jstring id = (file->id) ? env->NewStringUTF(file->id) : NULL;
+            jstring filename = (file->filename) ? env->NewStringUTF(file->filename) : NULL;
+            jstring created = (file->created) ? env->NewStringUTF(file->created) : NULL;
+            jstring mimetype = (file->mimetype) ? env->NewStringUTF(file->mimetype) : NULL;
+            jstring erasure = (file->erasure) ? env->NewStringUTF(file->erasure) : NULL;
+            jstring index = (file->index) ? env->NewStringUTF(file->index) : NULL;
+            jstring hmac = (file->hmac) ? env->NewStringUTF(file->hmac) : NULL;
 
             jobject fileObject = env->NewObject(fileClass,
                                                 fileInit,
@@ -224,16 +227,33 @@ static void list_files_callback(uv_work_t *work_req, int status)
                                                 file->decrypted,
                                                 file->size,
                                                 mimetype,
-                                                NULL, //env->NewStringUTF(file->erasure),
-                                                NULL, //env->NewStringUTF(file->index),
-                                                NULL); //env->NewStringUTF(file->hmac));
+                                                erasure,
+                                                index,
+                                                hmac);
             env->SetObjectArrayElement(fileArray, i, fileObject);
 
             env->DeleteLocalRef(fileObject);
-            env->DeleteLocalRef(id);
-            env->DeleteLocalRef(filename);
-            env->DeleteLocalRef(created);
-            env->DeleteLocalRef(mimetype);
+            if (id) {
+                env->DeleteLocalRef(id);
+            }
+            if (filename) {
+                env->DeleteLocalRef(filename);
+            }
+            if (created) {
+                env->DeleteLocalRef(created);
+            }
+            if (mimetype) {
+                env->DeleteLocalRef(mimetype);
+            }
+            if (erasure) {
+                env->DeleteLocalRef(erasure);
+            }
+            if (index) {
+                env->DeleteLocalRef(index);
+            }
+            if (hmac) {
+                env->DeleteLocalRef(hmac);
+            }
         }
 
         jclass callbackClass = env->GetObjectClass(callbackObject);

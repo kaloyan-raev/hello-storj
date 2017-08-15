@@ -236,6 +236,8 @@ static void list_files_request_worker(uv_work_t *work)
         file->id = json_object_get_string(id);
         file->decrypted = false;
         file->filename = NULL;
+        file->erasure = NULL;
+        file->index = NULL;
 
         // Attempt to decrypt the filename, otherwise
         // we will default the filename to the encrypted text.
