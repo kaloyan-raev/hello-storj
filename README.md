@@ -27,8 +27,7 @@ The app can be installed from Google Play: https://play.google.com/store/apps/de
 
 The essence of this project is the JNI wrapper of the libstorj native library. The following are the files of interest:
 - [app/src/main/cpp/native-lib.cpp](https://github.com/kaloyan-raev/hello-storj/blob/master/app/src/main/cpp/native-lib.cpp)
-- [app/src/main/java/name/raev/kaloyan/hellostorj/jni/Storj.java](https://github.com/kaloyan-raev/hello-storj/blob/master/app/src/main/java/name/raev/kaloyan/hellostorj/jni/Storj.java)
-- [app/src/main/java/name/raev/kaloyan/hellostorj/jni/NativeLibraries.java](https://github.com/kaloyan-raev/hello-storj/blob/master/app/src/main/java/name/raev/kaloyan/hellostorj/jni/NativeLibraries.java)
+- [app/src/main/java/name/raev/kaloyan/hellostorj/jni/**](https://github.com/kaloyan-raev/hello-storj/blob/master/app/src/main/java/name/raev/kaloyan/hellostorj/jni/)
 
 ## License
 
