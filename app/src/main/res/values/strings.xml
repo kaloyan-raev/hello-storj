@@ -6,6 +6,7 @@
     <string name="title_mnemonic">Generate Mnemonic</string>
     <string name="title_timestamp">Get Timestamp</string>
     <string name="title_libs">Native Libraries</string>
+    <string name="title_fileinfo">File Info</string>
     <string name="description_keys">Generates authentication file with the storj_encrypt_write_auth() native function and saves it in the app\'s data directory.</string>
     <string name="description_bridge_info">Storj bridge info retrieved with the storj_bridge_get_info() native function.</string>
     <string name="description_mnemonic">Mnemonic generated with the storj_mnemonic_generate() native function:</string>
@@ -13,6 +14,7 @@
     <string name="button_keys">Save</string>
     <string name="button_mnemonic">Regenerate</string>
     <string name="button_timestamp">Update</string>
+    <string name="button_download">Download</string>
     <string name="hint_keys_user">Bridge user name (email)</string>
     <string name="hint_keys_pass">Bridge password</string>
     <string name="hint_keys_mnemonic">Encryption key</string>
@@ -26,7 +28,6 @@
     <string name="keys_imported">Have you imported your keys yet?</string>
     <string name="browse_no_buckets">No buckets in this account.</string>
     <string name="browse_no_files">No files in this bucket.</string>
-    <string name="fileinfo_title">File Info</string>
-    <string name="fileinfo_download">Download</string>
-    <string name="fileinfo_download_in_progress">The file will be downloaded. See notification for details.</string>
+    <string name="download_in_progress">The file will be downloaded. See notification for details.</string>
+    <string name="download_permission_denied">Write permission denied. Download aborted.</string>
 </resources>

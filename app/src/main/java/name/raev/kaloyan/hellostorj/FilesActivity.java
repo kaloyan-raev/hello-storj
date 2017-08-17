@@ -16,16 +16,38 @@
  ***************************************************************************/
 package name.raev.kaloyan.hellostorj;
 
+import android.Manifest;
+import android.app.DownloadManager;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Process;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import name.raev.kaloyan.hellostorj.jni.Bucket;
+import name.raev.kaloyan.hellostorj.jni.File;
+import name.raev.kaloyan.hellostorj.jni.Storj;
+import name.raev.kaloyan.hellostorj.jni.callbacks.DownloadFileCallback;
 
-public class FilesActivity extends AppCompatActivity {
+public class FilesActivity extends AppCompatActivity implements FileInfoFragment.DownloadListener, DownloadFileCallback {
+
+    public static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+
+    private Bucket mBucket;
+    private File mFile;
+
+    private NotificationManager mNotifyManager;
+    private NotificationCompat.Builder mBuilder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,5 +106,90 @@ public class FilesActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    download();
+                } else {
+                    Snackbar.make(findViewById(R.id.browse_list),
+                            R.string.download_permission_denied,
+                            Snackbar.LENGTH_LONG).show();
+                }
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void onDownload(Bucket bucket, File file) {
+        mBucket = bucket;
+        mFile = file;
+        // check if write permission is already granted
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE },
+                    PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+        } else {
+            download();
+        }
+    }
+
+    private void download() {
+        // show snackbar for user to watch for download notifications
+        Snackbar.make(findViewById(R.id.browse_list),
+                R.string.download_in_progress,
+                Snackbar.LENGTH_LONG).show();
+        // init the download notification
+        mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(android.R.drawable.stat_sys_download)
+                .setContentTitle(mFile.getName())
+                .setContentText(getResources().getString(R.string.app_name))
+                .setProgress(0, 0, true);
+        mNotifyManager.notify(mFile.getId().hashCode(), mBuilder.build());
+        // trigger the download
+        new Thread() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                Storj.getInstance().download(mBucket, mFile, FilesActivity.this);
+            }
+        }.start();
+    }
+
+    @Override
+    public void onProgress(File file, double progress, long downloadedBytes, long totalBytes) {
+        mBuilder.setProgress(100, (int) (progress * 100), false);
+        mNotifyManager.notify(file.getId().hashCode(), mBuilder.build());
+    }
+
+    @Override
+    public void onComplete(File file, String localPath) {
+        // hide the "download in progress" notification
+        mNotifyManager.cancel(file.getId().hashCode());
+        // show the "download completed" notification
+        DownloadManager dm = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        dm.addCompletedDownload(file.getName(),
+                getResources().getString(R.string.app_name),
+                true,
+                file.getMimeType(),
+                localPath,
+                file.getSize(),
+                true);
+    }
+
+    @Override
+    public void onError(File file, String message) {
+        mBuilder.setProgress(0, 0, false)
+                .setSmallIcon(android.R.drawable.stat_notify_error)
+                .setContentText(message);
+        mNotifyManager.notify(file.getId().hashCode(), mBuilder.build());
     }
 }
