@@ -30,33 +30,30 @@ public class FileInfoFragment extends DialogFragment {
 
     public static final String FILE = "file";
 
-    private Bucket mBucket;
-    private File mFile;
-
     public interface DownloadListener {
         void onDownload(Bucket bucket, File file);
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        mBucket = (Bucket) getArguments().getSerializable(FilesFragment.BUCKET);
-        mFile = (File) getArguments().getSerializable(FILE);
+        final Bucket bucket = (Bucket) getArguments().getSerializable(FilesFragment.BUCKET);
+        final File file = (File) getArguments().getSerializable(FILE);
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.title_fileinfo)
                 .setMessage(String.format("ID: %s\nName: %s\nCreated: %s\nDecrypted: %b\nSize: %s\nMIME Type: %s\nErasure: %s\nIndex: %s\nHMAC: %s",
-                                          mFile.getId(),
-                                          mFile.getName(),
-                                          mFile.getCreated(),
-                                          mFile.isDecrypted(),
-                                          Formatter.formatFileSize(getContext(), mFile.getSize()),
-                                          mFile.getMimeType(),
-                                          mFile.getErasure(),
-                                          mFile.getIndex(),
-                                          mFile.getHMAC()))
+                                          file.getId(),
+                                          file.getName(),
+                                          file.getCreated(),
+                                          file.isDecrypted(),
+                                          Formatter.formatFileSize(getContext(), file.getSize()),
+                                          file.getMimeType(),
+                                          file.getErasure(),
+                                          file.getIndex(),
+                                          file.getHMAC()))
                 .setPositiveButton(R.string.button_download, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        ((DownloadListener) getActivity()).onDownload(mBucket, mFile);
+                        ((DownloadListener) getActivity()).onDownload(bucket, file);
                     }
                 });
         // Create the AlertDialog object and return it
