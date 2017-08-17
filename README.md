@@ -2,6 +2,8 @@
 
 Hello Storj is a demo app for integrating the [libstorj](https://github.com/Storj/libstorj) native library in Android. The focus is entirely on the integration and it is not intended to provide any meaningful usability and UX. Future user-focused apps may be based on this project.
 
+[![Hello Storj Video](http://img.youtube.com/vi/1082cipNheo/0.jpg)](http://www.youtube.com/watch?v=1082cipNheo)
+
 ## Installation
 
 The app can be installed from Google Play.
