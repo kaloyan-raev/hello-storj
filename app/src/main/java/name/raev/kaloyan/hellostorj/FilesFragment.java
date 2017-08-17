@@ -172,13 +172,13 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
         }
     }
 
-    public class SimpleItemRecyclerViewAdapter
+    class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>
             implements View.OnClickListener {
 
         private File[] mFiles;
 
-        public SimpleItemRecyclerViewAdapter()
+        SimpleItemRecyclerViewAdapter()
         {
             mFiles = new File[0];
         }
@@ -222,11 +222,11 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
             }
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public final TextView mId;
-            public final TextView mName;
+        class ViewHolder extends RecyclerView.ViewHolder {
+            final TextView mId;
+            final TextView mName;
 
-            public ViewHolder(View view) {
+            ViewHolder(View view) {
                 super(view);
                 mId = (TextView) itemView.findViewById(android.R.id.text2);
                 mName = (TextView) itemView.findViewById(android.R.id.text1);

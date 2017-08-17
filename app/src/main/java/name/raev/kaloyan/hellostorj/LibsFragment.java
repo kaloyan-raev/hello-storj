@@ -59,12 +59,12 @@ public class LibsFragment extends Fragment {
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(new TreeMap<>(versions)));
     }
 
-    public class SimpleItemRecyclerViewAdapter
+    class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final Map<String, String> mValues;
 
-        public SimpleItemRecyclerViewAdapter(Map<String, String> items) {
+        SimpleItemRecyclerViewAdapter(Map<String, String> items) {
             mValues = items;
         }
 
@@ -87,11 +87,11 @@ public class LibsFragment extends Fragment {
             return mValues.size();
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public final TextView mLibrary;
-            public final TextView mVersion;
+        class ViewHolder extends RecyclerView.ViewHolder {
+            final TextView mLibrary;
+            final TextView mVersion;
 
-            public ViewHolder(View view) {
+            ViewHolder(View view) {
                 super(view);
                 mLibrary = (TextView) itemView.findViewById(android.R.id.text1);
                 mVersion = (TextView) itemView.findViewById(android.R.id.text2);

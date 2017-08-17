@@ -97,7 +97,6 @@ public class FilesActivity extends AppCompatActivity implements FileInfoFragment
                 if (mDownloader != null) {
                     mDownloader.onRequestPermissionsResult(grantResults);
                 }
-                return;
             }
         }
     }

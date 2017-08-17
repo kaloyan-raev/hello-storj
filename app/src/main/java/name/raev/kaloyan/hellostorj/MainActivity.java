@@ -55,12 +55,12 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(items));
     }
 
-    public class SimpleItemRecyclerViewAdapter
+    class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final List<Integer> mValues;
 
-        public SimpleItemRecyclerViewAdapter(List<Integer> items) {
+        SimpleItemRecyclerViewAdapter(List<Integer> items) {
             mValues = items;
         }
 
@@ -98,11 +98,11 @@ public class MainActivity extends AppCompatActivity {
             return mValues.size();
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public final View mView;
-            public final TextView mText;
+        class ViewHolder extends RecyclerView.ViewHolder {
+            final View mView;
+            final TextView mText;
 
-            public ViewHolder(View view) {
+            ViewHolder(View view) {
                 super(view);
                 mView = view;
                 mText = (TextView) itemView.findViewById(android.R.id.text1);

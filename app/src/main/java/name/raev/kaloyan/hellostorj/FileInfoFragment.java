@@ -19,6 +19,7 @@ package name.raev.kaloyan.hellostorj;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.format.Formatter;
@@ -30,10 +31,11 @@ public class FileInfoFragment extends DialogFragment {
 
     public static final String FILE = "file";
 
-    public interface DownloadListener {
+    interface DownloadListener {
         void onDownload(Bucket bucket, File file);
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final Bucket bucket = (Bucket) getArguments().getSerializable(FilesFragment.BUCKET);

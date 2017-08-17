@@ -34,9 +34,9 @@ import name.raev.kaloyan.hellostorj.jni.File;
 import name.raev.kaloyan.hellostorj.jni.Storj;
 import name.raev.kaloyan.hellostorj.jni.callbacks.DownloadFileCallback;
 
-public class FileDownloader implements DownloadFileCallback {
+class FileDownloader implements DownloadFileCallback {
 
-    public static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+    static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private Activity mActivity;
     private Bucket mBucket;
@@ -45,7 +45,7 @@ public class FileDownloader implements DownloadFileCallback {
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilder;
 
-    public FileDownloader(Activity activity, Bucket bucket, File file) {
+    FileDownloader(Activity activity, Bucket bucket, File file) {
         mActivity = activity;
         mBucket = bucket;
         mFile = file;
@@ -70,7 +70,7 @@ public class FileDownloader implements DownloadFileCallback {
                 PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
     }
 
-    public void onRequestPermissionsResult(@NonNull int[] grantResults) {
+    void onRequestPermissionsResult(@NonNull int[] grantResults) {
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             doDownload();
         } else {

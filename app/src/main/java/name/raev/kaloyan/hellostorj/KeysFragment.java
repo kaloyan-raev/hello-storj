@@ -112,10 +112,7 @@ public class KeysFragment extends Fragment {
     }
 
     private boolean isValidPassword(String pass) {
-        if (pass != null && pass.length() > 0) {
-            return true;
-        }
-        return false;
+        return pass != null && pass.length() > 0;
     }
 
     private boolean isValidMnemonic(String mnemonic) {
