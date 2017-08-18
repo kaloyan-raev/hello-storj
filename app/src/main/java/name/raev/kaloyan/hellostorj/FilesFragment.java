@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Process;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -72,6 +73,14 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
 
         mProgress = (ProgressBar) rootView.findViewById(R.id.progress);
         mStatus = (TextView) rootView.findViewById(R.id.status);
+
+        FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(mList, "Not implemented", Snackbar.LENGTH_LONG).show();
+            }
+        });
 
         mBucket = (Bucket) getArguments().getSerializable(BUCKET);
         listFiles(mBucket);
