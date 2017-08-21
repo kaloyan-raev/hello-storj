@@ -8,10 +8,10 @@
     <string name="title_libs">Native libraries</string>
     <string name="title_fileinfo">File info</string>
     <string name="title_new_bucket">New bucket</string>
-    <string name="description_keys">Generates authentication file with the storj_encrypt_write_auth() native function and saves it in the app\'s data directory.</string>
-    <string name="description_bridge_info">Storj bridge info retrieved with the storj_bridge_get_info() native function.</string>
-    <string name="description_mnemonic">Mnemonic generated with the storj_mnemonic_generate() native function:</string>
-    <string name="description_timestamp">Current UNIX timestamp retrieved with the storj_util_timestamp() native function:</string>
+    <string name="description_keys">Generates authentication file with the storj_encrypt_write_auth() native function and saves it in the app\'s data directory</string>
+    <string name="description_bridge_info">Storj bridge info retrieved with the storj_bridge_get_info() native function</string>
+    <string name="description_mnemonic">Mnemonic generated with the storj_mnemonic_generate() native function</string>
+    <string name="description_timestamp">Current UNIX timestamp retrieved with the storj_util_timestamp() native function</string>
     <string name="button_keys">Save</string>
     <string name="button_mnemonic">Regenerate</string>
     <string name="button_timestamp">Update</string>
@@ -21,15 +21,15 @@
     <string name="hint_keys_mnemonic">Encryption key</string>
     <string name="hint_new_bucket_name">Bucket name</string>
     <string name="error_keys_user">Invalid email</string>
-    <string name="error_keys_pass">Password cannot be empty</string>
+    <string name="error_keys_pass">Password can\'t be empty</string>
     <string name="error_keys_mnemonic">Invalid mnemonic</string>
-    <string name="keys_import_success">Your keys have been imported.</string>
-    <string name="keys_import_fail">Error while importing your keys.</string>
+    <string name="keys_import_success">Keys imported</string>
+    <string name="keys_import_fail">Failed importing your keys</string>
     <string name="keys_import_action">Import</string>
-    <string name="keys_export_fail">Failed decrypting keys.</string>
-    <string name="keys_imported">Have you imported your keys yet?</string>
-    <string name="browse_no_buckets">No buckets in this account.</string>
-    <string name="browse_no_files">No files in this bucket.</string>
+    <string name="keys_export_fail">Failed decrypting keys</string>
+    <string name="keys_imported">Did you import your keys?</string>
+    <string name="browse_no_buckets">No buckets in this account</string>
+    <string name="browse_no_files">No files in this bucket</string>
     <string name="download_in_progress">The file will be downloaded. See notification for details.</string>
     <string name="download_permission_denied">Write permission denied. Download aborted.</string>
 </resources>
