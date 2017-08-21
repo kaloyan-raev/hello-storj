@@ -3,4 +3,5 @@
     <dimen name="item_width">200dp</dimen>
     <dimen name="text_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="dialog_margin">20dp</dimen>
 </resources>

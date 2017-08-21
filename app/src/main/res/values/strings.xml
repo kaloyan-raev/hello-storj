@@ -7,6 +7,7 @@
     <string name="title_timestamp">Get Timestamp</string>
     <string name="title_libs">Native Libraries</string>
     <string name="title_fileinfo">File Info</string>
+    <string name="title_new_bucket">New bucket</string>
     <string name="description_keys">Generates authentication file with the storj_encrypt_write_auth() native function and saves it in the app\'s data directory.</string>
     <string name="description_bridge_info">Storj bridge info retrieved with the storj_bridge_get_info() native function.</string>
     <string name="description_mnemonic">Mnemonic generated with the storj_mnemonic_generate() native function:</string>
@@ -18,6 +19,7 @@
     <string name="hint_keys_user">Bridge user name (email)</string>
     <string name="hint_keys_pass">Bridge password</string>
     <string name="hint_keys_mnemonic">Encryption key</string>
+    <string name="hint_new_bucket_name">Bucket name</string>
     <string name="error_keys_user">Invalid email</string>
     <string name="error_keys_pass">Password cannot be empty</string>
     <string name="error_keys_mnemonic">Invalid mnemonic</string>

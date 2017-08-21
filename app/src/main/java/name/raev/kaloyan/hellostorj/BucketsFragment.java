@@ -24,6 +24,7 @@ import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -72,7 +73,8 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(mList, "Not implemented", Snackbar.LENGTH_LONG).show();
+                DialogFragment dialog = new NewBucketFragment();
+                dialog.show(getFragmentManager(), NewBucketFragment.class.getName());
             }
         });
 
