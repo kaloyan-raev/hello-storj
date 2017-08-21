@@ -1,12 +1,12 @@
 <resources>
     <string name="app_name">Hello Storj</string>
     <string name="title_buckets">Browse</string>
-    <string name="title_keys">Import Keys</string>
-    <string name="title_bridge_info">Bridge Info</string>
-    <string name="title_mnemonic">Generate Mnemonic</string>
-    <string name="title_timestamp">Get Timestamp</string>
-    <string name="title_libs">Native Libraries</string>
-    <string name="title_fileinfo">File Info</string>
+    <string name="title_keys">Import keys</string>
+    <string name="title_bridge_info">Bridge info</string>
+    <string name="title_mnemonic">Generate mnemonic</string>
+    <string name="title_timestamp">Get timestamp</string>
+    <string name="title_libs">Native libraries</string>
+    <string name="title_fileinfo">File info</string>
     <string name="title_new_bucket">New bucket</string>
     <string name="description_keys">Generates authentication file with the storj_encrypt_write_auth() native function and saves it in the app\'s data directory.</string>
     <string name="description_bridge_info">Storj bridge info retrieved with the storj_bridge_get_info() native function.</string>
