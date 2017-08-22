@@ -16,8 +16,10 @@
  ***************************************************************************/
 package name.raev.kaloyan.hellostorj;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -30,12 +32,13 @@ import android.widget.EditText;
 
 public class NewBucketFragment extends DialogFragment {
 
-    public static final String FILE = "file";
+    static final String BUCKET_NAME = "bucketName";
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View v = getActivity().getLayoutInflater().inflate(R.layout.content_new_bucket, null);
+        final EditText input = (EditText) v.findViewById(R.id.input);
 
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -43,15 +46,16 @@ public class NewBucketFragment extends DialogFragment {
                .setView(v)
                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-//                        ((DownloadListener) getActivity()).onDownload(bucket, file);
-                   }
+                        Intent intent = getActivity().getIntent();
+                        intent.putExtra(BUCKET_NAME, input.getText().toString());
+                        getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
+                    }
                 })
                .setNegativeButton(android.R.string.cancel, null);
         // Create the AlertDialog object
         final AlertDialog dialog = builder.create();
 
         // Update the enable state of the OK button when input changes
-        final EditText input = (EditText) v.findViewById(R.id.input);
         input.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

@@ -38,12 +38,15 @@ import java.util.Arrays;
 import name.raev.kaloyan.hellostorj.jni.Bucket;
 import name.raev.kaloyan.hellostorj.jni.Keys;
 import name.raev.kaloyan.hellostorj.jni.Storj;
+import name.raev.kaloyan.hellostorj.jni.callbacks.CreateBucketCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetBucketsCallback;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class BucketsFragment extends Fragment implements GetBucketsCallback {
+public class BucketsFragment extends Fragment implements GetBucketsCallback, CreateBucketCallback {
+
+    private static final int NEW_BUCKET_FRAGMENT = 1;
 
     private RecyclerView mList;
     private ProgressBar mProgress;
@@ -74,6 +77,7 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
             @Override
             public void onClick(View view) {
                 DialogFragment dialog = new NewBucketFragment();
+                dialog.setTargetFragment(BucketsFragment.this, NEW_BUCKET_FRAGMENT);
                 dialog.show(getFragmentManager(), NewBucketFragment.class.getName());
             }
         });
@@ -102,6 +106,25 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
                     showKeysError();
                 } else {
                     Storj.getBuckets(keys.getUser(), keys.getPass(), keys.getMnemonic(), BucketsFragment.this);
+                }
+            }
+        }.start();
+    }
+
+    private void createBucket(final String name) {
+        mProgress.setVisibility(View.VISIBLE);
+        mList.setVisibility(View.GONE);
+        mStatus.setVisibility(View.GONE);
+
+        new Thread() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                Keys keys = Storj.getInstance().getKeys("");
+                if (keys == null) {
+                    showKeysError();
+                } else {
+                    Storj.createBucket(keys.getUser(), keys.getPass(), keys.getMnemonic(), name, BucketsFragment.this);
                 }
             }
         }.start();
@@ -162,6 +185,19 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
     }
 
     @Override
+    public void onBucketCreated(final Bucket bucket) {
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    openBucket(bucket);
+                }
+            });
+        }
+    }
+
+    @Override
     public void onError(final String message) {
         Activity activity = getActivity();
         if (activity != null) {
@@ -173,6 +209,35 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
                     mStatus.setVisibility(View.VISIBLE);
                 }
             });
+        }
+    }
+
+    private void openBucket(Bucket bucket) {
+        if (getResources().getBoolean(R.bool.twoPaneMode)) {
+            FilesFragment fragment = new FilesFragment();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(FilesFragment.BUCKET, bucket);
+            fragment.setArguments(bundle);
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.detail_container, fragment)
+                    .commit();
+        } else {
+            Context context = getContext();
+            Intent intent = new Intent(context, FilesActivity.class);
+            intent.putExtra(FilesFragment.BUCKET, bucket);
+            context.startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode) {
+            case NEW_BUCKET_FRAGMENT:
+                if (resultCode == Activity.RESULT_OK) {
+                    String name = data.getStringExtra(NewBucketFragment.BUCKET_NAME);
+                    createBucket(name);
+                }
+                break;
         }
     }
 
@@ -215,21 +280,7 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback {
         public void onClick(View v) {
             int position = mList.getChildAdapterPosition(v);
             if (position != RecyclerView.NO_POSITION) {
-                Bucket bucket = mBuckets[position];
-                if (getResources().getBoolean(R.bool.twoPaneMode)) {
-                    FilesFragment fragment = new FilesFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putSerializable(FilesFragment.BUCKET, bucket);
-                    fragment.setArguments(bundle);
-                    getFragmentManager().beginTransaction()
-                            .replace(R.id.detail_container, fragment)
-                            .commit();
-                } else {
-                    Context context = v.getContext();
-                    Intent intent = new Intent(context, FilesActivity.class);
-                    intent.putExtra(FilesFragment.BUCKET, bucket);
-                    context.startActivity(intent);
-                }
+                openBucket(mBuckets[position]);
             }
         }
 

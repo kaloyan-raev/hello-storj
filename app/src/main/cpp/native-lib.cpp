@@ -181,6 +181,116 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getBuckets(
     env->ReleaseStringUTFChars(mnemonic_, mnemonic);
 }
 
+static void create_bucket_callback(uv_work_t *work_req, int status)
+{
+    assert(status == 0);
+    create_bucket_request_t *req = (create_bucket_request_t *) work_req->data;
+    jcallback_t *jcallback = (jcallback_t *) req->handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
+
+    if (req->status_code != 201) {
+        char error_message[256];
+        if (req->status_code == 404) {
+            sprintf(error_message, "Cannot create bucket [%s]. Name already exists.", req->bucket->name);
+        } else if (req->status_code == 401) {
+            strcpy(error_message, "Invalid user credentials");
+        } else {
+            sprintf(error_message, "Request failed with status code: %i", req->status_code);
+        }
+        error_callback(env, callbackObject, error_message);
+    } else {
+        jclass bucketClass = env->FindClass("name/raev/kaloyan/hellostorj/jni/Bucket");
+        jmethodID bucketInit = env->GetMethodID(bucketClass,
+                                                "<init>",
+                                                "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
+
+        jstring id = env->NewStringUTF(req->bucket->id);
+        jstring name = env->NewStringUTF(req->bucket->name);
+        jstring created = env->NewStringUTF(req->bucket->created);
+        jobject bucketObject = env->NewObject(bucketClass,
+                                              bucketInit,
+                                              id,
+                                              name,
+                                              created,
+                                              req->bucket->decrypted);
+
+        jclass callbackClass = env->GetObjectClass(callbackObject);
+        jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                    "onBucketCreated",
+                                                    "(Lname/raev/kaloyan/hellostorj/jni/Bucket;)V");
+        env->CallVoidMethod(callbackObject, callbackMethod, bucketObject);
+    }
+
+    json_object_put(req->response);
+    free((char *)req->encrypted_bucket_name);
+    free(req->bucket);
+    free(req);
+    free(work_req);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_name_raev_kaloyan_hellostorj_jni_Storj_createBucket(
+        JNIEnv *env,
+        jclass /* clazz */,
+        jstring user_,
+        jstring pass_,
+        jstring mnemonic_,
+        jstring bucketName_,
+        jobject callbackObject) {
+    const char *user = env->GetStringUTFChars(user_, NULL);
+    const char *pass = env->GetStringUTFChars(pass_, NULL);
+    const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
+    const char *bucketName = env->GetStringUTFChars(bucketName_, NULL);
+
+    storj_http_options_t http_options = {
+            .user_agent = "Hello Storj",
+            .cainfo_path = cainfo_path,
+            .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
+            .low_speed_time = STORJ_LOW_SPEED_TIME,
+            .timeout = STORJ_HTTP_TIMEOUT
+    };
+
+    storj_bridge_options_t options = {
+            .proto = "https",
+            .host  = "api.storj.io",
+            .port  = 443,
+            .user  = user,
+            .pass  = pass
+    };
+
+    storj_encrypt_options_t encrypt_options = {
+            .mnemonic = mnemonic
+    };
+
+    storj_log_options_t log_options = {
+            .logger = NULL,
+            .level = 0
+    };
+
+    storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
+
+    if (!storj_env) {
+        error_callback(env, callbackObject, "Failed to initialize Storj environment");
+    } else {
+        jcallback_t jcallback = {
+                .env = env,
+                .callbackObject = callbackObject
+        };
+        storj_bridge_create_bucket(storj_env, bucketName, &jcallback, create_bucket_callback);
+
+        uv_run(storj_env->loop, UV_RUN_DEFAULT);
+
+        storj_destroy_env(storj_env);
+    }
+
+    env->ReleaseStringUTFChars(user_, user);
+    env->ReleaseStringUTFChars(pass_, pass);
+    env->ReleaseStringUTFChars(mnemonic_, mnemonic);
+    env->ReleaseStringUTFChars(bucketName_, bucketName);
+}
+
 static void list_files_callback(uv_work_t *work_req, int status)
 {
     assert(status == 0);

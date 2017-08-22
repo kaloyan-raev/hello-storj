@@ -18,6 +18,7 @@ package name.raev.kaloyan.hellostorj.jni;
 
 import android.os.Environment;
 
+import name.raev.kaloyan.hellostorj.jni.callbacks.CreateBucketCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.DownloadFileCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetBucketsCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetInfoCallback;
@@ -96,6 +97,8 @@ public class Storj {
     public static native boolean writeAuthFile(String location, String user, String pass, String mnemonic, String passphrase);
 
     public static native void getBuckets(String user, String pass, String mnemonic, GetBucketsCallback callback);
+
+    public static native void createBucket(String user, String pass, String mnemonic, String bucketName, CreateBucketCallback callback);
 
     public static native void listFiles(String user, String pass, String mnemonic, String bucketId, ListFilesCallback callback);
 
