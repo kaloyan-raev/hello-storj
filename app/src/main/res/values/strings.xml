@@ -28,8 +28,8 @@
     <string name="keys_import_action">Import</string>
     <string name="keys_export_fail">Failed decrypting keys</string>
     <string name="keys_imported">Did you import your keys?</string>
-    <string name="browse_no_buckets">No buckets in this account</string>
-    <string name="browse_no_files">No files in this bucket</string>
+    <string name="browse_no_buckets">No buckets</string>
+    <string name="browse_no_files">No files</string>
     <string name="download_in_progress">The file will be downloaded. See notification for details.</string>
     <string name="download_permission_denied">Write permission denied. Download aborted.</string>
 </resources>
