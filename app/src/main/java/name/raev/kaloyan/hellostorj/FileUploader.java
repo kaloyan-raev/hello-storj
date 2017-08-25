@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.os.Process;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 
 import java.io.File;
 
@@ -55,6 +56,7 @@ class FileUploader implements UploadFileCallback {
         mNotifyManager = (NotificationManager) mActivity.getSystemService(Context.NOTIFICATION_SERVICE);
         mBuilder = new NotificationCompat.Builder(mActivity)
                 .setSmallIcon(android.R.drawable.stat_sys_upload)
+                .setColor(ContextCompat.getColor(mActivity, R.color.colorNotification))
                 .setContentTitle(new File(mFilePath).getName())
                 .setContentText(mActivity.getResources().getString(R.string.app_name))
                 .setProgress(0, 0, true);
