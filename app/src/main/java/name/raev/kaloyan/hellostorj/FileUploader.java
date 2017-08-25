@@ -92,7 +92,8 @@ class FileUploader implements UploadFileCallback {
         mBuilder.setProgress(0, 0, false)
                 .setSmallIcon(android.R.drawable.stat_sys_upload_done)
                 .setContentText(mActivity.getResources().getString(R.string.upload_complete))
-                .setContentIntent(resultIntent);
+                .setContentIntent(resultIntent)
+                .setAutoCancel(true);
         mNotifyManager.notify(filePath.hashCode(), mBuilder.build());
     }
 
