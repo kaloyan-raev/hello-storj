@@ -29,10 +29,14 @@ typedef struct {
 
 typedef struct {
     jcallback_t base;
-
     jobject file;
     jstring localPath;
 } jdownload_callback_t;
+
+typedef struct {
+    jcallback_t base;
+    jstring filePath;
+} jupload_callback_t;
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -52,6 +56,17 @@ static void error_callback(JNIEnv *env, jobject callbackObject, const char *mess
                                                 "(Ljava/lang/String;)V");
     env->CallVoidMethod(callbackObject,
                         callbackMethod,
+                        env->NewStringUTF(message));
+}
+
+static void error_callback(JNIEnv *env, jobject callbackObject, jstring filePath, const char *message) {
+    jclass callbackClass = env->GetObjectClass(callbackObject);
+    jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                "onError",
+                                                "(Ljava/lang/String;Ljava/lang/String;)V");
+    env->CallVoidMethod(callbackObject,
+                        callbackMethod,
+                        filePath,
                         env->NewStringUTF(message));
 }
 
@@ -478,7 +493,6 @@ static void download_file_complete_callback(int status, FILE *fd, void *handle)
         sprintf(error_message, "Download failed (status: %d)", status);
         error_callback(env, callbackObject, cb_extension->file, error_message);
     } else {
-
         jclass callbackClass = env->GetObjectClass(callbackObject);
         jmethodID callbackMethod = env->GetMethodID(callbackClass,
                                                     "onComplete",
@@ -601,6 +615,172 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
     env->ReleaseStringUTFChars(bucketId_, bucket_id);
     env->ReleaseStringUTFChars(fileId_, file_id);
     env->ReleaseStringUTFChars(path_, path);
+    env->ReleaseStringUTFChars(user_, user);
+    env->ReleaseStringUTFChars(pass_, pass);
+    env->ReleaseStringUTFChars(mnemonic_, mnemonic);
+}
+
+static void upload_file_progress_callback(double progress, uint64_t bytes, uint64_t total_bytes, void *handle)
+{
+    jcallback_t *jcallback = (jcallback_t *) handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
+
+    jclass callbackClass = env->GetObjectClass(callbackObject);
+    jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                "onProgress",
+                                                "(Ljava/lang/String;DJJ)V");
+
+    jupload_callback_t *cb_extension = (jupload_callback_t *) handle;
+    env->CallVoidMethod(callbackObject,
+                        callbackMethod,
+                        cb_extension->filePath,
+                        progress,
+                        bytes,
+                        total_bytes);
+
+    // this function is called multiple times during file download
+    // cleanup is necessary to avoid local reference table overflow
+    env->DeleteLocalRef(callbackClass);
+}
+
+static void upload_file_complete_callback(int status, char *file_id, void *handle)
+{
+    jcallback_t *jcallback = (jcallback_t *) handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
+    jupload_callback_t *cb_extension = (jupload_callback_t *) handle;
+
+    if (status) {
+        char error_message[256];
+        sprintf(error_message, "Upload failed (status: %d)", status);
+        error_callback(env, callbackObject, cb_extension->filePath, error_message);
+    } else {
+        jclass callbackClass = env->GetObjectClass(callbackObject);
+        jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                    "onComplete",
+                                                    "(Ljava/lang/String;)V");
+
+        env->CallVoidMethod(callbackObject,
+                            callbackMethod,
+                            cb_extension->filePath);
+    }
+
+    free(file_id);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_name_raev_kaloyan_hellostorj_jni_Storj_uploadFile(
+        JNIEnv *env,
+        jclass /* clazz */,
+        jstring bucketId_,
+        jstring filePath_,
+        jstring user_,
+        jstring pass_,
+        jstring mnemonic_,
+        jobject callbackObject) {
+    const char *bucket_id = env->GetStringUTFChars(bucketId_, NULL);
+    const char *file_path = env->GetStringUTFChars(filePath_, NULL);
+    const char *user = env->GetStringUTFChars(user_, NULL);
+    const char *pass = env->GetStringUTFChars(pass_, NULL);
+    const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
+
+    storj_http_options_t http_options = {
+            .user_agent = "Hello Storj",
+            .cainfo_path = cainfo_path,
+            .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
+            .low_speed_time = STORJ_LOW_SPEED_TIME,
+            .timeout = STORJ_HTTP_TIMEOUT
+    };
+
+    storj_bridge_options_t options = {
+            .proto = "https",
+            .host  = "api.storj.io",
+            .port  = 443,
+            .user  = user,
+            .pass  = pass
+    };
+
+    storj_encrypt_options_t encrypt_options = {
+            .mnemonic = mnemonic
+    };
+
+    storj_log_options_t log_options = {
+            .logger = NULL,
+            .level = 0
+    };
+
+    storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
+
+    if (!storj_env) {
+        error_callback(env, callbackObject, filePath_, "Failed to initialize Storj environment");
+    } else {
+        jcallback_t jcallback = {
+                .env = env,
+                .callbackObject = callbackObject
+        };
+
+        jupload_callback_t cb_extension = {
+                .base = jcallback,
+                .filePath = filePath_
+        };
+
+        FILE *fd = fopen(file_path, "r");
+
+        if (!fd) {
+            error_callback(env, callbackObject, filePath_, "Invalid file path");
+        } else {
+            const char *file_name = strrchr(file_path, '/');;
+            if (!file_name) {
+                file_name = file_path;
+            }
+            if (file_name[0] == '/') {
+                file_name++;
+            }
+
+            storj_upload_opts_t upload_opts = {
+                    .prepare_frame_limit = 1,
+                    .push_frame_limit = 64,
+                    .push_shard_limit = 64,
+                    .rs = true,
+                    .bucket_id = bucket_id,
+                    .file_name = file_name,
+                    .fd = fd
+            };
+
+            uv_signal_t *sig = (uv_signal_t *) malloc(sizeof(uv_signal_t));
+            if (!sig) {
+                // TODO error
+                return;
+            }
+            uv_signal_init(storj_env->loop, sig);
+//            uv_signal_start(sig, upload_signal_handler, SIGINT);
+
+            storj_upload_state_t *state = (storj_upload_state_t *) malloc(sizeof(storj_upload_state_t));
+            if (!state) {
+                // TODO error
+                return;
+            }
+
+            sig->data = state;
+
+            int status = storj_bridge_store_file(storj_env,
+                                                 state,
+                                                 &upload_opts,
+                                                 &cb_extension,
+                                                 upload_file_progress_callback,
+                                                 upload_file_complete_callback);
+            assert(status == 0);
+
+            uv_run(storj_env->loop, UV_RUN_DEFAULT);
+        }
+
+        storj_destroy_env(storj_env);
+    }
+
+    env->ReleaseStringUTFChars(bucketId_, bucket_id);
+    env->ReleaseStringUTFChars(filePath_, file_path);
     env->ReleaseStringUTFChars(user_, user);
     env->ReleaseStringUTFChars(pass_, pass);
     env->ReleaseStringUTFChars(mnemonic_, mnemonic);

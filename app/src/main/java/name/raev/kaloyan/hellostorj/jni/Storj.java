@@ -23,6 +23,7 @@ import name.raev.kaloyan.hellostorj.jni.callbacks.DownloadFileCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetBucketsCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetInfoCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.ListFilesCallback;
+import name.raev.kaloyan.hellostorj.jni.callbacks.UploadFileCallback;
 
 public class Storj {
 
@@ -90,7 +91,14 @@ public class Storj {
         downloadFile(bucket.getId(), file, path, keys.getUser(), keys.getPass(), keys.getMnemonic(), callback);
     }
 
+    public void upload(Bucket bucket, String filePath, UploadFileCallback callback) {
+        Keys keys = getKeys("");
+        uploadFile(bucket.getId(), filePath, keys.getUser(), keys.getPass(), keys.getMnemonic(), callback);
+    }
+
     public static native void downloadFile(String bucketId, File file, String path, String user, String pass, String mnemonic, DownloadFileCallback callback);
+
+    public static native void uploadFile(String bucketId, String filePath, String user, String pass, String mnemonic, UploadFileCallback callback);
 
     public static native Keys exportKeys(String location, String passphrase);
 
@@ -111,4 +119,5 @@ public class Storj {
     public static native String generateMnemonic(int strength);
 
     public static native long getTimestamp();
+
 }

@@ -20,6 +20,8 @@ import android.app.Application;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Process;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 
 import java.io.IOException;
@@ -34,11 +36,21 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         setAppDir();
+        setTempDir();
         copyCABundle();
     }
 
     private void setAppDir() {
         Storj.appDir = getFilesDir().getPath();
+    }
+
+
+    private void setTempDir() {
+        try {
+            Os.setenv("STORJ_TEMP", getCacheDir().getPath(), true);
+        } catch (ErrnoException e) {
+            Log.e(App.class.getName(), e.getMessage(), e);
+        }
     }
 
     private void copyCABundle() {

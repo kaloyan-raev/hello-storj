@@ -38,6 +38,8 @@ This program is free software: you can redistribute it and/or modify it under th
 
 Some parts of the code (JNI wrapper) are licensed under the GNU Lesser General Public License as published by the Free Software Foundation. You can redistribute it and/or modify it under the terms either version 3 of the License, or (at your option) any later version.
 
+Some parts of the code (FileUtils) are licensed under the Apache License as published by the Apache Software Foundation. You can redistribute it and/or modify it under the terms version 2 of the License, or (at your option) any later version.
+
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU General Public License and the GNU Lesser General Public License along with this program. If not, see http://www.gnu.org/licenses/.

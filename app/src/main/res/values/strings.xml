@@ -32,4 +32,8 @@
     <string name="browse_no_files">No files</string>
     <string name="download_in_progress">The file will be downloaded. See notification for details.</string>
     <string name="download_permission_denied">Write permission denied. Download aborted.</string>
+    <string name="upload_in_progress">The file will be uploaded. See notification for details.</string>
+    <string name="upload_complete">Upload complete. Tap to open bucket.</string>
+    <string name="upload_permission_denied">Read permission denied. Upload not possible.</string>
+    <string name="upload_not_supported">Document provider not supported. Upload not possible.</string>
 </resources>

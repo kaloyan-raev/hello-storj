@@ -92,11 +92,13 @@ public class FilesActivity extends AppCompatActivity implements FileInfoFragment
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case FileDownloader.PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
                 if (mDownloader != null) {
                     mDownloader.onRequestPermissionsResult(grantResults);
                 }
+                break;
             }
         }
     }
