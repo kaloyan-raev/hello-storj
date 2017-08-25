@@ -18,7 +18,9 @@ package name.raev.kaloyan.hellostorj;
 
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Process;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
@@ -75,9 +77,20 @@ class FileUploader implements UploadFileCallback {
 
     @Override
     public void onComplete(String filePath) {
+        Intent intent = new Intent(mActivity, FilesActivity.class);
+        intent.putExtra(FilesFragment.BUCKET, mBucket);
+        PendingIntent resultIntent =
+                PendingIntent.getActivity(
+                        mActivity,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
         mBuilder.setProgress(0, 0, false)
                 .setSmallIcon(android.R.drawable.stat_sys_upload_done)
-                .setContentText(mActivity.getResources().getString(R.string.upload_complete));
+                .setContentText(mActivity.getResources().getString(R.string.upload_complete))
+                .setContentIntent(resultIntent);
         mNotifyManager.notify(filePath.hashCode(), mBuilder.build());
     }
 
