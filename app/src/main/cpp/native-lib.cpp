@@ -89,11 +89,11 @@ static void get_buckets_callback(uv_work_t *work_req, int status)
     JNIEnv *env = jcallback->env;
     jobject callbackObject = jcallback->callbackObject;
 
-    if (req->error_code || req->response == NULL) {
+    if (req->status_code != 200 && req->status_code != 304) {
         char error_message[256];
         if (req->status_code == 401) {
             strcpy(error_message, "Invalid user credentials");
-        } else if (req->status_code != 200 && req->status_code != 304) {
+        } else {
             sprintf(error_message, "Request failed with status code: %i", req->status_code);
         }
         error_callback(env, callbackObject, error_message);
