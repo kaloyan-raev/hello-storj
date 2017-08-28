@@ -490,7 +490,7 @@ static void download_file_complete_callback(int status, FILE *fd, void *handle)
 
     if (status) {
         char error_message[256];
-        sprintf(error_message, "Download failed (status: %d)", status);
+        sprintf(error_message, "Download failed. %s (%d)", storj_strerror(status), status);
         error_callback(env, callbackObject, cb_extension->file, error_message);
     } else {
         jclass callbackClass = env->GetObjectClass(callbackObject);
@@ -653,7 +653,7 @@ static void upload_file_complete_callback(int status, char *file_id, void *handl
 
     if (status) {
         char error_message[256];
-        sprintf(error_message, "Upload failed (status: %d)", status);
+        sprintf(error_message, "Upload failed. %s (%d)", storj_strerror(status), status);
         error_callback(env, callbackObject, cb_extension->filePath, error_message);
     } else {
         jclass callbackClass = env->GetObjectClass(callbackObject);
