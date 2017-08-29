@@ -48,3 +48,9 @@ Some parts of the code (FileUtils) are licensed under the Apache License as publ
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU General Public License and the GNU Lesser General Public License along with this program. If not, see http://www.gnu.org/licenses/.
+
+## Donations
+
+Any donations are hightly appreciated.
+
+ETH/STORJ/ERC20 Tokens address: `0x408DcFAEf05D706B5Bb3ba6C830aB82158395c51`
