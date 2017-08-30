@@ -20,8 +20,6 @@
 #include <nettle/version.h>
 #include <microhttpd/microhttpd.h>
 
-static char cainfo_path[256];
-
 typedef struct {
     JNIEnv *env;
     jobject callbackObject;
@@ -37,17 +35,6 @@ typedef struct {
     jcallback_t base;
     jstring filePath;
 } jupload_callback_t;
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_setCAInfoPath(
-        JNIEnv *env,
-        jclass /* clazz */,
-        jstring path_) {
-    const char *path = env->GetStringUTFChars(path_, NULL);
-    strcpy(cainfo_path, path);
-    env->ReleaseStringUTFChars(path_, path);
-}
 
 static void error_callback(JNIEnv *env, jobject callbackObject, const char *message) {
     jclass callbackClass = env->GetObjectClass(callbackObject);
@@ -152,7 +139,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getBuckets(
 
     storj_http_options_t http_options = {
             .user_agent = "Hello Storj",
-            .cainfo_path = cainfo_path,
+            .cainfo_path = getenv("STORJ_CAINFO"),
             .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
             .low_speed_time = STORJ_LOW_SPEED_TIME,
             .timeout = STORJ_HTTP_TIMEOUT
@@ -261,7 +248,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_createBucket(
 
     storj_http_options_t http_options = {
             .user_agent = "Hello Storj",
-            .cainfo_path = cainfo_path,
+            .cainfo_path = getenv("STORJ_CAINFO"),
             .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
             .low_speed_time = STORJ_LOW_SPEED_TIME,
             .timeout = STORJ_HTTP_TIMEOUT
@@ -410,7 +397,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_listFiles(
 
     storj_http_options_t http_options = {
             .user_agent = "Hello Storj",
-            .cainfo_path = cainfo_path,
+            .cainfo_path = getenv("STORJ_CAINFO"),
             .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
             .low_speed_time = STORJ_LOW_SPEED_TIME,
             .timeout = STORJ_HTTP_TIMEOUT
@@ -530,7 +517,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
 
     storj_http_options_t http_options = {
             .user_agent = "Hello Storj",
-            .cainfo_path = cainfo_path,
+            .cainfo_path = getenv("STORJ_CAINFO"),
             .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
             .low_speed_time = STORJ_LOW_SPEED_TIME,
             .timeout = STORJ_HTTP_TIMEOUT
@@ -688,7 +675,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_uploadFile(
 
     storj_http_options_t http_options = {
             .user_agent = "Hello Storj",
-            .cainfo_path = cainfo_path,
+            .cainfo_path = getenv("STORJ_CAINFO"),
             .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
             .low_speed_time = STORJ_LOW_SPEED_TIME,
             .timeout = STORJ_HTTP_TIMEOUT
@@ -848,7 +835,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
 
     storj_http_options_t http_options = {
             .user_agent = "Hello Storj",
-            .cainfo_path = cainfo_path,
+            .cainfo_path = getenv("STORJ_CAINFO"),
             .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
             .low_speed_time = STORJ_LOW_SPEED_TIME,
             .timeout = STORJ_HTTP_TIMEOUT

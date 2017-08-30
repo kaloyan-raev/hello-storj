@@ -112,8 +112,6 @@ public class Storj {
 
     public static native void getInfo(GetInfoCallback callback);
 
-    public static native void setCAInfoPath(String path);
-
     public static native boolean checkMnemonic(String mnemonic);
 
     public static native String generateMnemonic(int strength);
