@@ -53,4 +53,6 @@ You should have received a copy of the GNU General Public License and the GNU Le
 
 Any donations are hightly appreciated.
 
+Bitcoin address: `1JHrx3SgUcdeLJgg7FvJwrNEgMBm8UdHqg`
+
 ETH/STORJ/ERC20 Tokens address: `0x408DcFAEf05D706B5Bb3ba6C830aB82158395c51`
