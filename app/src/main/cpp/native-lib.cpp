@@ -729,7 +729,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_uploadFile(
         FILE *fd = fopen(file_path, "r");
 
         if (!fd) {
-            error_callback(env, callbackObject, filePath_, "Invalid file path");
+            error_callback(env, callbackObject, filePath_, "Can't read file");
         } else {
             const char *file_name = strrchr(file_path, '/');;
             if (!file_name) {
