@@ -68,6 +68,47 @@ static void error_callback(JNIEnv *env, jobject callbackObject, jobject file, co
                         env->NewStringUTF(message));
 }
 
+static storj_env_t *init_env(
+        JNIEnv *env,
+        jobject callbackObject,
+        const char *user,
+        const char *pass,
+        const char *mnemonic)
+{
+    storj_http_options_t http_options = {
+            .user_agent = "Hello Storj",
+            .cainfo_path = getenv("STORJ_CAINFO"),
+            .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
+            .low_speed_time = STORJ_LOW_SPEED_TIME,
+            .timeout = STORJ_HTTP_TIMEOUT
+    };
+
+    storj_bridge_options_t options = {
+            .proto = "https",
+            .host  = "api.storj.io",
+            .port  = 443,
+            .user  = user,
+            .pass  = pass
+    };
+
+    storj_encrypt_options_t encrypt_options = {
+            .mnemonic = mnemonic
+    };
+
+    storj_log_options_t log_options = {
+            .logger = NULL,
+            .level = 0
+    };
+
+    storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
+
+    if (!storj_env) {
+        error_callback(env, callbackObject, "Failed to initialize Storj environment");
+    }
+
+    return storj_env;
+}
+
 static void get_buckets_callback(uv_work_t *work_req, int status)
 {
     assert(status == 0);
@@ -137,36 +178,9 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getBuckets(
     const char *pass = env->GetStringUTFChars(pass_, NULL);
     const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
 
-    storj_http_options_t http_options = {
-            .user_agent = "Hello Storj",
-            .cainfo_path = getenv("STORJ_CAINFO"),
-            .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
-            .low_speed_time = STORJ_LOW_SPEED_TIME,
-            .timeout = STORJ_HTTP_TIMEOUT
-    };
+    storj_env_t *storj_env = init_env(env, callbackObject, user, pass, mnemonic);
 
-    storj_bridge_options_t options = {
-            .proto = "https",
-            .host  = "api.storj.io",
-            .port  = 443,
-            .user  = user,
-            .pass  = pass
-    };
-
-    storj_encrypt_options_t encrypt_options = {
-            .mnemonic = mnemonic
-    };
-
-    storj_log_options_t log_options = {
-            .logger = NULL,
-            .level = 0
-    };
-
-    storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
-
-    if (!storj_env) {
-        error_callback(env, callbackObject, "Failed to initialize Storj environment");
-    } else {
+    if (storj_env) {
         jcallback_t jcallback = {
                 .env = env,
                 .callbackObject = callbackObject
@@ -246,36 +260,9 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_createBucket(
     const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
     const char *bucketName = env->GetStringUTFChars(bucketName_, NULL);
 
-    storj_http_options_t http_options = {
-            .user_agent = "Hello Storj",
-            .cainfo_path = getenv("STORJ_CAINFO"),
-            .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
-            .low_speed_time = STORJ_LOW_SPEED_TIME,
-            .timeout = STORJ_HTTP_TIMEOUT
-    };
+    storj_env_t *storj_env = init_env(env, callbackObject, user, pass, mnemonic);
 
-    storj_bridge_options_t options = {
-            .proto = "https",
-            .host  = "api.storj.io",
-            .port  = 443,
-            .user  = user,
-            .pass  = pass
-    };
-
-    storj_encrypt_options_t encrypt_options = {
-            .mnemonic = mnemonic
-    };
-
-    storj_log_options_t log_options = {
-            .logger = NULL,
-            .level = 0
-    };
-
-    storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
-
-    if (!storj_env) {
-        error_callback(env, callbackObject, "Failed to initialize Storj environment");
-    } else {
+    if (storj_env) {
         jcallback_t jcallback = {
                 .env = env,
                 .callbackObject = callbackObject
@@ -395,36 +382,9 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_listFiles(
     const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
     const char *bucketId = env->GetStringUTFChars(bucketId_, NULL);
 
-    storj_http_options_t http_options = {
-            .user_agent = "Hello Storj",
-            .cainfo_path = getenv("STORJ_CAINFO"),
-            .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
-            .low_speed_time = STORJ_LOW_SPEED_TIME,
-            .timeout = STORJ_HTTP_TIMEOUT
-    };
+    storj_env_t *storj_env = init_env(env, callbackObject, user, pass, mnemonic);
 
-    storj_bridge_options_t options = {
-            .proto = "https",
-            .host  = "api.storj.io",
-            .port  = 443,
-            .user  = user,
-            .pass  = pass
-    };
-
-    storj_encrypt_options_t encrypt_options = {
-            .mnemonic = mnemonic
-    };
-
-    storj_log_options_t log_options = {
-            .logger = NULL,
-            .level = 0
-    };
-
-    storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
-
-    if (!storj_env) {
-        error_callback(env, callbackObject, "Failed to initialize Storj environment");
-    } else {
+    if (storj_env) {
         jcallback_t jcallback = {
                 .env = env,
                 .callbackObject = callbackObject
@@ -515,36 +475,9 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
     const char *pass = env->GetStringUTFChars(pass_, NULL);
     const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
 
-    storj_http_options_t http_options = {
-            .user_agent = "Hello Storj",
-            .cainfo_path = getenv("STORJ_CAINFO"),
-            .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
-            .low_speed_time = STORJ_LOW_SPEED_TIME,
-            .timeout = STORJ_HTTP_TIMEOUT
-    };
+    storj_env_t *storj_env = init_env(env, callbackObject, user, pass, mnemonic);
 
-    storj_bridge_options_t options = {
-            .proto = "https",
-            .host  = "api.storj.io",
-            .port  = 443,
-            .user  = user,
-            .pass  = pass
-    };
-
-    storj_encrypt_options_t encrypt_options = {
-            .mnemonic = mnemonic
-    };
-
-    storj_log_options_t log_options = {
-            .logger = NULL,
-            .level = 0
-    };
-
-    storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
-
-    if (!storj_env) {
-        error_callback(env, callbackObject, file_, "Failed to initialize Storj environment");
-    } else {
+    if (storj_env) {
         jcallback_t jcallback = {
                 .env = env,
                 .callbackObject = callbackObject
@@ -673,36 +606,9 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_uploadFile(
     const char *pass = env->GetStringUTFChars(pass_, NULL);
     const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
 
-    storj_http_options_t http_options = {
-            .user_agent = "Hello Storj",
-            .cainfo_path = getenv("STORJ_CAINFO"),
-            .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
-            .low_speed_time = STORJ_LOW_SPEED_TIME,
-            .timeout = STORJ_HTTP_TIMEOUT
-    };
+    storj_env_t *storj_env = init_env(env, callbackObject, user, pass, mnemonic);
 
-    storj_bridge_options_t options = {
-            .proto = "https",
-            .host  = "api.storj.io",
-            .port  = 443,
-            .user  = user,
-            .pass  = pass
-    };
-
-    storj_encrypt_options_t encrypt_options = {
-            .mnemonic = mnemonic
-    };
-
-    storj_log_options_t log_options = {
-            .logger = NULL,
-            .level = 0
-    };
-
-    storj_env_t *storj_env = storj_init_env(&options, &encrypt_options, &http_options, &log_options);
-
-    if (!storj_env) {
-        error_callback(env, callbackObject, filePath_, "Failed to initialize Storj environment");
-    } else {
+    if (storj_env) {
         jcallback_t jcallback = {
                 .env = env,
                 .callbackObject = callbackObject
@@ -825,32 +731,9 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
         JNIEnv *env,
         jclass /* clazz */,
         jobject callbackObject) {
-    storj_bridge_options_t options = {
-            .proto = "https",
-            .host  = "api.storj.io",
-            .port  = 443,
-            .user  = NULL,
-            .pass  = NULL
-    };
+    storj_env_t *storj_env = init_env(env, callbackObject, NULL, NULL, NULL);
 
-    storj_http_options_t http_options = {
-            .user_agent = "Hello Storj",
-            .cainfo_path = getenv("STORJ_CAINFO"),
-            .low_speed_limit = STORJ_LOW_SPEED_LIMIT,
-            .low_speed_time = STORJ_LOW_SPEED_TIME,
-            .timeout = STORJ_HTTP_TIMEOUT
-    };
-
-    storj_log_options_t log_options = {
-            .logger = NULL,
-            .level = 0
-    };
-
-    storj_env_t *storj_env = NULL;
-    storj_env = storj_init_env(&options, NULL, &http_options, &log_options);
-    if (!storj_env) {
-        error_callback(env, callbackObject, "Failed to initialize Storj environment");
-    } else {
+    if (storj_env) {
         jcallback_t jcallback = {
                 .env = env,
                 .callbackObject = callbackObject
