@@ -771,7 +771,7 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_exportKeys(
         JNIEnv *env,
-        jclass type,
+        jclass /* type */,
         jstring location_,
         jstring passphrase_) {
     const char *location = env->GetStringUTFChars(location_, NULL);
