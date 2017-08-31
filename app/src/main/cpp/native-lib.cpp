@@ -832,7 +832,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_writeAuthFile(
     env->ReleaseStringUTFChars(mnemonic_, mnemonic);
     env->ReleaseStringUTFChars(passphrase_, passphrase);
 
-    return result == 0;
+    return (jboolean) (result == 0);
 }
 
 extern "C"
@@ -844,7 +844,7 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_checkMnemonic(
     const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
     bool result = storj_mnemonic_check(mnemonic);
     env->ReleaseStringUTFChars(mnemonic_, mnemonic);
-    return result;
+    return (jboolean) result;
 }
 
 extern "C"
