@@ -452,6 +452,38 @@ static void download_file_complete_callback(int status, FILE *fd, void *handle)
     }
 }
 
+static int download_file(
+        FILE *fd,
+        const char *bucket_id,
+        const char *file_id,
+        storj_env_t *storj_env,
+        void *handle)
+{
+    uv_signal_t *sig = (uv_signal_t *) malloc(sizeof(uv_signal_t));
+    if (!sig) {
+        return 1;
+    }
+
+    uv_signal_init(storj_env->loop, sig);
+//  uv_signal_start(sig, download_signal_handler, SIGINT);
+
+    storj_download_state_t *state = (storj_download_state_t *) malloc(sizeof(storj_download_state_t));
+    if (!state) {
+        return 1;
+    }
+
+    sig->data = state;
+
+    return storj_bridge_resolve_file(storj_env,
+                                     state,
+                                     bucket_id,
+                                     file_id,
+                                     fd,
+                                     handle,
+                                     download_file_progress_callback,
+                                     download_file_complete_callback);
+}
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
@@ -504,29 +536,10 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
             char error_message[256];
             sprintf(error_message, "Unable to open %s: %s", path, strerror(errno));
             error_callback(env, callbackObject, file_, error_message);
+        } else if (download_file(fd, bucket_id, file_id, storj_env, &cb_extension)) {
+            error_callback(env, callbackObject, file_, "Can't allocate memory");
         } else {
-            uv_signal_t *sig = (uv_signal_t *) malloc(sizeof(uv_signal_t));
-            uv_signal_init(storj_env->loop, sig);
-//          uv_signal_start(sig, download_signal_handler, SIGINT);
-
-            storj_download_state_t *state = (storj_download_state_t *) malloc(sizeof(storj_download_state_t));
-            if (!state) {
-                error_callback(env, callbackObject, file_, "Failed to allocate memory for storj_download_state_t.");
-            } else {
-                sig->data = state;
-
-                int status = storj_bridge_resolve_file(storj_env,
-                                                       state,
-                                                       bucket_id,
-                                                       file_id,
-                                                       fd,
-                                                       &cb_extension,
-                                                       download_file_progress_callback,
-                                                       download_file_complete_callback);
-                assert(status == 0);
-
-                uv_run(storj_env->loop, UV_RUN_DEFAULT);
-            }
+            uv_run(storj_env->loop, UV_RUN_DEFAULT);
         }
 
         storj_destroy_env(storj_env);
@@ -589,6 +602,54 @@ static void upload_file_complete_callback(int status, char *file_id, void *handl
     free(file_id);
 }
 
+static int upload_file(
+        FILE *fd,
+        const char *bucket_id,
+        const char *file_path,
+        storj_env_t *storj_env,
+        void *handle)
+{
+    const char *file_name = strrchr(file_path, '/');;
+    if (!file_name) {
+        file_name = file_path;
+    }
+    if (file_name[0] == '/') {
+        file_name++;
+    }
+
+    storj_upload_opts_t upload_opts = {
+            .prepare_frame_limit = 1,
+            .push_frame_limit = 64,
+            .push_shard_limit = 64,
+            .rs = true,
+            .bucket_id = bucket_id,
+            .file_name = file_name,
+            .fd = fd
+    };
+
+    uv_signal_t *sig = (uv_signal_t *) malloc(sizeof(uv_signal_t));
+    if (!sig) {
+        return 1;
+    }
+
+    uv_signal_init(storj_env->loop, sig);
+//  uv_signal_start(sig, upload_signal_handler, SIGINT);
+
+    storj_upload_state_t *state = (storj_upload_state_t *) malloc(sizeof(storj_upload_state_t));
+    if (!state) {
+        return 1;
+    }
+
+    sig->data = state;
+
+    return storj_bridge_store_file(storj_env,
+                                   state,
+                                   &upload_opts,
+                                   handle,
+                                   upload_file_progress_callback,
+                                   upload_file_complete_callback);
+}
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_uploadFile(
@@ -623,49 +684,9 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_uploadFile(
 
         if (!fd) {
             error_callback(env, callbackObject, filePath_, "Can't read file");
+        } else if (upload_file(fd, bucket_id, file_path, storj_env, &cb_extension)) {
+            error_callback(env, callbackObject, filePath_, "Can't allocate memory");
         } else {
-            const char *file_name = strrchr(file_path, '/');;
-            if (!file_name) {
-                file_name = file_path;
-            }
-            if (file_name[0] == '/') {
-                file_name++;
-            }
-
-            storj_upload_opts_t upload_opts = {
-                    .prepare_frame_limit = 1,
-                    .push_frame_limit = 64,
-                    .push_shard_limit = 64,
-                    .rs = true,
-                    .bucket_id = bucket_id,
-                    .file_name = file_name,
-                    .fd = fd
-            };
-
-            uv_signal_t *sig = (uv_signal_t *) malloc(sizeof(uv_signal_t));
-            if (!sig) {
-                // TODO error
-                return;
-            }
-            uv_signal_init(storj_env->loop, sig);
-//            uv_signal_start(sig, upload_signal_handler, SIGINT);
-
-            storj_upload_state_t *state = (storj_upload_state_t *) malloc(sizeof(storj_upload_state_t));
-            if (!state) {
-                // TODO error
-                return;
-            }
-
-            sig->data = state;
-
-            int status = storj_bridge_store_file(storj_env,
-                                                 state,
-                                                 &upload_opts,
-                                                 &cb_extension,
-                                                 upload_file_progress_callback,
-                                                 upload_file_complete_callback);
-            assert(status == 0);
-
             uv_run(storj_env->loop, UV_RUN_DEFAULT);
         }
 
