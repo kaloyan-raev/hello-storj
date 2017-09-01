@@ -23,6 +23,7 @@ import android.util.Log;
 public enum Fragments {
     
     BROWSE(R.string.title_buckets, BucketsFragment.class),
+    REGISTER(R.string.title_register, RegisterFragment.class),
     KEYS(R.string.title_keys, KeysFragment.class),
     BRIDGE_INFO(R.string.title_bridge_info, BridgeInfoFragment.class),
     MNEMONIC(R.string.title_mnemonic, MnemonicFragment.class),

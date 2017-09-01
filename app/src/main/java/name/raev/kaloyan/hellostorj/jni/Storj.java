@@ -23,6 +23,7 @@ import name.raev.kaloyan.hellostorj.jni.callbacks.DownloadFileCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetBucketsCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.GetInfoCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.ListFilesCallback;
+import name.raev.kaloyan.hellostorj.jni.callbacks.RegisterCallback;
 import name.raev.kaloyan.hellostorj.jni.callbacks.UploadFileCallback;
 
 public class Storj {
@@ -111,6 +112,8 @@ public class Storj {
     public static native void listFiles(String user, String pass, String mnemonic, String bucketId, ListFilesCallback callback);
 
     public static native void getInfo(GetInfoCallback callback);
+
+    public static native void register(String user, String pass, RegisterCallback callback);
 
     public static native boolean checkMnemonic(String mnemonic);
 

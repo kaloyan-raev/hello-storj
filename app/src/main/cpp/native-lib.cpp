@@ -700,6 +700,71 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_uploadFile(
     env->ReleaseStringUTFChars(mnemonic_, mnemonic);
 }
 
+static void register_callback(uv_work_t *work_req, int status)
+{
+    assert(status == 0);
+    json_request_t *req = (json_request_t *) work_req->data;
+    jcallback_t *jcallback = (jcallback_t *) req->handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
+
+    if (req->status_code != 201) {
+        struct json_object *error;
+        json_object_object_get_ex(req->response, "error", &error);
+        char error_message[256];
+        sprintf(error_message,
+                "Request failed with status code: %i. Error: %s",
+                req->status_code,
+                json_object_get_string(error));
+        error_callback(env, callbackObject, error_message);
+    } else {
+        struct json_object *email;
+        json_object_object_get_ex(req->response, "email", &email);
+
+        jclass callbackClass = env->GetObjectClass(callbackObject);
+        jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                    "onConfirmationPending",
+                                                    "(Ljava/lang/String;)V");
+        env->CallVoidMethod(callbackObject,
+                            callbackMethod,
+                            env->NewStringUTF(json_object_get_string(email)));
+    }
+
+    json_object_put(req->response);
+    json_object_put(req->body);
+    free(req);
+    free(work_req);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_name_raev_kaloyan_hellostorj_jni_Storj_register(
+        JNIEnv *env,
+        jclass /* type */,
+        jstring user_,
+        jstring pass_,
+        jobject callbackObject) {
+    const char *user = env->GetStringUTFChars(user_, NULL);
+    const char *pass = env->GetStringUTFChars(pass_, NULL);
+
+    storj_env_t *storj_env = init_env(env, callbackObject, user, pass, NULL);
+
+    if (storj_env) {
+        jcallback_t jcallback = {
+                .env = env,
+                .callbackObject = callbackObject
+        };
+        storj_bridge_register(storj_env, user, pass, &jcallback, register_callback);
+
+        uv_run(storj_env->loop, UV_RUN_DEFAULT);
+
+        storj_destroy_env(storj_env);
+    }
+
+    env->ReleaseStringUTFChars(user_, user);
+    env->ReleaseStringUTFChars(pass_, pass);
+}
+
 static void get_info_callback(uv_work_t *work_req, int status)
 {
     assert(status == 0);
