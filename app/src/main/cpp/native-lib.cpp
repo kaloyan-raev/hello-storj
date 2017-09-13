@@ -700,6 +700,69 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_uploadFile(
     env->ReleaseStringUTFChars(mnemonic_, mnemonic);
 }
 
+static void delete_bucket_callback(uv_work_t *work_req, int status)
+{
+    assert(status == 0);
+    json_request_t *req = (json_request_t *) work_req->data;
+    jcallback_t *jcallback = (jcallback_t *) req->handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
+
+    if (req->status_code != 200 && req->status_code != 204) {
+        char error_message[256];
+        if (req->status_code == 401) {
+            strcpy(error_message, "Invalid user credentials");
+        } else {
+            sprintf(error_message, "Failed to destroy bucket. (%i)", req->status_code);
+        }
+        error_callback(env, callbackObject, error_message);
+    } else {
+        jclass callbackClass = env->GetObjectClass(callbackObject);
+        jmethodID callbackMethod = env->GetMethodID(callbackClass, "onBucketDeleted", "()V");
+        env->CallVoidMethod(callbackObject, callbackMethod);
+    }
+
+    json_object_put(req->response);
+    free(req->path);
+    free(req);
+    free(work_req);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_name_raev_kaloyan_hellostorj_jni_Storj_deleteBucket(
+        JNIEnv *env,
+        jclass /* clazz */,
+        jstring user_,
+        jstring pass_,
+        jstring mnemonic_,
+        jstring bucketId_,
+        jobject callbackObject) {
+    const char *user = env->GetStringUTFChars(user_, NULL);
+    const char *pass = env->GetStringUTFChars(pass_, NULL);
+    const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
+    const char *bucket_id = env->GetStringUTFChars(bucketId_, NULL);
+
+    storj_env_t *storj_env = init_env(env, callbackObject, user, pass, NULL);
+
+    if (storj_env) {
+        jcallback_t jcallback = {
+                .env = env,
+                .callbackObject = callbackObject
+        };
+        storj_bridge_delete_bucket(storj_env, bucket_id, &jcallback, delete_bucket_callback);
+
+        uv_run(storj_env->loop, UV_RUN_DEFAULT);
+
+        storj_destroy_env(storj_env);
+    }
+
+    env->ReleaseStringUTFChars(user_, user);
+    env->ReleaseStringUTFChars(pass_, pass);
+    env->ReleaseStringUTFChars(mnemonic_, mnemonic);
+    env->ReleaseStringUTFChars(bucketId_, bucket_id);
+}
+
 static void delete_file_callback(uv_work_t *work_req, int status)
 {
     assert(status == 0);
@@ -732,7 +795,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_deleteFile(
         JNIEnv *env,
-        jclass type,
+        jclass /* clazz */,
         jstring user_,
         jstring pass_,
         jstring mnemonic_,
@@ -806,7 +869,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_register(
         JNIEnv *env,
-        jclass /* type */,
+        jclass /* clazz */,
         jstring user_,
         jstring pass_,
         jobject callbackObject) {
@@ -902,7 +965,7 @@ extern "C"
 JNIEXPORT jobject JNICALL
 Java_name_raev_kaloyan_hellostorj_jni_Storj_exportKeys(
         JNIEnv *env,
-        jclass /* type */,
+        jclass /* clazz */,
         jstring location_,
         jstring passphrase_) {
     const char *location = env->GetStringUTFChars(location_, NULL);
