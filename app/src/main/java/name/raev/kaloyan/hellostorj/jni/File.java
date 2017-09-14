@@ -21,6 +21,7 @@ import android.support.annotation.NonNull;
 
 import java.io.Serializable;
 import java.net.URLConnection;
+import java.util.Objects;
 
 public class File implements Serializable, Comparable<File> {
 
@@ -94,6 +95,21 @@ public class File implements Serializable, Comparable<File> {
 
     public String getHMAC() {
         return hmac;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof File)) {
+            return false;
+        }
+        File file = (File) o;
+        return Objects.equals(id, file.id);
     }
 
     @Override

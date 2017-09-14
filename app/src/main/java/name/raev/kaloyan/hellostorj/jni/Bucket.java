@@ -19,6 +19,7 @@ package name.raev.kaloyan.hellostorj.jni;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Bucket implements Serializable, Comparable<Bucket> {
 
@@ -48,6 +49,21 @@ public class Bucket implements Serializable, Comparable<Bucket> {
 
     public boolean isDecrypted() {
         return decrypted;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Bucket)) {
+            return false;
+        }
+        Bucket bucket = (Bucket) o;
+        return Objects.equals(id, bucket.id);
     }
 
     @Override
