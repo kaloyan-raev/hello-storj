@@ -30,7 +30,7 @@ import java.io.File;
 
 import name.raev.kaloyan.hellostorj.jni.Bucket;
 import name.raev.kaloyan.hellostorj.jni.Storj;
-import name.raev.kaloyan.hellostorj.jni.callbacks.UploadFileCallback;
+import name.raev.kaloyan.hellostorj.jni.UploadFileCallback;
 
 class FileUploader implements UploadFileCallback {
 
@@ -66,7 +66,7 @@ class FileUploader implements UploadFileCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Storj.getInstance().upload(mBucket, mFilePath, FileUploader.this);
+                Storj.getInstance().uploadFile(mBucket, mFilePath, FileUploader.this);
             }
         }.start();
     }

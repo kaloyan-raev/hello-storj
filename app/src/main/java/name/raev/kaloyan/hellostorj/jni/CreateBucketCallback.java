@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***************************************************************************/
-package name.raev.kaloyan.hellostorj.jni.callbacks;
+package name.raev.kaloyan.hellostorj.jni;
 
 import name.raev.kaloyan.hellostorj.jni.Bucket;
 
-public interface GetBucketsCallback {
+public interface CreateBucketCallback {
 
-    void onBucketsReceived(Bucket[] buckets);
+    void onBucketCreated(Bucket bucket);
 
     void onError(String message);
 
