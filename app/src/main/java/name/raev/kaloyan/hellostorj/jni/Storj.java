@@ -18,16 +18,6 @@ package name.raev.kaloyan.hellostorj.jni;
 
 import android.os.Environment;
 
-import name.raev.kaloyan.hellostorj.jni.callbacks.CreateBucketCallback;
-import name.raev.kaloyan.hellostorj.jni.callbacks.DeleteBucketCallback;
-import name.raev.kaloyan.hellostorj.jni.callbacks.DeleteFileCallback;
-import name.raev.kaloyan.hellostorj.jni.callbacks.DownloadFileCallback;
-import name.raev.kaloyan.hellostorj.jni.callbacks.GetBucketsCallback;
-import name.raev.kaloyan.hellostorj.jni.callbacks.GetInfoCallback;
-import name.raev.kaloyan.hellostorj.jni.callbacks.ListFilesCallback;
-import name.raev.kaloyan.hellostorj.jni.callbacks.RegisterCallback;
-import name.raev.kaloyan.hellostorj.jni.callbacks.UploadFileCallback;
-
 public class Storj {
 
     // Used to load the 'native-lib' library on application startup.
@@ -35,15 +25,17 @@ public class Storj {
         System.loadLibrary("native-lib");
     }
 
-    private static final String HOST = "api.storj.io";
+    private static final String DEFAULT_HOST = "api.storj.io";
 
     public static String appDir;
 
     private static Storj instance;
 
+    private String host;
     private Keys keys;
 
     private Storj() {
+        host = DEFAULT_HOST;
         keys = null;
     }
 
@@ -54,13 +46,27 @@ public class Storj {
         return instance;
     }
 
+    public static native long getTimestamp();
+
+    public static native String generateMnemonic(int strength);
+
+    public static native boolean checkMnemonic(String mnemonic);
+
+    public void getInfo(GetInfoCallback callback) {
+        _getInfo(callback);
+    }
+
+    public void register(String user, String pass, RegisterCallback callback) {
+        _register(user, pass, callback);
+    }
+
     public boolean keysExist() {
         return getAuthFile().exists();
     }
 
     public Keys getKeys(String passphrase) {
         if (keys == null) {
-            keys = exportKeys(getAuthFile().getPath(), passphrase);
+            keys = _exportKeys(getAuthFile().getPath(), passphrase);
         }
         return keys;
     }
@@ -72,59 +78,83 @@ public class Storj {
      * @return <code>true</code> if importing keys was successful, <code>false</code> otherwise
      */
     public boolean importKeys(Keys keys, String passphrase) {
-        boolean success = writeAuthFile(getAuthFile().getPath(), keys.getUser(), keys.getPass(), keys.getMnemonic(), passphrase);
+        boolean success = _writeAuthFile(getAuthFile().getPath(), keys.getUser(), keys.getPass(), keys.getMnemonic(), passphrase);
         if (success) {
             this.keys = keys;
         }
         return success;
     }
 
+    public void getBuckets(GetBucketsCallback callback) throws KeysNotFoundException {
+        checkKeys();
+        _getBuckets(keys.getUser(), keys.getPass(), keys.getMnemonic(), callback);
+    }
+
+    public void createBucket(String bucketName, CreateBucketCallback callback) throws KeysNotFoundException {
+        checkKeys();
+        _createBucket(keys.getUser(), keys.getPass(), keys.getMnemonic(), bucketName, callback);
+    }
+
+    public void deleteBucket(Bucket bucket, DeleteBucketCallback callback) throws KeysNotFoundException {
+        checkKeys();
+        _deleteBucket(keys.getUser(), keys.getPass(), keys.getMnemonic(), bucket.getId(), callback);
+    }
+
+    public void listFiles(Bucket bucket, ListFilesCallback callback) throws KeysNotFoundException {
+        checkKeys();
+        _listFiles(keys.getUser(), keys.getPass(), keys.getMnemonic(), bucket.getId(), callback);
+    }
+
+    public void deleteFile(Bucket bucket, File file, DeleteFileCallback callback) throws KeysNotFoundException {
+        checkKeys();
+        _deleteFile(keys.getUser(), keys.getPass(), keys.getMnemonic(), bucket.getId(), file.getId(), callback);
+    }
+
+    public void downloadFile(Bucket bucket, File file, DownloadFileCallback callback) throws KeysNotFoundException {
+        checkKeys();
+        java.io.File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        String path = new java.io.File(downloads, file.getName()).getPath();
+        _downloadFile(bucket.getId(), file, path, keys.getUser(), keys.getPass(), keys.getMnemonic(), callback);
+    }
+
+    public void uploadFile(Bucket bucket, String filePath, UploadFileCallback callback) throws KeysNotFoundException {
+        checkKeys();
+        _uploadFile(bucket.getId(), filePath, keys.getUser(), keys.getPass(), keys.getMnemonic(), callback);
+    }
+
     private java.io.File getAuthFile() {
         if (appDir == null) {
             throw new IllegalStateException("appDir is not set");
         }
-
-        return new java.io.File(appDir, HOST + ".json");
+        return new java.io.File(appDir, host + ".json");
     }
 
-    public void download(Bucket bucket, File file, DownloadFileCallback callback) {
-        java.io.File downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        String path = new java.io.File(downloads, file.getName()).getPath();
-        Keys keys = getKeys("");
-        downloadFile(bucket.getId(), file, path, keys.getUser(), keys.getPass(), keys.getMnemonic(), callback);
+    private void checkKeys() throws KeysNotFoundException {
+        if (getKeys("") == null) {
+            throw new KeysNotFoundException();
+        }
     }
 
-    public void upload(Bucket bucket, String filePath, UploadFileCallback callback) {
-        Keys keys = getKeys("");
-        uploadFile(bucket.getId(), filePath, keys.getUser(), keys.getPass(), keys.getMnemonic(), callback);
-    }
+    private native void _getInfo(GetInfoCallback callback);
 
-    public static native void downloadFile(String bucketId, File file, String path, String user, String pass, String mnemonic, DownloadFileCallback callback);
+    private native void _register(String user, String pass, RegisterCallback callback);
 
-    public static native void uploadFile(String bucketId, String filePath, String user, String pass, String mnemonic, UploadFileCallback callback);
+    private native Keys _exportKeys(String location, String passphrase);
 
-    public static native Keys exportKeys(String location, String passphrase);
+    private native boolean _writeAuthFile(String location, String user, String pass, String mnemonic, String passphrase);
 
-    public static native boolean writeAuthFile(String location, String user, String pass, String mnemonic, String passphrase);
+    private native void _getBuckets(String user, String pass, String mnemonic, GetBucketsCallback callback);
 
-    public static native void getBuckets(String user, String pass, String mnemonic, GetBucketsCallback callback);
+    private native void _createBucket(String user, String pass, String mnemonic, String bucketName, CreateBucketCallback callback);
 
-    public static native void createBucket(String user, String pass, String mnemonic, String bucketName, CreateBucketCallback callback);
+    private native void _deleteBucket(String user, String pass, String mnemonic, String bucketId, DeleteBucketCallback callback);
 
-    public static native void listFiles(String user, String pass, String mnemonic, String bucketId, ListFilesCallback callback);
+    private native void _listFiles(String user, String pass, String mnemonic, String bucketId, ListFilesCallback callback);
 
-    public static native void deleteBucket(String user, String pass, String mnemonic, String bucketId, DeleteBucketCallback callback);
+    private native void _deleteFile(String user, String pass, String mnemonic, String bucketId, String fileId, DeleteFileCallback callback);
 
-    public static native void deleteFile(String user, String pass, String mnemonic, String bucketId, String fileId, DeleteFileCallback callback);
+    private native void _downloadFile(String bucketId, File file, String path, String user, String pass, String mnemonic, DownloadFileCallback callback);
 
-    public static native void getInfo(GetInfoCallback callback);
-
-    public static native void register(String user, String pass, RegisterCallback callback);
-
-    public static native boolean checkMnemonic(String mnemonic);
-
-    public static native String generateMnemonic(int strength);
-
-    public static native long getTimestamp();
+    private native void _uploadFile(String bucketId, String filePath, String user, String pass, String mnemonic, UploadFileCallback callback);
 
 }

@@ -41,9 +41,9 @@ import java.util.Arrays;
 
 import name.raev.kaloyan.hellostorj.jni.Bucket;
 import name.raev.kaloyan.hellostorj.jni.File;
-import name.raev.kaloyan.hellostorj.jni.Keys;
+import name.raev.kaloyan.hellostorj.jni.KeysNotFoundException;
 import name.raev.kaloyan.hellostorj.jni.Storj;
-import name.raev.kaloyan.hellostorj.jni.callbacks.ListFilesCallback;
+import name.raev.kaloyan.hellostorj.jni.ListFilesCallback;
 import name.raev.kaloyan.hellostorj.utils.FileUtils;
 
 import static android.app.Activity.RESULT_OK;
@@ -117,11 +117,10 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Keys keys = Storj.getInstance().getKeys("");
-                if (keys == null) {
+                try {
+                    Storj.getInstance().listFiles(bucket, FilesFragment.this);
+                } catch (KeysNotFoundException e) {
                     showKeysError();
-                } else {
-                    Storj.listFiles(keys.getUser(), keys.getPass(), keys.getMnemonic(), bucket.getId(), FilesFragment.this);
                 }
             }
         }.start();
@@ -229,16 +228,14 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == READ_REQUEST_CODE && resultCode == RESULT_OK) {
-            if (resultCode == RESULT_OK) {
-                Uri uri = data.getData();
-                String path = FileUtils.getPath(getContext(), uri);
-                if (path != null && FileUtils.isLocal(path)) {
-                    new FileUploader(getActivity(), mBucket, path).upload();
-                } else {
-                    Snackbar.make(getActivity().findViewById(R.id.browse_list),
-                            R.string.upload_not_supported,
-                            Snackbar.LENGTH_LONG).show();
-                }
+            Uri uri = data.getData();
+            String path = FileUtils.getPath(getContext(), uri);
+            if (path != null && FileUtils.isLocal(path)) {
+                new FileUploader(getActivity(), mBucket, path).upload();
+            } else {
+                Snackbar.make(getActivity().findViewById(R.id.browse_list),
+                        R.string.upload_not_supported,
+                        Snackbar.LENGTH_LONG).show();
             }
         }
     }

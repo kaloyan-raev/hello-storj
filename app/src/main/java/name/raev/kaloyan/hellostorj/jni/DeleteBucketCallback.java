@@ -16,27 +16,10 @@
  ***************************************************************************/
 package name.raev.kaloyan.hellostorj.jni;
 
-public class Keys {
+public interface DeleteBucketCallback {
 
-    private String user;
-    private String pass;
-    private String mnemonic;
+    void onBucketDeleted();
 
-    public Keys(String user, String pass, String mnemonic) {
-        this.user = user;
-        this.pass = pass;
-        this.mnemonic = mnemonic;
-    }
+    void onError(String message);
 
-    public String getUser() {
-        return user;
-    }
-
-    public String getPass() {
-        return pass;
-    }
-
-    public String getMnemonic() {
-        return mnemonic;
-    }
 }

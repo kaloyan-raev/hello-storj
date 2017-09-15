@@ -27,7 +27,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import name.raev.kaloyan.hellostorj.jni.callbacks.GetInfoCallback;
+import name.raev.kaloyan.hellostorj.jni.GetInfoCallback;
 import name.raev.kaloyan.hellostorj.jni.Storj;
 
 /**
@@ -73,7 +73,7 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Storj.getInfo(BridgeInfoFragment.this);
+                Storj.getInstance().getInfo(BridgeInfoFragment.this);
             }
         }.start();
     }

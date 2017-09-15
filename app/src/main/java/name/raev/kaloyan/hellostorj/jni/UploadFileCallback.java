@@ -14,12 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***************************************************************************/
-package name.raev.kaloyan.hellostorj.jni.callbacks;
+package name.raev.kaloyan.hellostorj.jni;
 
-public interface RegisterCallback {
+import name.raev.kaloyan.hellostorj.jni.File;
 
-    void onConfirmationPending(String email);
+public interface UploadFileCallback {
 
-    void onError(String message);
+    void onProgress(String filePath, double progress, long uploadedBytes, long totalBytes);
+
+    void onComplete(String filePath);
+
+    void onError(String filePath, String message);
 
 }

@@ -167,9 +167,9 @@ static void get_buckets_callback(uv_work_t *work_req, int status)
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_getBuckets(
+Java_name_raev_kaloyan_hellostorj_jni_Storj__1getBuckets(
         JNIEnv *env,
-        jclass /* clazz */,
+        jobject /* instance */,
         jstring user_,
         jstring pass_,
         jstring mnemonic_,
@@ -247,9 +247,9 @@ static void create_bucket_callback(uv_work_t *work_req, int status)
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_createBucket(
+Java_name_raev_kaloyan_hellostorj_jni_Storj__1createBucket(
         JNIEnv *env,
-        jclass /* clazz */,
+        jobject /* instance */,
         jstring user_,
         jstring pass_,
         jstring mnemonic_,
@@ -369,9 +369,9 @@ static void list_files_callback(uv_work_t *work_req, int status)
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_listFiles(
+Java_name_raev_kaloyan_hellostorj_jni_Storj__1listFiles(
         JNIEnv *env,
-        jclass /* clazz */,
+        jobject /* instance */,
         jstring user_,
         jstring pass_,
         jstring mnemonic_,
@@ -486,9 +486,9 @@ static int download_file(
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_downloadFile(
+Java_name_raev_kaloyan_hellostorj_jni_Storj__1downloadFile(
         JNIEnv *env,
-        jclass /* clazz */,
+        jobject /* instance */,
         jstring bucketId_,
         jobject file_,
         jstring path_,
@@ -652,9 +652,9 @@ static int upload_file(
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_uploadFile(
+Java_name_raev_kaloyan_hellostorj_jni_Storj__1uploadFile(
         JNIEnv *env,
-        jclass /* clazz */,
+        jobject /* instance */,
         jstring bucketId_,
         jstring filePath_,
         jstring user_,
@@ -730,9 +730,9 @@ static void delete_bucket_callback(uv_work_t *work_req, int status)
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_deleteBucket(
+Java_name_raev_kaloyan_hellostorj_jni_Storj__1deleteBucket(
         JNIEnv *env,
-        jclass /* clazz */,
+        jobject /* instance */,
         jstring user_,
         jstring pass_,
         jstring mnemonic_,
@@ -793,9 +793,9 @@ static void delete_file_callback(uv_work_t *work_req, int status)
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_deleteFile(
+Java_name_raev_kaloyan_hellostorj_jni_Storj__1deleteFile(
         JNIEnv *env,
-        jclass /* clazz */,
+        jobject /* instance */,
         jstring user_,
         jstring pass_,
         jstring mnemonic_,
@@ -867,9 +867,9 @@ static void register_callback(uv_work_t *work_req, int status)
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_register(
+Java_name_raev_kaloyan_hellostorj_jni_Storj__1register(
         JNIEnv *env,
-        jclass /* clazz */,
+        jobject /* instance */,
         jstring user_,
         jstring pass_,
         jobject callbackObject) {
@@ -942,9 +942,9 @@ static void get_info_callback(uv_work_t *work_req, int status)
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
+Java_name_raev_kaloyan_hellostorj_jni_Storj__1getInfo(
         JNIEnv *env,
-        jclass /* clazz */,
+        jobject /* instance */,
         jobject callbackObject) {
     storj_env_t *storj_env = init_env(env, callbackObject, NULL, NULL, NULL);
 
@@ -963,9 +963,9 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_getInfo(
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_exportKeys(
+Java_name_raev_kaloyan_hellostorj_jni_Storj__1exportKeys(
         JNIEnv *env,
-        jclass /* clazz */,
+        jobject /* instance */,
         jstring location_,
         jstring passphrase_) {
     const char *location = env->GetStringUTFChars(location_, NULL);
@@ -1004,9 +1004,9 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj_exportKeys(
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_name_raev_kaloyan_hellostorj_jni_Storj_writeAuthFile(
+Java_name_raev_kaloyan_hellostorj_jni_Storj__1writeAuthFile(
         JNIEnv *env,
-        jclass /* clazz */,
+        jobject /* instance */,
         jstring location_,
         jstring user_,
         jstring pass_,

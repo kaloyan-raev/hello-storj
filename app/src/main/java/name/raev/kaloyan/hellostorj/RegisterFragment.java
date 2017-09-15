@@ -33,7 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import name.raev.kaloyan.hellostorj.jni.Storj;
-import name.raev.kaloyan.hellostorj.jni.callbacks.RegisterCallback;
+import name.raev.kaloyan.hellostorj.jni.RegisterCallback;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -126,7 +126,7 @@ public class RegisterFragment extends Fragment implements RegisterCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Storj.register(user, pass, RegisterFragment.this);
+                Storj.getInstance().register(user, pass, RegisterFragment.this);
             }
         }.start();
     }

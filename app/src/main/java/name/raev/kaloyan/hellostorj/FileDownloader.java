@@ -32,7 +32,7 @@ import android.support.v4.content.ContextCompat;
 import name.raev.kaloyan.hellostorj.jni.Bucket;
 import name.raev.kaloyan.hellostorj.jni.File;
 import name.raev.kaloyan.hellostorj.jni.Storj;
-import name.raev.kaloyan.hellostorj.jni.callbacks.DownloadFileCallback;
+import name.raev.kaloyan.hellostorj.jni.DownloadFileCallback;
 
 class FileDownloader implements DownloadFileCallback {
 
@@ -99,7 +99,7 @@ class FileDownloader implements DownloadFileCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Storj.getInstance().download(mBucket, mFile, FileDownloader.this);
+                Storj.getInstance().downloadFile(mBucket, mFile, FileDownloader.this);
             }
         }.start();
     }

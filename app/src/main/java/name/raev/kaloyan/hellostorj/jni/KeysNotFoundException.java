@@ -14,12 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ***************************************************************************/
-package name.raev.kaloyan.hellostorj.jni.callbacks;
+package name.raev.kaloyan.hellostorj.jni;
 
-public interface GetInfoCallback {
-
-    void onInfoReceived(String title, String description, String version, String host);
-
-    void onError(String message);
-
+public class KeysNotFoundException extends RuntimeException {
 }

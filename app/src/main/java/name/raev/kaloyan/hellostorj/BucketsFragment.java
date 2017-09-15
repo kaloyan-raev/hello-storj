@@ -36,10 +36,10 @@ import android.widget.TextView;
 import java.util.Arrays;
 
 import name.raev.kaloyan.hellostorj.jni.Bucket;
-import name.raev.kaloyan.hellostorj.jni.Keys;
+import name.raev.kaloyan.hellostorj.jni.KeysNotFoundException;
 import name.raev.kaloyan.hellostorj.jni.Storj;
-import name.raev.kaloyan.hellostorj.jni.callbacks.CreateBucketCallback;
-import name.raev.kaloyan.hellostorj.jni.callbacks.GetBucketsCallback;
+import name.raev.kaloyan.hellostorj.jni.CreateBucketCallback;
+import name.raev.kaloyan.hellostorj.jni.GetBucketsCallback;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -101,11 +101,10 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Keys keys = Storj.getInstance().getKeys("");
-                if (keys == null) {
+                try {
+                    Storj.getInstance().getBuckets(BucketsFragment.this);
+                } catch (KeysNotFoundException e) {
                     showKeysError();
-                } else {
-                    Storj.getBuckets(keys.getUser(), keys.getPass(), keys.getMnemonic(), BucketsFragment.this);
                 }
             }
         }.start();
@@ -120,11 +119,10 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Keys keys = Storj.getInstance().getKeys("");
-                if (keys == null) {
+                try {
+                    Storj.getInstance().createBucket(name, BucketsFragment.this);
+                } catch (KeysNotFoundException e) {
                     showKeysError();
-                } else {
-                    Storj.createBucket(keys.getUser(), keys.getPass(), keys.getMnemonic(), name, BucketsFragment.this);
                 }
             }
         }.start();
