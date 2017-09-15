@@ -18,6 +18,8 @@ package name.raev.kaloyan.hellostorj.jni;
 
 import android.os.Environment;
 
+import java.util.concurrent.CountDownLatch;
+
 public class Storj {
 
     // Used to load the 'native-lib' library on application startup.
@@ -83,6 +85,35 @@ public class Storj {
             this.keys = keys;
         }
         return success;
+    }
+
+    public boolean verifyKeys(String user, String pass) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final boolean[] result = { false };
+
+        _getBuckets(user, pass, "", new GetBucketsCallback() {
+            @Override
+            public void onBucketsReceived(Bucket[] buckets) {
+                result[0] = true;
+                latch.countDown();
+            }
+
+            @Override
+            public void onError(String message) {
+                // TODO better error handling to determine if error is due to authentication error or network error
+                result[0] = false;
+                latch.countDown();
+            }
+        });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            // TODO better error handling
+            result[0] = false;
+        }
+
+        return result[0];
     }
 
     public void getBuckets(GetBucketsCallback callback) throws KeysNotFoundException {
