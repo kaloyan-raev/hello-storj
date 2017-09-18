@@ -1,0 +1,9 @@
+package name.raev.kaloyan.hellostorj.jni;
+
+public interface LogOutCallback {
+
+  void onSuccess();
+
+  void onError();
+
+}
