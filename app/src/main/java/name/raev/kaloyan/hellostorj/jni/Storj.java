@@ -86,13 +86,14 @@ public class Storj {
         }
         return success;
     }
-
-    public boolean deleteKeys() {
-        boolean success = getAuthFile().delete();
-        if (success) {
+    
+    public void deleteKeys(LogOutCallback callback) {
+        if (getAuthFile().delete()) {
+            callback.onSuccess();
             keys = null;
+        } else {
+            callback.onError();
         }
-        return success;
     }
 
     public boolean verifyKeys(String user, String pass) {
