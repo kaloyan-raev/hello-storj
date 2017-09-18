@@ -87,6 +87,14 @@ public class Storj {
         return success;
     }
 
+    public boolean deleteKeys() {
+        boolean success = getAuthFile().delete();
+        if (success) {
+            keys = null;
+        }
+        return success;
+    }
+
     public boolean verifyKeys(String user, String pass) {
         final CountDownLatch latch = new CountDownLatch(1);
         final boolean[] result = { false };
