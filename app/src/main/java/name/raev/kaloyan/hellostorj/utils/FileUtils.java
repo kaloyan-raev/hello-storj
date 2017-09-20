@@ -42,17 +42,14 @@ public class FileUtils {
     private FileUtils() {} //private constructor to enforce Singleton pattern
 
     /** TAG for log messages. */
-    static final String TAG = "FileUtils";
+    private static final String TAG = "FileUtils";
     private static final boolean DEBUG = false; // Set to true to enable logging
 
     /**
      * @return Whether the URI is a local one.
      */
     public static boolean isLocal(String url) {
-        if (url != null && !url.startsWith("http://") && !url.startsWith("https://")) {
-            return true;
-        }
-        return false;
+        return url != null && !url.startsWith("http://") && !url.startsWith("https://");
     }
 
     /**
