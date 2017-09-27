@@ -197,6 +197,90 @@ Java_name_raev_kaloyan_hellostorj_jni_Storj__1getBuckets(
     env->ReleaseStringUTFChars(mnemonic_, mnemonic);
 }
 
+static void get_bucket_callback(uv_work_t *work_req, int status)
+{
+    assert(status == 0);
+    get_bucket_request_t *req = (get_bucket_request_t *) work_req->data;
+    jcallback_t *jcallback = (jcallback_t *) req->handle;
+    JNIEnv *env = jcallback->env;
+    jobject callbackObject = jcallback->callbackObject;
+
+    if (req->status_code != 200) {
+        char error_message[256];
+        char *bucket_id = strrchr(req->path, '/') + 1;
+        if (req->status_code == 404) {
+            sprintf(error_message, "Bucket id [%s] does not exist", bucket_id);
+        } else if (req->status_code == 400) {
+            sprintf(error_message, "Bucket id [%s] is invalid", bucket_id);
+        } else if (req->status_code == 401) {
+            strcpy(error_message, "Invalid user credentials");
+        } else {
+            sprintf(error_message, "Failed to retrieve bucket. (%i)", req->status_code);
+        }
+        error_callback(env, callbackObject, error_message);
+    } else {
+        jclass bucketClass = env->FindClass("name/raev/kaloyan/hellostorj/jni/Bucket");
+        jmethodID bucketInit = env->GetMethodID(bucketClass,
+                                                "<init>",
+                                                "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V");
+
+        jstring id = env->NewStringUTF(req->bucket->id);
+        jstring name = env->NewStringUTF(req->bucket->name);
+        jstring created = env->NewStringUTF(req->bucket->created);
+        jobject bucketObject = env->NewObject(bucketClass,
+                                              bucketInit,
+                                              id,
+                                              name,
+                                              created,
+                                              req->bucket->decrypted);
+
+        jclass callbackClass = env->GetObjectClass(callbackObject);
+        jmethodID callbackMethod = env->GetMethodID(callbackClass,
+                                                    "onBucketReceived",
+                                                    "(Lname/raev/kaloyan/hellostorj/jni/Bucket;)V");
+        env->CallVoidMethod(callbackObject, callbackMethod, bucketObject);
+    }
+
+    json_object_put(req->response);
+    storj_free_get_bucket_request(req);
+    free(work_req);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_name_raev_kaloyan_hellostorj_jni_Storj__1getBucket(
+        JNIEnv *env,
+        jobject /* instance */,
+        jstring user_,
+        jstring pass_,
+        jstring mnemonic_,
+        jstring bucketId_,
+        jobject callbackObject) {
+    const char *user = env->GetStringUTFChars(user_, NULL);
+    const char *pass = env->GetStringUTFChars(pass_, NULL);
+    const char *mnemonic = env->GetStringUTFChars(mnemonic_, NULL);
+    const char *bucket_id = env->GetStringUTFChars(bucketId_, NULL);
+
+    storj_env_t *storj_env = init_env(env, callbackObject, user, pass, mnemonic);
+
+    if (storj_env) {
+        jcallback_t jcallback = {
+                .env = env,
+                .callbackObject = callbackObject
+        };
+        storj_bridge_get_bucket(storj_env, bucket_id, &jcallback, get_bucket_callback);
+
+        uv_run(storj_env->loop, UV_RUN_DEFAULT);
+
+        storj_destroy_env(storj_env);
+    }
+
+    env->ReleaseStringUTFChars(user_, user);
+    env->ReleaseStringUTFChars(pass_, pass);
+    env->ReleaseStringUTFChars(mnemonic_, mnemonic);
+    env->ReleaseStringUTFChars(bucketId_, bucket_id);
+}
+
 static void create_bucket_callback(uv_work_t *work_req, int status)
 {
     assert(status == 0);

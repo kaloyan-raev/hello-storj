@@ -129,6 +129,11 @@ public class Storj {
         _getBuckets(keys.getUser(), keys.getPass(), keys.getMnemonic(), callback);
     }
 
+    public void getBucket(String bucketId, GetBucketCallback callback) throws KeysNotFoundException {
+        checkKeys();
+        _getBucket(keys.getUser(), keys.getPass(), keys.getMnemonic(), bucketId, callback);
+    }
+
     public void createBucket(String bucketName, CreateBucketCallback callback) throws KeysNotFoundException {
         checkKeys();
         _createBucket(keys.getUser(), keys.getPass(), keys.getMnemonic(), bucketName, callback);
@@ -183,6 +188,8 @@ public class Storj {
     private native boolean _writeAuthFile(String location, String user, String pass, String mnemonic, String passphrase);
 
     private native void _getBuckets(String user, String pass, String mnemonic, GetBucketsCallback callback);
+
+    private native void _getBucket(String user, String pass, String mnemonic, String bucketId, GetBucketCallback callback);
 
     private native void _createBucket(String user, String pass, String mnemonic, String bucketName, CreateBucketCallback callback);
 

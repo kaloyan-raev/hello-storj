@@ -257,6 +257,23 @@ typedef struct {
     void *handle;
 } get_buckets_request_t;
 
+/** @brief A structure for queueing get bucket request work
+ */
+typedef struct {
+    storj_http_options_t *http_options;
+    storj_encrypt_options_t *encrypt_options;
+    storj_bridge_options_t *options;
+    char *method;
+    char *path;
+    bool auth;
+    struct json_object *body;
+    struct json_object *response;
+    storj_bucket_meta_t *bucket;
+    int error_code;
+    int status_code;
+    void *handle;
+} get_bucket_request_t;
+
 /** @brief A structure for that describes a bucket entry/file
  */
 typedef struct {
@@ -698,6 +715,13 @@ int storj_bridge_get_buckets(storj_env_t *env,
  * @param[in] req - The work request from storj_bridge_get_buckets callback
  */
 void storj_free_get_buckets_request(get_buckets_request_t *req);
+
+/**
+ * @brief Will free all structs for get bucket request
+ *
+ * @param[in] req - The work request from storj_bridge_get_bucket callback
+ */
+void storj_free_get_bucket_request(get_bucket_request_t *req);
 
 /**
  * @brief Create a bucket.
