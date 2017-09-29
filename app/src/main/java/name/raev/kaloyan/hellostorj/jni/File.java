@@ -1,9 +1,8 @@
-/***************************************************************************
+/*
  * Copyright (C) 2017 Kaloyan Raev
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser
-            android:label="@string/title_browse" General Public License as
+ * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
@@ -14,13 +13,14 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ***************************************************************************/
+ */
 package name.raev.kaloyan.hellostorj.jni;
 
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
 import java.net.URLConnection;
+import java.util.Objects;
 
 public class File implements Serializable, Comparable<File> {
 
@@ -94,6 +94,21 @@ public class File implements Serializable, Comparable<File> {
 
     public String getHMAC() {
         return hmac;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof File)) {
+            return false;
+        }
+        File file = (File) o;
+        return Objects.equals(id, file.id);
     }
 
     @Override

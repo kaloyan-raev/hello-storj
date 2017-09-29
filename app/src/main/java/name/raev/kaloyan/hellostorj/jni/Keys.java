@@ -1,6 +1,4 @@
-package name.raev.kaloyan.hellostorj.jni;
-
-/***************************************************************************
+/*
  * Copyright (C) 2017 Kaloyan Raev
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,7 +13,9 @@ package name.raev.kaloyan.hellostorj.jni;
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ***************************************************************************/
+ */
+package name.raev.kaloyan.hellostorj.jni;
+
 public class Keys {
 
     private String user;

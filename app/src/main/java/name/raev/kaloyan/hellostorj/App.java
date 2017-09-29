@@ -1,4 +1,4 @@
-/***************************************************************************
+/*
  * Copyright (C) 2017 Kaloyan Raev
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ***************************************************************************/
+ */
 package name.raev.kaloyan.hellostorj;
 
 import android.app.Application;
@@ -61,11 +61,11 @@ public class App extends Application {
                 String filename = "cacert.pem";
                 AssetManager assetManager = getAssets();
                 try (InputStream in = assetManager.open(filename);
-                     OutputStream out = openFileOutput(filename, Context.MODE_PRIVATE)) {
+                    OutputStream out = openFileOutput(filename, Context.MODE_PRIVATE)) {
                     copy(in, out);
-                    Storj.setCAInfoPath(getFileStreamPath(filename).getPath());
-                } catch(IOException e) {
-                    Log.e("tag", "Failed to copy asset file: " + filename, e);
+                    Os.setenv("STORJ_CAINFO", getFileStreamPath(filename).getPath(), true);
+                } catch (IOException | ErrnoException e) {
+                    Log.e(App.class.getName(), e.getMessage(), e);
                 }
             }
         }.start();

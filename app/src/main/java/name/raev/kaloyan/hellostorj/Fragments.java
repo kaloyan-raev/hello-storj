@@ -1,4 +1,4 @@
-/***************************************************************************
+/*
  * Copyright (C) 2017 Kaloyan Raev
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ***************************************************************************/
+ */
 package name.raev.kaloyan.hellostorj;
 
 import android.support.annotation.Nullable;
@@ -23,6 +23,7 @@ import android.util.Log;
 public enum Fragments {
     
     BROWSE(R.string.title_buckets, BucketsFragment.class),
+    REGISTER(R.string.title_register, RegisterFragment.class),
     KEYS(R.string.title_keys, KeysFragment.class),
     BRIDGE_INFO(R.string.title_bridge_info, BridgeInfoFragment.class),
     MNEMONIC(R.string.title_mnemonic, MnemonicFragment.class),

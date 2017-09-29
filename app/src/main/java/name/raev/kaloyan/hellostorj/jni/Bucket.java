@@ -1,4 +1,4 @@
-/***************************************************************************
+/*
  * Copyright (C) 2017 Kaloyan Raev
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,12 +13,13 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ***************************************************************************/
+ */
 package name.raev.kaloyan.hellostorj.jni;
 
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Bucket implements Serializable, Comparable<Bucket> {
 
@@ -48,6 +49,21 @@ public class Bucket implements Serializable, Comparable<Bucket> {
 
     public boolean isDecrypted() {
         return decrypted;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Bucket)) {
+            return false;
+        }
+        Bucket bucket = (Bucket) o;
+        return Objects.equals(id, bucket.id);
     }
 
     @Override

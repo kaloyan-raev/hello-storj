@@ -1,4 +1,4 @@
-/***************************************************************************
+/*
  * Copyright (C) 2017 Kaloyan Raev
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ***************************************************************************/
+ */
 package name.raev.kaloyan.hellostorj;
 
 import android.Manifest;
@@ -32,7 +32,7 @@ import android.support.v4.content.ContextCompat;
 import name.raev.kaloyan.hellostorj.jni.Bucket;
 import name.raev.kaloyan.hellostorj.jni.File;
 import name.raev.kaloyan.hellostorj.jni.Storj;
-import name.raev.kaloyan.hellostorj.jni.callbacks.DownloadFileCallback;
+import name.raev.kaloyan.hellostorj.jni.DownloadFileCallback;
 
 class FileDownloader implements DownloadFileCallback {
 
@@ -99,7 +99,7 @@ class FileDownloader implements DownloadFileCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Storj.getInstance().download(mBucket, mFile, FileDownloader.this);
+                Storj.getInstance().downloadFile(mBucket, mFile, FileDownloader.this);
             }
         }.start();
     }

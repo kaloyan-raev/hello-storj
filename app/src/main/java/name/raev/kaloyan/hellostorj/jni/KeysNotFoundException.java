@@ -1,4 +1,4 @@
-/***************************************************************************
+/*
  * Copyright (C) 2017 Kaloyan Raev
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,17 +13,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ***************************************************************************/
-package name.raev.kaloyan.hellostorj.jni.callbacks;
+ */
+package name.raev.kaloyan.hellostorj.jni;
 
-import name.raev.kaloyan.hellostorj.jni.File;
-
-public interface DownloadFileCallback {
-
-    void onProgress(File file, double progress, long downloadedBytes, long totalBytes);
-
-    void onComplete(File file, String localPath);
-
-    void onError(File file, String message);
-
+public class KeysNotFoundException extends RuntimeException {
 }

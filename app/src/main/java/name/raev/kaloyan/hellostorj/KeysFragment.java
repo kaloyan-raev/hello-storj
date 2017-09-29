@@ -1,4 +1,4 @@
-/***************************************************************************
+/*
  * Copyright (C) 2017 Kaloyan Raev
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ***************************************************************************/
+ */
 package name.raev.kaloyan.hellostorj;
 
 import android.content.Context;
@@ -122,7 +122,15 @@ public class KeysFragment extends Fragment {
     private class ImportKeysTask extends AsyncTask<String, Void, Boolean> {
         @Override
         protected Boolean doInBackground(String... params) {
-            return Storj.getInstance().importKeys(new Keys(params[0], params[1], params[2]), "");
+            String user = params[0];
+            String pass = params[1];
+            String mnemonic = params[2];
+
+            if (!Storj.getInstance().verifyKeys(user, pass)) {
+                return false;
+            }
+
+            return Storj.getInstance().importKeys(new Keys(user, pass, mnemonic), "");
         }
 
         @Override
