@@ -1274,6 +1274,7 @@ int storj_bridge_get_bucket(storj_env_t *env,
 void storj_free_get_bucket_request(get_bucket_request_t *req)
 {
     json_object_put(req->response);
+    free(req->path);
     if (req->bucket) {
         free((char *)req->bucket->name);
     }
