@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "26.0.0"
+    buildToolsVersion "26.0.1"
     defaultConfig {
         applicationId "name.raev.kaloyan.hellostorj"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 8
-        versionName "0.6.1"
+        versionCode 9
+        versionName "0.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
