@@ -24,11 +24,11 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 
+import io.storj.libstorj.Storj;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import name.raev.kaloyan.hellostorj.jni.Storj;
 
 public class App extends Application {
 

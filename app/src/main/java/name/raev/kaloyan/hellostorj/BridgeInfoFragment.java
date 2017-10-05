@@ -27,8 +27,8 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import name.raev.kaloyan.hellostorj.jni.GetInfoCallback;
-import name.raev.kaloyan.hellostorj.jni.Storj;
+import io.storj.libstorj.GetInfoCallback;
+import io.storj.libstorj.Storj;
 
 /**
  * A placeholder fragment containing a simple view.

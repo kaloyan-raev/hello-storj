@@ -26,11 +26,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
-import java.io.File;
+import io.storj.libstorj.Bucket;
+import io.storj.libstorj.Storj;
+import io.storj.libstorj.UploadFileCallback;
 
-import name.raev.kaloyan.hellostorj.jni.Bucket;
-import name.raev.kaloyan.hellostorj.jni.Storj;
-import name.raev.kaloyan.hellostorj.jni.UploadFileCallback;
+import java.io.File;
 
 class FileUploader implements UploadFileCallback {
 

@@ -29,10 +29,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
-import name.raev.kaloyan.hellostorj.jni.Bucket;
-import name.raev.kaloyan.hellostorj.jni.File;
-import name.raev.kaloyan.hellostorj.jni.Storj;
-import name.raev.kaloyan.hellostorj.jni.DownloadFileCallback;
+import io.storj.libstorj.Bucket;
+import io.storj.libstorj.File;
+import io.storj.libstorj.Storj;
+import io.storj.libstorj.DownloadFileCallback;
 
 class FileDownloader implements DownloadFileCallback {
 

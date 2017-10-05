@@ -24,8 +24,8 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.format.Formatter;
 
-import name.raev.kaloyan.hellostorj.jni.Bucket;
-import name.raev.kaloyan.hellostorj.jni.File;
+import io.storj.libstorj.Bucket;
+import io.storj.libstorj.File;
 
 public class FileInfoFragment extends DialogFragment {
 

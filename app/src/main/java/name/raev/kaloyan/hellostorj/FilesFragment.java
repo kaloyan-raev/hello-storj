@@ -37,13 +37,14 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import io.storj.libstorj.Bucket;
+import io.storj.libstorj.File;
+import io.storj.libstorj.KeysNotFoundException;
+import io.storj.libstorj.Storj;
+import io.storj.libstorj.ListFilesCallback;
+
 import java.util.Arrays;
 
-import name.raev.kaloyan.hellostorj.jni.Bucket;
-import name.raev.kaloyan.hellostorj.jni.File;
-import name.raev.kaloyan.hellostorj.jni.KeysNotFoundException;
-import name.raev.kaloyan.hellostorj.jni.Storj;
-import name.raev.kaloyan.hellostorj.jni.ListFilesCallback;
 import name.raev.kaloyan.hellostorj.utils.FileUtils;
 
 import static android.app.Activity.RESULT_OK;

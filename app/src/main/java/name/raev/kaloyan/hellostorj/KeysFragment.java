@@ -28,11 +28,11 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import io.storj.libstorj.Keys;
+import io.storj.libstorj.Storj;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import name.raev.kaloyan.hellostorj.jni.Keys;
-import name.raev.kaloyan.hellostorj.jni.Storj;
 
 /**
  * A placeholder fragment containing a simple view.

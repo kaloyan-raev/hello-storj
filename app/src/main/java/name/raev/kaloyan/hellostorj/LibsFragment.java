@@ -25,10 +25,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import io.storj.libstorj.NativeLibraries;
+
 import java.util.Map;
 import java.util.TreeMap;
-
-import name.raev.kaloyan.hellostorj.jni.NativeLibraries;
 
 /**
  * A placeholder fragment containing a simple view.

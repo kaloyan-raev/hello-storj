@@ -24,8 +24,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import name.raev.kaloyan.hellostorj.jni.Bucket;
-import name.raev.kaloyan.hellostorj.jni.File;
+import io.storj.libstorj.Bucket;
+import io.storj.libstorj.File;
 
 public class FilesActivity extends AppCompatActivity implements FileInfoFragment.DownloadListener {
 

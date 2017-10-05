@@ -33,13 +33,13 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.util.Arrays;
+import io.storj.libstorj.Bucket;
+import io.storj.libstorj.KeysNotFoundException;
+import io.storj.libstorj.Storj;
+import io.storj.libstorj.CreateBucketCallback;
+import io.storj.libstorj.GetBucketsCallback;
 
-import name.raev.kaloyan.hellostorj.jni.Bucket;
-import name.raev.kaloyan.hellostorj.jni.KeysNotFoundException;
-import name.raev.kaloyan.hellostorj.jni.Storj;
-import name.raev.kaloyan.hellostorj.jni.CreateBucketCallback;
-import name.raev.kaloyan.hellostorj.jni.GetBucketsCallback;
+import java.util.Arrays;
 
 /**
  * A placeholder fragment containing a simple view.
