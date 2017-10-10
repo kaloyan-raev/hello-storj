@@ -17,6 +17,12 @@ Requrirements:
 - Android 5.0 Lollipop or newer
 - armeabi-v7a compatible device (most phones and tablets)
 
+Gradle Use:
+```
+compile 'io.storj:libstorj-android:0.1'
+```
+
+
 
 ## Features
 
