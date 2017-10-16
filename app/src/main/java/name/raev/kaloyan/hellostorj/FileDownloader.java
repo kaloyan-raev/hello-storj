@@ -30,9 +30,9 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
 import io.storj.libstorj.Bucket;
-import io.storj.libstorj.File;
-import io.storj.libstorj.Storj;
 import io.storj.libstorj.DownloadFileCallback;
+import io.storj.libstorj.File;
+import io.storj.libstorj.android.StorjAndroid;
 
 class FileDownloader implements DownloadFileCallback {
 
@@ -99,7 +99,8 @@ class FileDownloader implements DownloadFileCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Storj.getInstance().downloadFile(mBucket, mFile, FileDownloader.this);
+                StorjAndroid.getInstance(mActivity)
+                        .downloadFile(mBucket, mFile, FileDownloader.this);
             }
         }.start();
     }

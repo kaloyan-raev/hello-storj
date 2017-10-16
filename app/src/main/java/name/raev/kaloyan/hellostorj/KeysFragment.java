@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import io.storj.libstorj.Keys;
 import io.storj.libstorj.Storj;
+import io.storj.libstorj.android.StorjAndroid;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -126,11 +127,12 @@ public class KeysFragment extends Fragment {
             String pass = params[1];
             String mnemonic = params[2];
 
-            if (!Storj.getInstance().verifyKeys(user, pass)) {
+            Storj storj = StorjAndroid.getInstance(getContext());
+            if (!storj.verifyKeys(user, pass)) {
                 return false;
             }
 
-            return Storj.getInstance().importKeys(new Keys(user, pass, mnemonic), "");
+            return storj.importKeys(new Keys(user, pass, mnemonic), "");
         }
 
         @Override

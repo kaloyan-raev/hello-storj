@@ -33,13 +33,13 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.Arrays;
+
 import io.storj.libstorj.Bucket;
-import io.storj.libstorj.KeysNotFoundException;
-import io.storj.libstorj.Storj;
 import io.storj.libstorj.CreateBucketCallback;
 import io.storj.libstorj.GetBucketsCallback;
-
-import java.util.Arrays;
+import io.storj.libstorj.KeysNotFoundException;
+import io.storj.libstorj.android.StorjAndroid;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -102,7 +102,8 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try {
-                    Storj.getInstance().getBuckets(BucketsFragment.this);
+                    StorjAndroid.getInstance(getContext())
+                            .getBuckets(BucketsFragment.this);
                 } catch (KeysNotFoundException e) {
                     showKeysError();
                 }
@@ -120,7 +121,8 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try {
-                    Storj.getInstance().createBucket(name, BucketsFragment.this);
+                    StorjAndroid.getInstance(getContext())
+                            .createBucket(name, BucketsFragment.this);
                 } catch (KeysNotFoundException e) {
                     showKeysError();
                 }

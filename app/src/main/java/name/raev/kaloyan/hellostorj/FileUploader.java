@@ -26,11 +26,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
-import io.storj.libstorj.Bucket;
-import io.storj.libstorj.Storj;
-import io.storj.libstorj.UploadFileCallback;
-
 import java.io.File;
+
+import io.storj.libstorj.Bucket;
+import io.storj.libstorj.UploadFileCallback;
+import io.storj.libstorj.android.StorjAndroid;
 
 class FileUploader implements UploadFileCallback {
 
@@ -66,7 +66,8 @@ class FileUploader implements UploadFileCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Storj.getInstance().uploadFile(mBucket, mFilePath, FileUploader.this);
+                StorjAndroid.getInstance(mActivity)
+                        .uploadFile(mBucket, mFilePath, FileUploader.this);
             }
         }.start();
     }

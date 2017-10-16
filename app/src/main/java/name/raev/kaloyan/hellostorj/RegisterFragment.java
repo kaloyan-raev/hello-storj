@@ -29,11 +29,11 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import io.storj.libstorj.Storj;
-import io.storj.libstorj.RegisterCallback;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import io.storj.libstorj.RegisterCallback;
+import io.storj.libstorj.android.StorjAndroid;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -126,7 +126,8 @@ public class RegisterFragment extends Fragment implements RegisterCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Storj.getInstance().register(user, pass, RegisterFragment.this);
+                StorjAndroid.getInstance(getContext())
+                        .register(user, pass, RegisterFragment.this);
             }
         }.start();
     }

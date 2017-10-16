@@ -37,14 +37,13 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.Arrays;
+
 import io.storj.libstorj.Bucket;
 import io.storj.libstorj.File;
 import io.storj.libstorj.KeysNotFoundException;
-import io.storj.libstorj.Storj;
 import io.storj.libstorj.ListFilesCallback;
-
-import java.util.Arrays;
-
+import io.storj.libstorj.android.StorjAndroid;
 import name.raev.kaloyan.hellostorj.utils.FileUtils;
 
 import static android.app.Activity.RESULT_OK;
@@ -119,7 +118,8 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try {
-                    Storj.getInstance().listFiles(bucket, FilesFragment.this);
+                    StorjAndroid.getInstance(getContext())
+                            .listFiles(bucket, FilesFragment.this);
                 } catch (KeysNotFoundException e) {
                     showKeysError();
                 }

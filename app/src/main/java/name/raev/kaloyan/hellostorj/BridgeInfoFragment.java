@@ -28,7 +28,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import io.storj.libstorj.GetInfoCallback;
-import io.storj.libstorj.Storj;
+import io.storj.libstorj.android.StorjAndroid;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -73,7 +73,8 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                Storj.getInstance().getInfo(BridgeInfoFragment.this);
+                StorjAndroid.getInstance(getContext())
+                        .getInfo(BridgeInfoFragment.this);
             }
         }.start();
     }
