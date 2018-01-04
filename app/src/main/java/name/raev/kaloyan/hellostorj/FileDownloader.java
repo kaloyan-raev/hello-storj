@@ -29,6 +29,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
+import java.net.URLConnection;
+
 import io.storj.libstorj.Bucket;
 import io.storj.libstorj.DownloadFileCallback;
 import io.storj.libstorj.File;
@@ -106,31 +108,40 @@ class FileDownloader implements DownloadFileCallback {
     }
 
     @Override
-    public void onProgress(File file, double progress, long downloadedBytes, long totalBytes) {
+    public void onProgress(String fileId, double progress, long downloadedBytes, long totalBytes) {
         mBuilder.setProgress(100, (int) (progress * 100), false);
-        mNotifyManager.notify(file.getId().hashCode(), mBuilder.build());
+        mNotifyManager.notify(fileId.hashCode(), mBuilder.build());
     }
 
     @Override
-    public void onComplete(File file, String localPath) {
+    public void onComplete(String fileId, String localPath) {
+        java.io.File file = new java.io.File(localPath);
         // hide the "download in progress" notification
-        mNotifyManager.cancel(file.getId().hashCode());
+        mNotifyManager.cancel(fileId.hashCode());
         // show the "download completed" notification
         DownloadManager dm = (DownloadManager) mActivity.getSystemService(Context.DOWNLOAD_SERVICE);
         dm.addCompletedDownload(file.getName(),
                 mActivity.getResources().getString(R.string.app_name),
                 true,
-                file.getMimeType(),
+                getMimeType(file),
                 localPath,
-                file.getSize(),
+                file.length(),
                 true);
     }
 
     @Override
-    public void onError(File file, String message) {
+    public void onError(String fileId, String message) {
         mBuilder.setProgress(0, 0, false)
                 .setSmallIcon(android.R.drawable.stat_notify_error)
                 .setContentText(message);
-        mNotifyManager.notify(file.getId().hashCode(), mBuilder.build());
+        mNotifyManager.notify(fileId.hashCode(), mBuilder.build());
+    }
+
+    private String getMimeType(java.io.File file) {
+        String mime = URLConnection.guessContentTypeFromName(file.getName());
+        if (mime == null || mime.isEmpty()) {
+            mime = "application/octet-stream";
+        }
+        return mime;
     }
 }

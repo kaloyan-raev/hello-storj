@@ -26,9 +26,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
-import java.io.File;
-
 import io.storj.libstorj.Bucket;
+import io.storj.libstorj.File;
 import io.storj.libstorj.UploadFileCallback;
 import io.storj.libstorj.android.StorjAndroid;
 
@@ -57,7 +56,7 @@ class FileUploader implements UploadFileCallback {
         mBuilder = new NotificationCompat.Builder(mActivity)
                 .setSmallIcon(android.R.drawable.stat_sys_upload)
                 .setColor(ContextCompat.getColor(mActivity, R.color.colorNotification))
-                .setContentTitle(new File(mFilePath).getName())
+                .setContentTitle(new java.io.File(mFilePath).getName())
                 .setContentText(mActivity.getResources().getString(R.string.app_name))
                 .setProgress(0, 0, true);
         mNotifyManager.notify(mFilePath.hashCode(), mBuilder.build());
@@ -79,7 +78,7 @@ class FileUploader implements UploadFileCallback {
     }
 
     @Override
-    public void onComplete(String filePath) {
+    public void onComplete(String filePath, File file) {
         Intent intent = new Intent(mActivity, FilesActivity.class);
         intent.putExtra(FilesFragment.BUCKET, mBucket);
         PendingIntent resultIntent =

@@ -43,8 +43,9 @@ public class FileInfoFragment extends DialogFragment {
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.title_fileinfo)
-                .setMessage(String.format("ID: %s\nName: %s\nCreated: %s\nDecrypted: %b\nSize: %s\nMIME Type: %s\nErasure: %s\nIndex: %s\nHMAC: %s",
+                .setMessage(String.format("ID: %s\nBucket: %s\nName: %s\nCreated: %s\nDecrypted: %b\nSize: %s\nMIME Type: %s\nErasure: %s\nIndex: %s\nHMAC: %s",
                                           file.getId(),
+                                          file.getBucketId(),
                                           file.getName(),
                                           file.getCreated(),
                                           file.isDecrypted(),
