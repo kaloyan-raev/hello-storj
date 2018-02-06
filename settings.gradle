@@ -1,1 +1,4 @@
 include ':app'
+//include ':app', ':android-libstorj', ':java-libstorj'
+//project(':android-libstorj').projectDir=new File('/home/kraev/git/android-libstorj/android-libstorj')
+//project(':java-libstorj').projectDir=new File('/home/kraev/git/android-libstorj/java-libstorj')

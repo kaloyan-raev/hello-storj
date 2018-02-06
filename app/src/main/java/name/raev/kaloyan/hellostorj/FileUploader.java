@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Kaloyan Raev
+ * Copyright (C) 2017-2018 Kaloyan Raev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,10 +98,11 @@ class FileUploader implements UploadFileCallback {
     }
 
     @Override
-    public void onError(String filePath, String message) {
+    public void onError(String filePath, int code, String message) {
+        String msg = String.format("Upload failed: %s (%d)", message, code);
         mBuilder.setProgress(0, 0, false)
                 .setSmallIcon(android.R.drawable.stat_notify_error)
-                .setContentText(message);
+                .setContentText(msg);
         mNotifyManager.notify(filePath.hashCode(), mBuilder.build());
     }
 }

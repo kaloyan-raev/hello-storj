@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Kaloyan Raev
+ * Copyright (C) 2017-2018 Kaloyan Raev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
     }
 
     @Override
-    public void onError(final String message) {
+    public void onError(final int code, final String message) {
         Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {

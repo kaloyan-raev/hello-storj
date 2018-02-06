@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Kaloyan Raev
+ * Copyright (C) 2017-2018 Kaloyan Raev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,10 +36,14 @@ import io.storj.libstorj.android.StorjAndroid;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static android.webkit.ConsoleMessage.MessageLevel.LOG;
+
 /**
  * A placeholder fragment containing a simple view.
  */
 public class KeysFragment extends Fragment {
+
+    private static final String TAG = "KeyFragment";
 
     private Button button;
     private ProgressBar progress;
@@ -120,27 +125,43 @@ public class KeysFragment extends Fragment {
         return Storj.checkMnemonic(mnemonic);
     }
 
-    private class ImportKeysTask extends AsyncTask<String, Void, Boolean> {
+    private class ImportKeysTask extends AsyncTask<String, Void, Integer> {
         @Override
-        protected Boolean doInBackground(String... params) {
+        protected Integer doInBackground(String... params) {
             String user = params[0];
             String pass = params[1];
             String mnemonic = params[2];
 
             Storj storj = StorjAndroid.getInstance(getContext());
-            if (!storj.verifyKeys(user, pass)) {
-                return false;
+            try {
+                int result = storj.verifyKeys(new Keys(user, pass, mnemonic));
+                if (result != Storj.NO_ERROR) {
+                    switch (result) {
+                        case Storj.HTTP_UNAUTHORIZED:
+                            return R.string.keys_import_invalid_credentials;
+                        case Storj.STORJ_META_DECRYPTION_ERROR:
+                            return R.string.keys_import_invalid_mnemonic;
+                        default:
+                            return R.string.keys_import_fail;
+                    }
+                }
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Verify keys interrupted", e);
+                return R.string.keys_import_fail;
             }
 
-            return storj.importKeys(new Keys(user, pass, mnemonic), "");
+            if (!storj.importKeys(new Keys(user, pass, mnemonic), "")) {
+                return R.string.keys_import_fail;
+            }
+
+            return R.string.keys_import_success;
         }
 
         @Override
-        protected void onPostExecute(Boolean success) {
+        protected void onPostExecute(Integer message) {
             button.setEnabled(true);
             progress.setVisibility(View.GONE);
 
-            int message = (success) ? R.string.keys_import_success : R.string.keys_import_fail;
             Toast.makeText(appContext, message, Toast.LENGTH_LONG).show();
         }
     }
