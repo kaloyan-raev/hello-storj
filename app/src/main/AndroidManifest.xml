@@ -38,5 +38,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="name.raev.kaloyan.hellostorj.MainActivity" />
         </activity>
+        <receiver android:name=".CancelDownloadReceiver" />
+        <receiver android:name=".CancelUploadReceiver" />
     </application>
 </manifest>

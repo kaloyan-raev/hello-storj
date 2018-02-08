@@ -20,7 +20,9 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Process;
 import android.support.annotation.NonNull;
@@ -34,6 +36,7 @@ import java.net.URLConnection;
 import io.storj.libstorj.Bucket;
 import io.storj.libstorj.DownloadFileCallback;
 import io.storj.libstorj.File;
+import io.storj.libstorj.Storj;
 import io.storj.libstorj.android.StorjAndroid;
 
 class FileDownloader implements DownloadFileCallback {
@@ -97,14 +100,16 @@ class FileDownloader implements DownloadFileCallback {
                 .setProgress(0, 0, true);
         mNotifyManager.notify(mFile.getId().hashCode(), mBuilder.build());
         // trigger the download
-        new Thread() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                StorjAndroid.getInstance(mActivity)
-                        .downloadFile(mBucket, mFile, FileDownloader.this);
-            }
-        }.start();
+        long state = StorjAndroid.getInstance(mActivity)
+                .downloadFile(mBucket, mFile, FileDownloader.this);
+        // intent for cancel action
+        Intent intent = new Intent(mActivity, CancelDownloadReceiver.class);
+        intent.putExtra(CancelDownloadReceiver.NOTIFICATION_ID, mFile.getId().hashCode());
+        intent.putExtra(CancelDownloadReceiver.DOWNLOAD_STATE, state);
+        PendingIntent cancelIntent = PendingIntent.getBroadcast(mActivity, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        // add cancel action to notification
+        mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
+        mNotifyManager.notify(mFile.getId().hashCode(), mBuilder.build());
     }
 
     @Override
@@ -131,10 +136,13 @@ class FileDownloader implements DownloadFileCallback {
 
     @Override
     public void onError(String fileId, int code, String message) {
-        String msg = String.format("Download failed: %s (%d)", message, code);
+        String msg = (code == Storj.TRANSFER_CANCELED)
+                ? "Download canceled"
+                : String.format("Download failed: %s (%d)", message, code);
         mBuilder.setProgress(0, 0, false)
                 .setSmallIcon(android.R.drawable.stat_notify_error)
-                .setContentText(msg);
+                .setContentText(msg)
+                .mActions.clear();
         mNotifyManager.notify(fileId.hashCode(), mBuilder.build());
     }
 

@@ -28,6 +28,7 @@ import android.support.v4.content.ContextCompat;
 
 import io.storj.libstorj.Bucket;
 import io.storj.libstorj.File;
+import io.storj.libstorj.Storj;
 import io.storj.libstorj.UploadFileCallback;
 import io.storj.libstorj.android.StorjAndroid;
 
@@ -61,14 +62,17 @@ class FileUploader implements UploadFileCallback {
                 .setProgress(0, 0, true);
         mNotifyManager.notify(mFilePath.hashCode(), mBuilder.build());
         // trigger the upload
-        new Thread() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                StorjAndroid.getInstance(mActivity)
-                        .uploadFile(mBucket, mFilePath, FileUploader.this);
-            }
-        }.start();
+        long state = StorjAndroid.getInstance(mActivity)
+                .uploadFile(mBucket, mFilePath, FileUploader.this);
+        // intent for cancel action
+        Intent intent = new Intent(mActivity, CancelUploadReceiver.class);
+        intent.putExtra(CancelUploadReceiver.NOTIFICATION_ID, mFilePath.hashCode());
+        intent.putExtra(CancelUploadReceiver.UPLOAD_STATE, state);
+        PendingIntent cancelIntent = PendingIntent.getBroadcast(
+                mActivity, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        // add cancel action to notification
+        mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
+        mNotifyManager.notify(mFilePath.hashCode(), mBuilder.build());
     }
 
     @Override
@@ -93,16 +97,20 @@ class FileUploader implements UploadFileCallback {
                 .setSmallIcon(android.R.drawable.stat_sys_upload_done)
                 .setContentText(mActivity.getResources().getString(R.string.upload_complete))
                 .setContentIntent(resultIntent)
-                .setAutoCancel(true);
+                .setAutoCancel(true)
+                .mActions.clear();
         mNotifyManager.notify(filePath.hashCode(), mBuilder.build());
     }
 
     @Override
     public void onError(String filePath, int code, String message) {
-        String msg = String.format("Upload failed: %s (%d)", message, code);
+        String msg = (code == Storj.TRANSFER_CANCELED)
+                ? "Upload canceled"
+                : String.format("Upload failed: %s (%d)", message, code);
         mBuilder.setProgress(0, 0, false)
                 .setSmallIcon(android.R.drawable.stat_notify_error)
-                .setContentText(msg);
+                .setContentText(msg)
+                .mActions.clear();
         mNotifyManager.notify(filePath.hashCode(), mBuilder.build());
     }
 }
