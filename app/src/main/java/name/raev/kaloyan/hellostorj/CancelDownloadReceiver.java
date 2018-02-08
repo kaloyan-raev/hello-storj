@@ -38,8 +38,9 @@ public class CancelDownloadReceiver extends BroadcastReceiver {
 
             StorjAndroid.getInstance(context).cancelDownload(state);
 
-            NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            nm.cancel(id);
+            NotificationManager notifyManager = (NotificationManager)
+                    context.getSystemService(Context.NOTIFICATION_SERVICE);
+            notifyManager.cancel(id);
         }
     }
 }

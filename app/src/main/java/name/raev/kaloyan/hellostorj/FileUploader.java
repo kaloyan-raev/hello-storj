@@ -21,10 +21,13 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Process;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.storj.libstorj.Bucket;
 import io.storj.libstorj.File;
@@ -40,6 +43,8 @@ class FileUploader implements UploadFileCallback {
 
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilder;
+
+    Map<String, Long> lastNotifiedMap = Collections.synchronizedMap(new HashMap<String, Long>());
 
     FileUploader(Activity activity, Bucket bucket, String filePath) {
         mActivity = activity;
@@ -69,7 +74,7 @@ class FileUploader implements UploadFileCallback {
         intent.putExtra(CancelUploadReceiver.NOTIFICATION_ID, mFilePath.hashCode());
         intent.putExtra(CancelUploadReceiver.UPLOAD_STATE, state);
         PendingIntent cancelIntent = PendingIntent.getBroadcast(
-                mActivity, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                mActivity, mFilePath.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
         // add cancel action to notification
         mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
         mNotifyManager.notify(mFilePath.hashCode(), mBuilder.build());
@@ -77,8 +82,16 @@ class FileUploader implements UploadFileCallback {
 
     @Override
     public void onProgress(String filePath, double progress, long uploadedBytes, long totalBytes) {
-        mBuilder.setProgress(100, (int) (progress * 100), false);
-        mNotifyManager.notify(filePath.hashCode(), mBuilder.build());
+        Long lastNotifiedTime = lastNotifiedMap.get(filePath);
+        long now = System.currentTimeMillis();
+
+        // check if 1 second elapsed since last notification or progress it at 100%
+        if (progress == 1 || lastNotifiedTime == null || now > lastNotifiedTime + 1150) {
+            mBuilder.setProgress(100, (int) (progress * 100), false);
+            mNotifyManager.notify(filePath.hashCode(), mBuilder.build());
+            // update last notified map
+            lastNotifiedMap.put(filePath, now);
+        }
     }
 
     @Override
@@ -100,6 +113,8 @@ class FileUploader implements UploadFileCallback {
                 .setAutoCancel(true)
                 .mActions.clear();
         mNotifyManager.notify(filePath.hashCode(), mBuilder.build());
+        // remove from last notified map
+        lastNotifiedMap.remove(filePath);
     }
 
     @Override
@@ -112,5 +127,7 @@ class FileUploader implements UploadFileCallback {
                 .setContentText(msg)
                 .mActions.clear();
         mNotifyManager.notify(filePath.hashCode(), mBuilder.build());
+        // remove from last notified map
+        lastNotifiedMap.remove(filePath);
     }
 }

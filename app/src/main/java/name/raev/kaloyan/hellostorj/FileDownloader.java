@@ -24,7 +24,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -32,6 +31,9 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
 import java.net.URLConnection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.storj.libstorj.Bucket;
 import io.storj.libstorj.DownloadFileCallback;
@@ -49,6 +51,8 @@ class FileDownloader implements DownloadFileCallback {
 
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilder;
+
+    Map<String, Long> lastNotifiedMap = Collections.synchronizedMap(new HashMap<String, Long>());
 
     FileDownloader(Activity activity, Bucket bucket, File file) {
         mActivity = activity;
@@ -106,7 +110,7 @@ class FileDownloader implements DownloadFileCallback {
         Intent intent = new Intent(mActivity, CancelDownloadReceiver.class);
         intent.putExtra(CancelDownloadReceiver.NOTIFICATION_ID, mFile.getId().hashCode());
         intent.putExtra(CancelDownloadReceiver.DOWNLOAD_STATE, state);
-        PendingIntent cancelIntent = PendingIntent.getBroadcast(mActivity, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent cancelIntent = PendingIntent.getBroadcast(mActivity, mFile.getId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
         // add cancel action to notification
         mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
         mNotifyManager.notify(mFile.getId().hashCode(), mBuilder.build());
@@ -114,8 +118,16 @@ class FileDownloader implements DownloadFileCallback {
 
     @Override
     public void onProgress(String fileId, double progress, long downloadedBytes, long totalBytes) {
-        mBuilder.setProgress(100, (int) (progress * 100), false);
-        mNotifyManager.notify(fileId.hashCode(), mBuilder.build());
+        Long lastNotifiedTime = lastNotifiedMap.get(fileId);
+        long now = System.currentTimeMillis();
+
+        // check if 1 second elapsed since last notification or progress it at 100%
+        if (progress == 1 || lastNotifiedTime == null || now > lastNotifiedTime + 1150) {
+            mBuilder.setProgress(100, (int) (progress * 100), false);
+            mNotifyManager.notify(fileId.hashCode(), mBuilder.build());
+            // update last notified map
+            lastNotifiedMap.put(fileId, now);
+        }
     }
 
     @Override
@@ -132,6 +144,8 @@ class FileDownloader implements DownloadFileCallback {
                 localPath,
                 file.length(),
                 true);
+        // remove from last notified map
+        lastNotifiedMap.remove(fileId);
     }
 
     @Override
@@ -144,6 +158,8 @@ class FileDownloader implements DownloadFileCallback {
                 .setContentText(msg)
                 .mActions.clear();
         mNotifyManager.notify(fileId.hashCode(), mBuilder.build());
+        // remove from last notified map
+        lastNotifiedMap.remove(fileId);
     }
 
     private String getMimeType(java.io.File file) {
