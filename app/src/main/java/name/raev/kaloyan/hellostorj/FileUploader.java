@@ -59,7 +59,7 @@ class FileUploader implements UploadFileCallback {
                 Snackbar.LENGTH_LONG).show();
         // init the upload notification
         mNotifyManager = (NotificationManager) mActivity.getSystemService(Context.NOTIFICATION_SERVICE);
-        mBuilder = new NotificationCompat.Builder(mActivity)
+        mBuilder = new NotificationCompat.Builder(mActivity, FileTransferChannel.ID)
                 .setSmallIcon(android.R.drawable.stat_sys_upload)
                 .setColor(ContextCompat.getColor(mActivity, R.color.colorNotification))
                 .setContentTitle(new java.io.File(mFilePath).getName())

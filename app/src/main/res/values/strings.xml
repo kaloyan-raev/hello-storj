@@ -46,4 +46,6 @@
     <string name="upload_permission_denied">Read permission denied. Upload not possible.</string>
     <string name="upload_not_supported">Document provider not supported. Upload not possible.</string>
     <string name="register_confirmation_sent">Successfully registered %1$s, please check your email to confirm.</string>
+    <string name="channel_name">File Transfer</string>
+    <string name="channel_description">Notifications for downloading and uploading files</string>
 </resources>

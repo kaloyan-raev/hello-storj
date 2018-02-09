@@ -96,7 +96,7 @@ class FileDownloader implements DownloadFileCallback {
                 Snackbar.LENGTH_LONG).show();
         // init the download notification
         mNotifyManager = (NotificationManager) mActivity.getSystemService(Context.NOTIFICATION_SERVICE);
-        mBuilder = new NotificationCompat.Builder(mActivity)
+        mBuilder = new NotificationCompat.Builder(mActivity, FileTransferChannel.ID)
                 .setSmallIcon(android.R.drawable.stat_sys_download)
                 .setColor(ContextCompat.getColor(mActivity, R.color.colorNotification))
                 .setContentTitle(mFile.getName())

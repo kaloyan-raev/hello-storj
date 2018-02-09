@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Kaloyan Raev
+ * Copyright (C) 2017-2018 Kaloyan Raev
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
         View recyclerView = findViewById(R.id.main_list);
         assert recyclerView != null;
         setupRecyclerView((RecyclerView) recyclerView);
+
+        FileTransferChannel.create(this);
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
