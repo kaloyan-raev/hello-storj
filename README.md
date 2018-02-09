@@ -15,7 +15,6 @@ The app can be installed from Google Play.
 
 Requrirements:
 - Android 5.0 Lollipop or newer
-- armeabi-v7a compatible device (most phones and tablets)
 
 
 ## Features
@@ -30,6 +29,7 @@ Requrirements:
 * [x] Create bucket
 * [x] Upload files
 * [x] Register new user
+* [x] Cancel button for downloads and uploads
 
 ## License
 
