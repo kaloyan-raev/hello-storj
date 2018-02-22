@@ -106,14 +106,16 @@ class FileDownloader implements DownloadFileCallback {
         // trigger the download
         long state = StorjAndroid.getInstance(mActivity)
                 .downloadFile(mBucket, mFile, FileDownloader.this);
-        // intent for cancel action
-        Intent intent = new Intent(mActivity, CancelDownloadReceiver.class);
-        intent.putExtra(CancelDownloadReceiver.NOTIFICATION_ID, mFile.getId().hashCode());
-        intent.putExtra(CancelDownloadReceiver.DOWNLOAD_STATE, state);
-        PendingIntent cancelIntent = PendingIntent.getBroadcast(mActivity, mFile.getId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        // add cancel action to notification
-        mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
-        mNotifyManager.notify(mFile.getId().hashCode(), mBuilder.build());
+        if (state != 0) {
+            // intent for cancel action
+            Intent intent = new Intent(mActivity, CancelDownloadReceiver.class);
+            intent.putExtra(CancelDownloadReceiver.NOTIFICATION_ID, mFile.getId().hashCode());
+            intent.putExtra(CancelDownloadReceiver.DOWNLOAD_STATE, state);
+            PendingIntent cancelIntent = PendingIntent.getBroadcast(mActivity, mFile.getId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            // add cancel action to notification
+            mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
+            mNotifyManager.notify(mFile.getId().hashCode(), mBuilder.build());
+        }
     }
 
     @Override

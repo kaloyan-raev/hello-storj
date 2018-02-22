@@ -69,15 +69,17 @@ class FileUploader implements UploadFileCallback {
         // trigger the upload
         long state = StorjAndroid.getInstance(mActivity)
                 .uploadFile(mBucket, mFilePath, FileUploader.this);
-        // intent for cancel action
-        Intent intent = new Intent(mActivity, CancelUploadReceiver.class);
-        intent.putExtra(CancelUploadReceiver.NOTIFICATION_ID, mFilePath.hashCode());
-        intent.putExtra(CancelUploadReceiver.UPLOAD_STATE, state);
-        PendingIntent cancelIntent = PendingIntent.getBroadcast(
-                mActivity, mFilePath.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        // add cancel action to notification
-        mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
-        mNotifyManager.notify(mFilePath.hashCode(), mBuilder.build());
+        if (state != 0) {
+            // intent for cancel action
+            Intent intent = new Intent(mActivity, CancelUploadReceiver.class);
+            intent.putExtra(CancelUploadReceiver.NOTIFICATION_ID, mFilePath.hashCode());
+            intent.putExtra(CancelUploadReceiver.UPLOAD_STATE, state);
+            PendingIntent cancelIntent = PendingIntent.getBroadcast(
+                    mActivity, mFilePath.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            // add cancel action to notification
+            mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
+            mNotifyManager.notify(mFilePath.hashCode(), mBuilder.build());
+        }
     }
 
     @Override
