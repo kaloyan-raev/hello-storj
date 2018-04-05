@@ -7,8 +7,8 @@ android {
         applicationId "name.raev.kaloyan.hellostorj"
         minSdkVersion 21
         targetSdkVersion 26
-        versionCode 10
-        versionName "0.8"
+        versionCode 11
+        versionName "0.8.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
