@@ -190,7 +190,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
     }
 
     @Override
-    public void onFilesReceived(final File[] files) {
+    public void onFilesReceived(final String bucketId, final File[] files) {
         Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
@@ -212,7 +212,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
     }
 
     @Override
-    public void onError(final int code, final String message) {
+    public void onError(final String bucketId, final int code, final String message) {
         Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {

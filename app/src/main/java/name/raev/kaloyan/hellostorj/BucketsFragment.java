@@ -198,6 +198,11 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
     }
 
     @Override
+    public void onError(final String bucketName, final int code, final String message) {
+        onError(code, message);
+    }
+
+    @Override
     public void onError(final int code, final String message) {
         Activity activity = getActivity();
         if (activity != null) {
