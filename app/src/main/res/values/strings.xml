@@ -30,6 +30,7 @@
     <string name="error_keys_pass">Password can\'t be empty</string>
     <string name="error_keys_mnemonic">Invalid mnemonic</string>
     <string name="error_register_pass_dont_match">Passwords don\'t match</string>
+    <string name="error_invalid_url">Invalid Bridge URL</string>
     <string name="keys_import_success">Keys imported</string>
     <string name="keys_import_invalid_credentials">User and password don\'t match</string>
     <string name="keys_import_invalid_mnemonic">Encryption key cannot decrypt content</string>

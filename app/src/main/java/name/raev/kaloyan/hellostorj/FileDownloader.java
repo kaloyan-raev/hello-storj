@@ -30,6 +30,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
+import java.net.MalformedURLException;
 import java.net.URLConnection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -104,17 +105,21 @@ class FileDownloader implements DownloadFileCallback {
                 .setProgress(0, 0, true);
         mNotifyManager.notify(mFile.getId().hashCode(), mBuilder.build());
         // trigger the download
-        long state = StorjAndroid.getInstance(mActivity)
-                .downloadFile(mBucket, mFile, FileDownloader.this);
-        if (state != 0) {
-            // intent for cancel action
-            Intent intent = new Intent(mActivity, CancelDownloadReceiver.class);
-            intent.putExtra(CancelDownloadReceiver.NOTIFICATION_ID, mFile.getId().hashCode());
-            intent.putExtra(CancelDownloadReceiver.DOWNLOAD_STATE, state);
-            PendingIntent cancelIntent = PendingIntent.getBroadcast(mActivity, mFile.getId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            // add cancel action to notification
-            mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
-            mNotifyManager.notify(mFile.getId().hashCode(), mBuilder.build());
+        try {
+            long state = StorjAndroid.getInstance(mActivity, Fragments.URL)
+                    .downloadFile(mBucket, mFile, FileDownloader.this);
+            if (state != 0) {
+                // intent for cancel action
+                Intent intent = new Intent(mActivity, CancelDownloadReceiver.class);
+                intent.putExtra(CancelDownloadReceiver.NOTIFICATION_ID, mFile.getId().hashCode());
+                intent.putExtra(CancelDownloadReceiver.DOWNLOAD_STATE, state);
+                PendingIntent cancelIntent = PendingIntent.getBroadcast(mActivity, mFile.getId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                // add cancel action to notification
+                mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
+                mNotifyManager.notify(mFile.getId().hashCode(), mBuilder.build());
+            }
+        } catch (MalformedURLException e) {
+            onError(mFile.getId(), Storj.CURLE_URL_MALFORMAT, "Invalid Bridge URL: " + Fragments.URL);
         }
     }
 

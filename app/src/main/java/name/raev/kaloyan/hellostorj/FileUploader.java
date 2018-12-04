@@ -25,6 +25,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
+import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,18 +68,22 @@ class FileUploader implements UploadFileCallback {
                 .setProgress(0, 0, true);
         mNotifyManager.notify(mFilePath.hashCode(), mBuilder.build());
         // trigger the upload
-        long state = StorjAndroid.getInstance(mActivity)
-                .uploadFile(mBucket, mFilePath, FileUploader.this);
-        if (state != 0) {
-            // intent for cancel action
-            Intent intent = new Intent(mActivity, CancelUploadReceiver.class);
-            intent.putExtra(CancelUploadReceiver.NOTIFICATION_ID, mFilePath.hashCode());
-            intent.putExtra(CancelUploadReceiver.UPLOAD_STATE, state);
-            PendingIntent cancelIntent = PendingIntent.getBroadcast(
-                    mActivity, mFilePath.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            // add cancel action to notification
-            mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
-            mNotifyManager.notify(mFilePath.hashCode(), mBuilder.build());
+        try {
+            long state = StorjAndroid.getInstance(mActivity, Fragments.URL)
+                    .uploadFile(mBucket, mFilePath, FileUploader.this);
+            if (state != 0) {
+                // intent for cancel action
+                Intent intent = new Intent(mActivity, CancelUploadReceiver.class);
+                intent.putExtra(CancelUploadReceiver.NOTIFICATION_ID, mFilePath.hashCode());
+                intent.putExtra(CancelUploadReceiver.UPLOAD_STATE, state);
+                PendingIntent cancelIntent = PendingIntent.getBroadcast(
+                        mActivity, mFilePath.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                // add cancel action to notification
+                mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
+                mNotifyManager.notify(mFilePath.hashCode(), mBuilder.build());
+            }
+        } catch (MalformedURLException e) {
+            onError(mFilePath, Storj.CURLE_URL_MALFORMAT, "Invalid Bridge URL: " + Fragments.URL);
         }
     }
 

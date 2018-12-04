@@ -21,7 +21,7 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 
 public enum Fragments {
-    
+
     BROWSE(R.string.title_buckets, BucketsFragment.class),
     REGISTER(R.string.title_register, RegisterFragment.class),
     KEYS(R.string.title_keys, KeysFragment.class),
@@ -29,6 +29,8 @@ public enum Fragments {
     MNEMONIC(R.string.title_mnemonic, MnemonicFragment.class),
     TIMESTAMP(R.string.title_timestamp, TimestampFragment.class),
     LIBS(R.string.title_libs, LibsFragment.class);
+
+    public static String URL = "https://api.storj.io";
 
     private static final String TAG = "Fragments";
 

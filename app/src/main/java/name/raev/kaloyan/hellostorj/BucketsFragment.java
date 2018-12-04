@@ -33,12 +33,14 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.net.MalformedURLException;
 import java.util.Arrays;
 
 import io.storj.libstorj.Bucket;
 import io.storj.libstorj.CreateBucketCallback;
 import io.storj.libstorj.GetBucketsCallback;
 import io.storj.libstorj.KeysNotFoundException;
+import io.storj.libstorj.Storj;
 import io.storj.libstorj.android.StorjAndroid;
 
 /**
@@ -102,8 +104,12 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try {
-                    StorjAndroid.getInstance(getContext())
-                            .getBuckets(BucketsFragment.this);
+                    try {
+                        StorjAndroid.getInstance(getContext(), Fragments.URL)
+                                .getBuckets(BucketsFragment.this);
+                    } catch (MalformedURLException e) {
+                        onError(0, "Invalid Bridge URL: " + Fragments.URL);
+                    }
                 } catch (KeysNotFoundException e) {
                     showKeysError();
                 }
@@ -121,8 +127,12 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try {
-                    StorjAndroid.getInstance(getContext())
-                            .createBucket(name, BucketsFragment.this);
+                    try {
+                        StorjAndroid.getInstance(getContext(), Fragments.URL)
+                                .createBucket(name, BucketsFragment.this);
+                    } catch (MalformedURLException e) {
+                        onError(Storj.CURLE_URL_MALFORMAT, "Invalid Bridge URL: " + Fragments.URL);
+                    }
                 } catch (KeysNotFoundException e) {
                     showKeysError();
                 }

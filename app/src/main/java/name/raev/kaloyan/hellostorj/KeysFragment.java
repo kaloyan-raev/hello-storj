@@ -33,6 +33,7 @@ import io.storj.libstorj.Keys;
 import io.storj.libstorj.Storj;
 import io.storj.libstorj.android.StorjAndroid;
 
+import java.net.MalformedURLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -132,7 +133,13 @@ public class KeysFragment extends Fragment {
             String pass = params[1];
             String mnemonic = params[2];
 
-            Storj storj = StorjAndroid.getInstance(getContext());
+            Storj storj = null;
+            try {
+                storj = StorjAndroid.getInstance(getContext(), Fragments.URL);
+            } catch (MalformedURLException e) {
+                return R.string.error_invalid_url;
+            }
+
             try {
                 int result = storj.verifyKeys(new Keys(user, pass, mnemonic));
                 if (result != Storj.NO_ERROR) {

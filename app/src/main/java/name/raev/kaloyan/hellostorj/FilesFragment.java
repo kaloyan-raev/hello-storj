@@ -37,12 +37,14 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.net.MalformedURLException;
 import java.util.Arrays;
 
 import io.storj.libstorj.Bucket;
 import io.storj.libstorj.File;
 import io.storj.libstorj.KeysNotFoundException;
 import io.storj.libstorj.ListFilesCallback;
+import io.storj.libstorj.Storj;
 import io.storj.libstorj.android.StorjAndroid;
 import name.raev.kaloyan.hellostorj.utils.FileUtils;
 
@@ -118,8 +120,12 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try {
-                    StorjAndroid.getInstance(getContext())
-                            .listFiles(bucket, FilesFragment.this);
+                    try {
+                        StorjAndroid.getInstance(getContext(), Fragments.URL)
+                                .listFiles(bucket, FilesFragment.this);
+                    } catch (MalformedURLException e) {
+                        onError(bucket.getId(), Storj.CURLE_URL_MALFORMAT, "Invalid Bridge URL: " + Fragments.URL);
+                    }
                 } catch (KeysNotFoundException e) {
                     showKeysError();
                 }

@@ -29,10 +29,12 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.net.MalformedURLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.storj.libstorj.RegisterCallback;
+import io.storj.libstorj.Storj;
 import io.storj.libstorj.android.StorjAndroid;
 
 /**
@@ -126,8 +128,12 @@ public class RegisterFragment extends Fragment implements RegisterCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                StorjAndroid.getInstance(getContext())
-                        .register(user, pass, RegisterFragment.this);
+                try {
+                    StorjAndroid.getInstance(getContext(), Fragments.URL)
+                            .register(user, pass, RegisterFragment.this);
+                } catch (MalformedURLException e) {
+                    onError(Storj.CURLE_URL_MALFORMAT, "Invalid Bridge URL: " + Fragments.URL);
+                }
             }
         }.start();
     }

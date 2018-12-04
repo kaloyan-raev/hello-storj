@@ -27,7 +27,10 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.net.MalformedURLException;
+
 import io.storj.libstorj.GetInfoCallback;
+import io.storj.libstorj.Storj;
 import io.storj.libstorj.android.StorjAndroid;
 
 /**
@@ -73,8 +76,12 @@ public class BridgeInfoFragment extends Fragment implements GetInfoCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                StorjAndroid.getInstance(getContext())
-                        .getInfo(BridgeInfoFragment.this);
+                try {
+                    StorjAndroid.getInstance(getContext(), Fragments.URL)
+                            .getInfo(BridgeInfoFragment.this);
+                } catch (MalformedURLException e) {
+                    onError(Storj.CURLE_URL_MALFORMAT, "Invalid Bridge URL: " + Fragments.URL);
+                }
             }
         }.start();
     }
