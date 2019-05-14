@@ -13,24 +13,17 @@
         android:layout_marginTop="16dp"
         android:text="@string/description_keys" />
 
-    <EditText android:id="@+id/edit_user"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:inputType="textEmailAddress"
-        android:hint="@string/hint_keys_user" />
-
-    <EditText android:id="@+id/edit_pass"
+    <EditText android:id="@+id/edit_api_key"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
-        android:hint="@string/hint_keys_pass" />
+        android:hint="@string/hint_keys_api" />
 
-    <EditText android:id="@+id/edit_mnemonic"
+    <EditText android:id="@+id/edit_encryption_key"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textMultiLine|textPassword"
-        android:hint="@string/hint_keys_mnemonic" />
+        android:inputType="textPassword"
+        android:hint="@string/hint_keys_encryption" />
 
     <Button
         android:id="@+id/button"

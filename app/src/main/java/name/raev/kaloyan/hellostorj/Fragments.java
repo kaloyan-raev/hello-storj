@@ -23,14 +23,13 @@ import android.util.Log;
 public enum Fragments {
 
     BROWSE(R.string.title_buckets, BucketsFragment.class),
-    REGISTER(R.string.title_register, RegisterFragment.class),
     KEYS(R.string.title_keys, KeysFragment.class),
     BRIDGE_INFO(R.string.title_bridge_info, BridgeInfoFragment.class),
     MNEMONIC(R.string.title_mnemonic, MnemonicFragment.class),
     TIMESTAMP(R.string.title_timestamp, TimestampFragment.class),
     LIBS(R.string.title_libs, LibsFragment.class);
 
-    public static String URL = "https://api.storj.io";
+    public static String URL = "https://mars.tardigrade.io:7777";
 
     private static final String TAG = "Fragments";
 

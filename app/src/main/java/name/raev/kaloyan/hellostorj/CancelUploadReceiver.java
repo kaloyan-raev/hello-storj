@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import java.net.MalformedURLException;
 
@@ -40,13 +41,14 @@ public class CancelUploadReceiver extends BroadcastReceiver {
 
             try {
                 StorjAndroid.getInstance(context, Fragments.URL).cancelUpload(state);
-            } catch (MalformedURLException e) {
-                // do nothing
+                NotificationManager notifyManager = (NotificationManager)
+                        context.getSystemService(Context.NOTIFICATION_SERVICE);
+                if (notifyManager != null) {
+                    notifyManager.cancel(id);
+                }
+            } catch (Exception e) {
+                Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
             }
-
-            NotificationManager notifyManager = (NotificationManager)
-                    context.getSystemService(Context.NOTIFICATION_SERVICE);
-            notifyManager.cancel(id);
         }
     }
 }

@@ -34,10 +34,6 @@ import io.storj.libstorj.Storj;
 import io.storj.libstorj.android.StorjAndroid;
 
 import java.net.MalformedURLException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static android.webkit.ConsoleMessage.MessageLevel.LOG;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -62,44 +58,35 @@ public class KeysFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.content_keys, container, false);
 
-        final EditText userEdit = (EditText) rootView.findViewById(R.id.edit_user);
-        final EditText passEdit = (EditText) rootView.findViewById(R.id.edit_pass);
-        final EditText mnemonicEdit = (EditText) rootView.findViewById(R.id.edit_mnemonic);
+        final EditText apiKeyEdit = (EditText) rootView.findViewById(R.id.edit_api_key);
+        final EditText encryptionKeyEdit = (EditText) rootView.findViewById(R.id.edit_encryption_key);
 
         button = (Button) rootView.findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String user = userEdit.getText().toString();
-                String pass = passEdit.getText().toString();
-                String mnemonic = mnemonicEdit.getText().toString();
+                String apiKey = apiKeyEdit.getText().toString();
+                String encryptionKey = encryptionKeyEdit.getText().toString();
 
                 boolean error = false;
 
-                if (!isValidEmail(user)) {
-                    userEdit.setError(getText(R.string.error_keys_user));
+                if (isEmpty(apiKey)) {
+                    apiKeyEdit.setError(getText(R.string.error_keys_api_key));
                     error = true;
                 } else {
-                    userEdit.setError(null);
+                    apiKeyEdit.setError(null);
                 }
 
-                if (!isValidPassword(pass)) {
-                    passEdit.setError(getText(R.string.error_keys_pass));
+                if (isEmpty(encryptionKey)) {
+                    encryptionKeyEdit.setError(getText(R.string.error_keys_encryption_key));
                     error = true;
                 } else {
-                    passEdit.setError(null);
-                }
-
-                if (!isValidMnemonic(mnemonic)) {
-                    mnemonicEdit.setError(getText(R.string.error_keys_mnemonic));
-                    error = true;
-                } else {
-                    mnemonicEdit.setError(null);
+                    encryptionKeyEdit.setError(null);
                 }
 
                 if (!error) {
                     button.setEnabled(false);
                     progress.setVisibility(View.VISIBLE);
-                    new ImportKeysTask().execute(user, pass, mnemonic);
+                    new ImportKeysTask().execute(apiKey, encryptionKey);
                 }
             }
         });
@@ -111,27 +98,15 @@ public class KeysFragment extends Fragment {
         return rootView;
     }
 
-    private boolean isValidEmail(String email) {
-        String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
-        Pattern pattern = Pattern.compile(EMAIL_PATTERN);
-        Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
-    }
-
-    private boolean isValidPassword(String pass) {
-        return pass != null && pass.length() > 0;
-    }
-
-    private boolean isValidMnemonic(String mnemonic) {
-        return Storj.checkMnemonic(mnemonic);
+    private boolean isEmpty(String pass) {
+        return pass == null || pass.length() == 0;
     }
 
     private class ImportKeysTask extends AsyncTask<String, Void, Integer> {
         @Override
         protected Integer doInBackground(String... params) {
-            String user = params[0];
-            String pass = params[1];
-            String mnemonic = params[2];
+            String apiKey = params[0];
+            String encryptionKey = params[1];
 
             Storj storj = null;
             try {
@@ -141,7 +116,7 @@ public class KeysFragment extends Fragment {
             }
 
             try {
-                int result = storj.verifyKeys(new Keys(user, pass, mnemonic));
+                int result = storj.verifyKeys(new Keys(apiKey, encryptionKey));
                 if (result != Storj.NO_ERROR) {
                     switch (result) {
                         case Storj.HTTP_UNAUTHORIZED:
@@ -157,7 +132,7 @@ public class KeysFragment extends Fragment {
                 return R.string.keys_import_fail;
             }
 
-            if (!storj.importKeys(new Keys(user, pass, mnemonic), "")) {
+            if (!storj.importKeys(new Keys(apiKey, encryptionKey), "")) {
                 return R.string.keys_import_fail;
             }
 

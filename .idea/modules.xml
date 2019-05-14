@@ -3,7 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/HelloStorj.iml" filepath="$PROJECT_DIR$/HelloStorj.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../android-libstorj/android-libstorj/android-libstorj.iml" filepath="$PROJECT_DIR$/../android-libstorj/android-libstorj/android-libstorj.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hello-storj.iml" filepath="$PROJECT_DIR$/hello-storj.iml" />
     </modules>
   </component>
 </project>
