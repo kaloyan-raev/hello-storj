@@ -31,14 +31,20 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.ocpsoft.prettytime.PrettyTime;
+
 import java.net.MalformedURLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
 import io.storj.libstorj.Bucket;
 import io.storj.libstorj.File;
@@ -269,8 +275,16 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
         @Override
         public void onBindViewHolder(final ViewHolder holder, final int position) {
             File file = mFiles[position];
-            holder.mId.setText(file.getId());
             holder.mName.setText(file.getName());
+
+            try {
+                Date date = SimpleDateFormat.getDateTimeInstance().parse(file.getCreated());
+                holder.mInfo.setText(getContext().getString(R.string.file_list_info,
+                        Formatter.formatFileSize(getContext(), file.getSize()),
+                        new PrettyTime().format(date)));
+            } catch (ParseException e) {
+                holder.mInfo.setText(e.getMessage());
+            }
         }
 
         @Override
@@ -298,18 +312,18 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
-            final TextView mId;
             final TextView mName;
+            final TextView mInfo;
 
             ViewHolder(View view) {
                 super(view);
-                mId = (TextView) itemView.findViewById(android.R.id.text2);
                 mName = (TextView) itemView.findViewById(android.R.id.text1);
+                mInfo = (TextView) itemView.findViewById(android.R.id.text2);
             }
 
             @Override
             public String toString() {
-                return super.toString() + " " + mId.getText() + " " + mName.getText();
+                return super.toString() + " " + mName.getText();
             }
         }
     }

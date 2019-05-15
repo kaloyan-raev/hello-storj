@@ -30,4 +30,5 @@
     <string name="upload_not_supported">Document provider not supported. Upload not possible.</string>
     <string name="channel_name">File Transfer</string>
     <string name="channel_description">Notifications for downloading and uploading files</string>
+    <string name="file_list_info">%1$s\t\t\t\t\t\t%2$s</string>
 </resources>

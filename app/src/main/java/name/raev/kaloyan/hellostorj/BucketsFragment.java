@@ -33,8 +33,14 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.ocpsoft.prettytime.PrettyTime;
+
 import java.net.MalformedURLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
 import io.storj.libstorj.Bucket;
 import io.storj.libstorj.CreateBucketCallback;
@@ -278,8 +284,14 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
         @Override
         public void onBindViewHolder(final ViewHolder holder, final int position) {
             Bucket bucket = mBuckets[position];
-            holder.mId.setText(bucket.getId());
             holder.mName.setText(bucket.getName());
+
+            try {
+                Date date = SimpleDateFormat.getDateTimeInstance().parse(bucket.getCreated());
+                holder.mCreated.setText(new PrettyTime().format(date));
+            } catch (ParseException e) {
+                holder.mCreated.setText(e.getMessage());
+            }
         }
 
         @Override
@@ -300,18 +312,18 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
-            final TextView mId;
             final TextView mName;
+            final TextView mCreated;
 
             ViewHolder(View view) {
                 super(view);
-                mId = (TextView) itemView.findViewById(android.R.id.text2);
                 mName = (TextView) itemView.findViewById(android.R.id.text1);
+                mCreated = (TextView) itemView.findViewById(android.R.id.text2);
             }
 
             @Override
             public String toString() {
-                return super.toString() + " " + mId.getText() + " " + mName.getText();
+                return super.toString() + mName.getText();
             }
         }
     }
