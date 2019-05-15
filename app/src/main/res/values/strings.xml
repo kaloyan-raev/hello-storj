@@ -1,30 +1,17 @@
 <resources>
     <string name="app_name">Hello Storj</string>
     <string name="title_buckets">Browse</string>
-    <string name="title_register">Register</string>
     <string name="title_keys">Import keys</string>
-    <string name="title_bridge_info">Bridge info</string>
-    <string name="title_mnemonic">Generate mnemonic</string>
-    <string name="title_timestamp">Get timestamp</string>
-    <string name="title_libs">Native libraries</string>
     <string name="title_fileinfo">File info</string>
     <string name="title_new_bucket">New bucket</string>
     <string name="description_keys">Import your API key and encryption key for the Mars satellite</string>
-    <string name="description_register">Creates new bridge account with the storj_bridge_register() native function</string>
-    <string name="description_bridge_info">Storj bridge info retrieved with the storj_bridge_get_info() native function</string>
-    <string name="description_mnemonic">Mnemonic generated with the storj_mnemonic_generate() native function</string>
-    <string name="description_timestamp">Current UNIX timestamp retrieved with the storj_util_timestamp() native function</string>
     <string name="button_keys">Save</string>
-    <string name="button_register">Register</string>
-    <string name="button_mnemonic">Regenerate</string>
-    <string name="button_timestamp">Update</string>
     <string name="button_download">Download</string>
     <string name="hint_keys_api">API Key</string>
     <string name="hint_keys_encryption">Encryption key</string>
     <string name="hint_new_bucket_name">Bucket name</string>
     <string name="error_keys_api_key">API key can\'t be empty</string>
     <string name="error_keys_encryption_key">Encryption key can\'t be empty</string>
-    <string name="error_register_pass_dont_match">Passwords don\'t match</string>
     <string name="error_invalid_url">Invalid Bridge URL</string>
     <string name="keys_import_success">Keys imported</string>
     <string name="keys_import_invalid_credentials">User and password don\'t match</string>
@@ -41,7 +28,6 @@
     <string name="upload_complete">Upload complete. Touch to open bucket.</string>
     <string name="upload_permission_denied">Read permission denied. Upload not possible.</string>
     <string name="upload_not_supported">Document provider not supported. Upload not possible.</string>
-    <string name="register_confirmation_sent">Successfully registered %1$s, please check your email to confirm.</string>
     <string name="channel_name">File Transfer</string>
     <string name="channel_description">Notifications for downloading and uploading files</string>
 </resources>
