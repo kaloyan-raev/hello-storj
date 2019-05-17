@@ -2,7 +2,7 @@
 
 Hello Storj is a demo app for integrating the Android library for Storj. The focus is entirely on the integration and it is not intended to provide any meaningful usability and UX. Future user-focused apps may be based on this project.
 
-If you want to build a similar Android app, you can use the [android-libstorj](https://github.com/storj/android-libstorj) Gradle library. It provides everything you need for working with the Storj network: a Java API and pre-build native libraries for libstorj and all its dependencies. See the [android-libstorj](https://github.com/storj/android-libstorj) repo for instructions.
+If you want to build a similar Android app, you can use the [android-libstorj](https://github.com/storj/android-libstorj/tree/v3) Gradle library. It provides everything you need for working with the Storj network: a Java API and pre-build native libraries for libstorj and all its dependencies. See the [android-libstorj](https://github.com/storj/android-libstorj/tree/v3) repo for instructions.
 
 [![Downloading files video](http://img.youtube.com/vi/1082cipNheo/0.jpg)](http://www.youtube.com/watch?v=1082cipNheo)
 [![Uploading files video](http://img.youtube.com/vi/7h3rB0eByrU/0.jpg)](http://www.youtube.com/watch?v=7h3rB0eByrU)
