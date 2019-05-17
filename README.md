@@ -1,6 +1,6 @@
 # Hello Storj
 
-Hello Storj is a demo app for integrating the [libstorj](https://github.com/storj/libstorj) native library in Android. The focus is entirely on the integration and it is not intended to provide any meaningful usability and UX. Future user-focused apps may be based on this project.
+Hello Storj is a demo app for integrating the Android library for Storj. The focus is entirely on the integration and it is not intended to provide any meaningful usability and UX. Future user-focused apps may be based on this project.
 
 If you want to build a similar Android app, you can use the [android-libstorj](https://github.com/storj/android-libstorj) Gradle library. It provides everything you need for working with the Storj network: a Java API and pre-build native libraries for libstorj and all its dependencies. See the [android-libstorj](https://github.com/storj/android-libstorj) repo for instructions.
 
@@ -19,16 +19,13 @@ Requrirements:
 
 ## Features
 
-* [x] Call simple native function from libstorj (`storj_util_timestamp()`)
-* [x] Call native function and convert types (`storj_mnemonic_generate()`)
-* [x] Call native function with networking (`storj_bridge_get_info()`)
+* [x] Now works with Storj V3!
 * [x] Import account keys
 * [x] List buckets
 * [x] List files in the buckets
 * [x] Download files
 * [x] Create bucket
 * [x] Upload files
-* [x] Register new user
 * [x] Cancel button for downloads and uploads
 
 ## License
