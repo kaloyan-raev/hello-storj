@@ -102,6 +102,7 @@ class FileDownloader implements DownloadFileCallback {
                 .setColor(ContextCompat.getColor(mActivity, R.color.colorNotification))
                 .setContentTitle(mFile.getName())
                 .setContentText(mActivity.getResources().getString(R.string.app_name))
+                .setOnlyAlertOnce(true)
                 .setProgress(0, 0, true);
         mNotifyManager.notify(mFile.getId().hashCode(), mBuilder.build());
         // trigger the download

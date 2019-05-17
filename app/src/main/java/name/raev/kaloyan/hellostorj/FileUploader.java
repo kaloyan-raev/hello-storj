@@ -65,6 +65,7 @@ class FileUploader implements UploadFileCallback {
                 .setColor(ContextCompat.getColor(mActivity, R.color.colorNotification))
                 .setContentTitle(new java.io.File(mFilePath).getName())
                 .setContentText(mActivity.getResources().getString(R.string.app_name))
+                .setOnlyAlertOnce(true)
                 .setProgress(0, 0, true);
         mNotifyManager.notify(mFilePath.hashCode(), mBuilder.build());
         // trigger the upload
