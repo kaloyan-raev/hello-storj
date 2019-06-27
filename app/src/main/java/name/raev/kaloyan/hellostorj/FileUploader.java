@@ -133,6 +133,8 @@ class FileUploader implements UploadFileCallback {
         mBuilder.setProgress(0, 0, false)
                 .setSmallIcon(android.R.drawable.stat_notify_error)
                 .setContentText(msg)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(msg))
                 .mActions.clear();
         mNotifyManager.notify(filePath.hashCode(), mBuilder.build());
         // remove from last notified map
