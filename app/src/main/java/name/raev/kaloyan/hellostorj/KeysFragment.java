@@ -77,7 +77,7 @@ public class KeysFragment extends Fragment {
                 }
 
                 if (isEmpty(encryptionKey)) {
-                    encryptionKeyEdit.setError(getText(R.string.error_keys_encryption_key));
+                    encryptionKeyEdit.setError(getText(R.string.error_keys_encryption_context));
                     error = true;
                 } else {
                     encryptionKeyEdit.setError(null);
@@ -106,7 +106,7 @@ public class KeysFragment extends Fragment {
         @Override
         protected Integer doInBackground(String... params) {
             String apiKey = params[0];
-            String encryptionKey = params[1];
+            String encryptionContext = params[1];
 
             Storj storj = null;
             try {
@@ -116,7 +116,7 @@ public class KeysFragment extends Fragment {
             }
 
             try {
-                int result = storj.verifyKeys(new Keys(apiKey, encryptionKey));
+                int result = storj.verifyKeys(new Keys(apiKey, encryptionContext));
                 if (result != Storj.NO_ERROR) {
                     switch (result) {
                         case Storj.HTTP_UNAUTHORIZED:
@@ -132,7 +132,7 @@ public class KeysFragment extends Fragment {
                 return R.string.keys_import_fail;
             }
 
-            if (!storj.importKeys(new Keys(apiKey, encryptionKey), "")) {
+            if (!storj.importKeys(new Keys(apiKey, encryptionContext), "")) {
                 return R.string.keys_import_fail;
             }
 
