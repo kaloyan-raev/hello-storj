@@ -4,7 +4,7 @@
     <string name="title_keys">Import keys</string>
     <string name="title_fileinfo">File info</string>
     <string name="title_new_bucket">New bucket</string>
-    <string name="description_keys">Import your API key and encryption context for the Mars satellite</string>
+    <string name="description_keys">Import your API key and encryption context for the US-Central-1 satellite</string>
     <string name="button_keys">Save</string>
     <string name="button_download">Download</string>
     <string name="hint_keys_api">API Key</string>

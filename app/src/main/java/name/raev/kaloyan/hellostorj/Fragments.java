@@ -25,7 +25,7 @@ public enum Fragments {
     BROWSE(R.string.title_buckets, BucketsFragment.class),
     KEYS(R.string.title_keys, KeysFragment.class);
 
-    public static String URL = "https://mars.tardigrade.io:7777";
+    public static String URL = "https://us-central-1.tardigrade.io:7777";
 
     private static final String TAG = "Fragments";
 
