@@ -13,13 +13,19 @@
         android:layout_marginTop="16dp"
         android:text="@string/description_keys" />
 
+    <EditText android:id="@+id/edit_satellite_addr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPassword"
+        android:hint="@string/hint_keys_satellite_addr" />
+
     <EditText android:id="@+id/edit_api_key"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
         android:hint="@string/hint_keys_api" />
 
-    <EditText android:id="@+id/edit_encryption_key"
+    <EditText android:id="@+id/edit_passphrase"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPassword"

@@ -16,6 +16,9 @@
  */
 package name.raev.kaloyan.hellostorj;
 
+import static name.raev.kaloyan.hellostorj.Fragments.SCOPE;
+
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -25,21 +28,26 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
-import java.net.MalformedURLException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.storj.libstorj.Bucket;
-import io.storj.libstorj.File;
-import io.storj.libstorj.Storj;
-import io.storj.libstorj.UploadFileCallback;
-import io.storj.libstorj.android.StorjAndroid;
+import io.storj.Bucket;
+import io.storj.BucketInfo;
+import io.storj.ObjectInfo;
+import io.storj.Project;
+import io.storj.Scope;
+import io.storj.StorjException;
+import io.storj.Uplink;
 
-class FileUploader implements UploadFileCallback {
+class FileUploader {
 
     private Activity mActivity;
-    private Bucket mBucket;
+    private BucketInfo mBucket;
     private String mFilePath;
 
     private NotificationManager mNotifyManager;
@@ -47,7 +55,7 @@ class FileUploader implements UploadFileCallback {
 
     Map<String, Long> lastNotifiedMap = Collections.synchronizedMap(new HashMap<String, Long>());
 
-    FileUploader(Activity activity, Bucket bucket, String filePath) {
+    FileUploader(Activity activity, BucketInfo bucket, String filePath) {
         mActivity = activity;
         mBucket = bucket;
         mFilePath = filePath;
@@ -63,32 +71,31 @@ class FileUploader implements UploadFileCallback {
         mBuilder = new NotificationCompat.Builder(mActivity, FileTransferChannel.ID)
                 .setSmallIcon(android.R.drawable.stat_sys_upload)
                 .setColor(ContextCompat.getColor(mActivity, R.color.colorNotification))
-                .setContentTitle(new java.io.File(mFilePath).getName())
+                .setContentTitle(new File(mFilePath).getName())
                 .setContentText(mActivity.getResources().getString(R.string.app_name))
                 .setOnlyAlertOnce(true)
                 .setProgress(0, 0, true);
         mNotifyManager.notify(mFilePath.hashCode(), mBuilder.build());
         // trigger the upload
-        try {
-            long state = StorjAndroid.getInstance(mActivity, Fragments.URL)
-                    .uploadFile(mBucket, mFilePath, FileUploader.this);
-            if (state != 0) {
-                // intent for cancel action
-                Intent intent = new Intent(mActivity, CancelUploadReceiver.class);
-                intent.putExtra(CancelUploadReceiver.NOTIFICATION_ID, mFilePath.hashCode());
-                intent.putExtra(CancelUploadReceiver.UPLOAD_STATE, state);
-                PendingIntent cancelIntent = PendingIntent.getBroadcast(
-                        mActivity, mFilePath.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                // add cancel action to notification
-                mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
-                mNotifyManager.notify(mFilePath.hashCode(), mBuilder.build());
-            }
-        } catch (MalformedURLException e) {
-            onError(mFilePath, Storj.CURLE_URL_MALFORMAT, "Invalid Bridge URL: " + Fragments.URL);
+        try (Uplink uplink = new Uplink();
+             Project project = uplink.openProject(Scope.parse(SCOPE));
+             Bucket bucket = project.openBucket(mBucket.getName(), Scope.parse(SCOPE));
+             InputStream file = new FileInputStream(mFilePath)) {
+            bucket.uploadObject(new File(mFilePath).getName(), file);
+            // intent for cancel action
+            Intent intent = new Intent(mActivity, CancelUploadReceiver.class);
+            intent.putExtra(CancelUploadReceiver.NOTIFICATION_ID, mFilePath.hashCode());
+//            intent.putExtra(CancelUploadReceiver.UPLOAD_STATE, state);
+            PendingIntent cancelIntent = PendingIntent.getBroadcast(
+                    mActivity, mFilePath.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            // add cancel action to notification
+            mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
+            mNotifyManager.notify(mFilePath.hashCode(), mBuilder.build());
+        } catch (StorjException | IOException e) {
+            onError(mFilePath, 0, e.getMessage());
         }
     }
 
-    @Override
     public void onProgress(String filePath, double progress, long uploadedBytes, long totalBytes) {
         Long lastNotifiedTime = lastNotifiedMap.get(filePath);
         long now = System.currentTimeMillis();
@@ -102,8 +109,8 @@ class FileUploader implements UploadFileCallback {
         }
     }
 
-    @Override
-    public void onComplete(String filePath, File file) {
+    @SuppressLint("RestrictedApi")
+    public void onComplete(String filePath, ObjectInfo file) {
         Intent intent = new Intent(mActivity, FilesActivity.class);
         intent.putExtra(FilesFragment.BUCKET, mBucket);
         PendingIntent resultIntent =
@@ -120,16 +127,16 @@ class FileUploader implements UploadFileCallback {
                 .setContentIntent(resultIntent)
                 .setAutoCancel(true)
                 .mActions.clear();
-        mNotifyManager.notify(filePath.hashCode(), mBuilder.build());
+        mNotifyManager.notify(file.hashCode(), mBuilder.build());
         // remove from last notified map
         lastNotifiedMap.remove(filePath);
     }
 
-    @Override
+    @SuppressLint("RestrictedApi")
     public void onError(String filePath, int code, String message) {
-        String msg = (code == Storj.TRANSFER_CANCELED)
+        String msg = /*(code == Storj.TRANSFER_CANCELED)
                 ? "Upload canceled"
-                : String.format("Upload failed: %s (%d)", message, code);
+                :*/ String.format("Upload failed: %s (%d)", message, code);
         mBuilder.setProgress(0, 0, false)
                 .setSmallIcon(android.R.drawable.stat_notify_error)
                 .setContentText(msg)

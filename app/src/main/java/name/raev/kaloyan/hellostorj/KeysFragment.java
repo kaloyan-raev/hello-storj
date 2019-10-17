@@ -28,12 +28,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import java.io.IOException;
+import java.io.PrintWriter;
 
-import io.storj.libstorj.Keys;
-import io.storj.libstorj.Storj;
-import io.storj.libstorj.android.StorjAndroid;
-
-import java.net.MalformedURLException;
+import io.storj.ApiKey;
+import io.storj.EncryptionAccess;
+import io.storj.Key;
+import io.storj.Project;
+import io.storj.Scope;
+import io.storj.StorjException;
+import io.storj.Uplink;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -58,40 +62,51 @@ public class KeysFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.content_keys, container, false);
 
-        final EditText apiKeyEdit = (EditText) rootView.findViewById(R.id.edit_api_key);
-        final EditText encryptionKeyEdit = (EditText) rootView.findViewById(R.id.edit_encryption_key);
+        final EditText satelliteAddressEdit = rootView.findViewById(R.id.edit_satellite_addr);
+        final EditText apiKeyEdit = rootView.findViewById(R.id.edit_api_key);
+        final EditText passphraseEdit = rootView.findViewById(R.id.edit_passphrase);
 
-        button = (Button) rootView.findViewById(R.id.button);
+        button = rootView.findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String apiKey = apiKeyEdit.getText().toString();
-                String encryptionKey = encryptionKeyEdit.getText().toString();
+                String satelliteAddress = satelliteAddressEdit.getText().toString();
+                String serializedApiKey = apiKeyEdit.getText().toString();
+                String passphrase = passphraseEdit.getText().toString();
 
                 boolean error = false;
 
-                if (isEmpty(apiKey)) {
+                if (isEmpty(satelliteAddress)) {
+                    satelliteAddressEdit.setError(getText(R.string.error_keys_satellite_addr));
+                    error = true;
+                } else {
+                    satelliteAddressEdit.setError(null);
+                }
+
+                if (isEmpty(serializedApiKey)) {
                     apiKeyEdit.setError(getText(R.string.error_keys_api_key));
                     error = true;
                 } else {
                     apiKeyEdit.setError(null);
                 }
 
-                if (isEmpty(encryptionKey)) {
-                    encryptionKeyEdit.setError(getText(R.string.error_keys_encryption_context));
+                if (isEmpty(passphrase)) {
+                    passphraseEdit.setError(getText(R.string.error_keys_passphrase));
                     error = true;
                 } else {
-                    encryptionKeyEdit.setError(null);
+                    passphraseEdit.setError(null);
                 }
 
-                if (!error) {
-                    button.setEnabled(false);
-                    progress.setVisibility(View.VISIBLE);
-                    new ImportKeysTask().execute(apiKey, encryptionKey);
+                if (error) {
+                    return;
                 }
+
+                button.setEnabled(false);
+                progress.setVisibility(View.VISIBLE);
+                new ImportKeysTask().execute(satelliteAddress, serializedApiKey, passphrase);
             }
         });
 
-        progress = (ProgressBar) rootView.findViewById(R.id.progress);
+        progress = rootView.findViewById(R.id.progress);
 
         appContext = getActivity().getApplicationContext();
 
@@ -102,45 +117,38 @@ public class KeysFragment extends Fragment {
         return pass == null || pass.length() == 0;
     }
 
-    private class ImportKeysTask extends AsyncTask<String, Void, Integer> {
+    private Scope getScope(String satelliteAddress, String serializedApiKey, String passphrase) throws StorjException {
+        ApiKey apiKey = ApiKey.parse(serializedApiKey);
+        try (Uplink uplink = new Uplink();
+             Project project = uplink.openProject(satelliteAddress, apiKey)) {
+            Key saltedKey = Key.getSaltedKeyFromPassphrase(project, passphrase);
+            EncryptionAccess access = new EncryptionAccess(saltedKey);
+            return new Scope(satelliteAddress, apiKey, access);
+        }
+    }
+
+    private class ImportKeysTask extends AsyncTask<String, Void, String> {
         @Override
-        protected Integer doInBackground(String... params) {
-            String apiKey = params[0];
-            String encryptionContext = params[1];
-
-            Storj storj = null;
-            try {
-                storj = StorjAndroid.getInstance(getContext(), Fragments.URL);
-            } catch (MalformedURLException e) {
-                return R.string.error_invalid_url;
-            }
+        protected String doInBackground(String... params) {
+            String satelliteAddress = params[0];
+            String serializedApiKey = params[1];
+            String passphrase = params[2];
 
             try {
-                int result = storj.verifyKeys(new Keys(apiKey, encryptionContext));
-                if (result != Storj.NO_ERROR) {
-                    switch (result) {
-                        case Storj.HTTP_UNAUTHORIZED:
-                            return R.string.keys_import_invalid_credentials;
-                        case Storj.STORJ_META_DECRYPTION_ERROR:
-                            return R.string.keys_import_invalid_mnemonic;
-                        default:
-                            return R.string.keys_import_fail;
-                    }
+                Scope scope = getScope(satelliteAddress, serializedApiKey, passphrase);
+                try (PrintWriter file = new PrintWriter(getContext().getFilesDir(), "scope")) {
+                    file.print(scope.serialize());
                 }
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Verify keys interrupted", e);
-                return R.string.keys_import_fail;
+            } catch (StorjException | IOException e) {
+                Log.e(TAG, "Error importing keys", e);
+                return "Error importing keys: " + e.getMessage();
             }
 
-            if (!storj.importKeys(new Keys(apiKey, encryptionContext), "")) {
-                return R.string.keys_import_fail;
-            }
-
-            return R.string.keys_import_success;
+            return "Keys imported";
         }
 
         @Override
-        protected void onPostExecute(Integer message) {
+        protected void onPostExecute(String message) {
             button.setEnabled(true);
             progress.setVisibility(View.GONE);
 

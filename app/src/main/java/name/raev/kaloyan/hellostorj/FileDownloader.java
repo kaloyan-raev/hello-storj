@@ -16,7 +16,10 @@
  */
 package name.raev.kaloyan.hellostorj;
 
+import static name.raev.kaloyan.hellostorj.Fragments.SCOPE;
+
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.NotificationManager;
@@ -24,38 +27,44 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
-import java.net.MalformedURLException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URLConnection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.storj.libstorj.Bucket;
-import io.storj.libstorj.DownloadFileCallback;
-import io.storj.libstorj.File;
-import io.storj.libstorj.Storj;
-import io.storj.libstorj.android.StorjAndroid;
+import io.storj.Bucket;
+import io.storj.BucketInfo;
+import io.storj.ObjectInfo;
+import io.storj.Project;
+import io.storj.Scope;
+import io.storj.StorjException;
+import io.storj.Uplink;
 
-class FileDownloader implements DownloadFileCallback {
+class FileDownloader {
 
     static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private Activity mActivity;
-    private Bucket mBucket;
-    private File mFile;
+    private BucketInfo mBucket;
+    private ObjectInfo mFile;
 
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilder;
 
-    Map<String, Long> lastNotifiedMap = Collections.synchronizedMap(new HashMap<String, Long>());
+    private Map<ObjectInfo, Long> lastNotifiedMap = Collections.synchronizedMap(new HashMap<ObjectInfo, Long>());
 
-    FileDownloader(Activity activity, Bucket bucket, File file) {
+    FileDownloader(Activity activity, BucketInfo bucket, ObjectInfo file) {
         mActivity = activity;
         mBucket = bucket;
         mFile = file;
@@ -100,76 +109,76 @@ class FileDownloader implements DownloadFileCallback {
         mBuilder = new NotificationCompat.Builder(mActivity, FileTransferChannel.ID)
                 .setSmallIcon(android.R.drawable.stat_sys_download)
                 .setColor(ContextCompat.getColor(mActivity, R.color.colorNotification))
-                .setContentTitle(mFile.getName())
+                .setContentTitle(mFile.getPath())
                 .setContentText(mActivity.getResources().getString(R.string.app_name))
                 .setOnlyAlertOnce(true)
                 .setProgress(0, 0, true);
-        mNotifyManager.notify(mFile.getId().hashCode(), mBuilder.build());
+        mNotifyManager.notify(mFile.hashCode(), mBuilder.build());
         // trigger the download
-        try {
-            long state = StorjAndroid.getInstance(mActivity, Fragments.URL)
-                    .downloadFile(mBucket, mFile, FileDownloader.this);
-            if (state != 0) {
-                // intent for cancel action
-                Intent intent = new Intent(mActivity, CancelDownloadReceiver.class);
-                intent.putExtra(CancelDownloadReceiver.NOTIFICATION_ID, mFile.getId().hashCode());
-                intent.putExtra(CancelDownloadReceiver.DOWNLOAD_STATE, state);
-                PendingIntent cancelIntent = PendingIntent.getBroadcast(mActivity, mFile.getId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                // add cancel action to notification
-                mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
-                mNotifyManager.notify(mFile.getId().hashCode(), mBuilder.build());
-            }
-        } catch (MalformedURLException e) {
-            onError(mFile.getId(), Storj.CURLE_URL_MALFORMAT, "Invalid Bridge URL: " + Fragments.URL);
+        File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        String fileName = new File(mFile.getPath()).getName();
+        try (Uplink uplink = new Uplink();
+             Project project = uplink.openProject(Scope.parse(SCOPE));
+             Bucket bucket = project.openBucket(mBucket.getName(), Scope.parse(SCOPE));
+             OutputStream out = new FileOutputStream(new File(downloadDir, fileName))) {
+            bucket.downloadObject(mFile.getPath(), out);
+            // intent for cancel action
+            Intent intent = new Intent(mActivity, CancelDownloadReceiver.class);
+            intent.putExtra(CancelDownloadReceiver.NOTIFICATION_ID, mFile.hashCode());
+//            intent.putExtra(CancelDownloadReceiver.DOWNLOAD_STATE, state);
+            PendingIntent cancelIntent = PendingIntent.getBroadcast(mActivity, mFile.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            // add cancel action to notification
+            mBuilder.addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent);
+            mNotifyManager.notify(mFile.hashCode(), mBuilder.build());
+        } catch (StorjException | IOException e) {
+            onError(mFile, 0, e.getMessage());
         }
     }
 
-    @Override
-    public void onProgress(String fileId, double progress, long downloadedBytes, long totalBytes) {
-        Long lastNotifiedTime = lastNotifiedMap.get(fileId);
+    public void onProgress(ObjectInfo file, double progress, long downloadedBytes, long totalBytes) {
+        Long lastNotifiedTime = lastNotifiedMap.get(file);
         long now = System.currentTimeMillis();
 
         // check if 1 second elapsed since last notification or progress it at 100%
         if (progress == 1 || lastNotifiedTime == null || now > lastNotifiedTime + 1150) {
             mBuilder.setProgress(100, (int) (progress * 100), false);
-            mNotifyManager.notify(fileId.hashCode(), mBuilder.build());
+            mNotifyManager.notify(file.hashCode(), mBuilder.build());
             // update last notified map
-            lastNotifiedMap.put(fileId, now);
+            lastNotifiedMap.put(file, now);
         }
     }
 
-    @Override
-    public void onComplete(String fileId, String localPath) {
-        java.io.File file = new java.io.File(localPath);
+    public void onComplete(ObjectInfo file, String localPath) {
+        java.io.File localFile = new java.io.File(localPath);
         // hide the "download in progress" notification
-        mNotifyManager.cancel(fileId.hashCode());
+        mNotifyManager.cancel(file.hashCode());
         // show the "download completed" notification
         DownloadManager dm = (DownloadManager) mActivity.getSystemService(Context.DOWNLOAD_SERVICE);
-        dm.addCompletedDownload(file.getName(),
+        dm.addCompletedDownload(localFile.getName(),
                 mActivity.getResources().getString(R.string.app_name),
                 true,
-                getMimeType(file),
+                getMimeType(localFile),
                 localPath,
-                file.length(),
+                file.getSize(),
                 true);
         // remove from last notified map
-        lastNotifiedMap.remove(fileId);
+        lastNotifiedMap.remove(file);
     }
 
-    @Override
-    public void onError(String fileId, int code, String message) {
-        String msg = (code == Storj.TRANSFER_CANCELED)
+    @SuppressLint("RestrictedApi")
+    public void onError(ObjectInfo file, int code, String message) {
+        String msg = /*(code == Storj.TRANSFER_CANCELED)
                 ? "Download canceled"
-                : String.format("Download failed: %s (%d)", message, code);
+                : */String.format("Download failed: %s (%d)", message, code);
         mBuilder.setProgress(0, 0, false)
                 .setSmallIcon(android.R.drawable.stat_notify_error)
                 .setContentText(msg)
                 .setStyle(new NotificationCompat.BigTextStyle()
                         .bigText(msg))
                 .mActions.clear();
-        mNotifyManager.notify(fileId.hashCode(), mBuilder.build());
+        mNotifyManager.notify(file.hashCode(), mBuilder.build());
         // remove from last notified map
-        lastNotifiedMap.remove(fileId);
+        lastNotifiedMap.remove(file);
     }
 
     private String getMimeType(java.io.File file) {

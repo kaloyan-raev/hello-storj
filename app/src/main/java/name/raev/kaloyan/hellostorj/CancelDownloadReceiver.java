@@ -23,10 +23,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import java.net.MalformedURLException;
-
-import io.storj.libstorj.android.StorjAndroid;
-
 public class CancelDownloadReceiver extends BroadcastReceiver {
 
     public static final String NOTIFICATION_ID = "notificationId";
@@ -40,7 +36,7 @@ public class CancelDownloadReceiver extends BroadcastReceiver {
             long state = extras.getLong(DOWNLOAD_STATE);
 
             try {
-                StorjAndroid.getInstance(context, Fragments.URL).cancelDownload(state);
+//                StorjAndroid.getInstance(context, Fragments.URL).cancelDownload(state);
                 NotificationManager notifyManager = (NotificationManager)
                         context.getSystemService(Context.NOTIFICATION_SERVICE);
                 if (notifyManager != null) {

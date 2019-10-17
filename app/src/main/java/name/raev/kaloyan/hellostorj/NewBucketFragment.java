@@ -38,7 +38,7 @@ public class NewBucketFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View v = getActivity().getLayoutInflater().inflate(R.layout.content_new_bucket, null);
-        final EditText input = (EditText) v.findViewById(R.id.input);
+        final EditText input = v.findViewById(R.id.input);
 
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

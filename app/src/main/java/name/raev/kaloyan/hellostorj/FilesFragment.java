@@ -16,6 +16,8 @@
  */
 package name.raev.kaloyan.hellostorj;
 
+import static name.raev.kaloyan.hellostorj.Fragments.SCOPE;
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -40,18 +42,18 @@ import android.widget.TextView;
 
 import org.ocpsoft.prettytime.PrettyTime;
 
-import java.net.MalformedURLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import io.storj.libstorj.Bucket;
-import io.storj.libstorj.File;
-import io.storj.libstorj.KeysNotFoundException;
-import io.storj.libstorj.ListFilesCallback;
-import io.storj.libstorj.Storj;
-import io.storj.libstorj.android.StorjAndroid;
+import io.storj.Bucket;
+import io.storj.BucketInfo;
+import io.storj.ObjectInfo;
+import io.storj.Project;
+import io.storj.Scope;
+import io.storj.StorjException;
+import io.storj.Uplink;
 import name.raev.kaloyan.hellostorj.utils.FileUtils;
 
 import static android.app.Activity.RESULT_OK;
@@ -59,7 +61,7 @@ import static android.app.Activity.RESULT_OK;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class FilesFragment extends Fragment implements ListFilesCallback {
+public class FilesFragment extends Fragment {
 
     public static final String BUCKET = "bucket";
 
@@ -71,7 +73,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
     private ProgressBar mProgress;
     private TextView mStatus;
 
-    private Bucket mBucket;
+    private BucketInfo mBucket;
 
     private SimpleItemRecyclerViewAdapter mListAdapter;
 
@@ -87,13 +89,13 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.content_browse, container, false);
 
-        mList = (RecyclerView) rootView.findViewById(R.id.browse_list);
+        mList = rootView.findViewById(R.id.browse_list);
         setupRecyclerView(mList);
 
-        mProgress = (ProgressBar) rootView.findViewById(R.id.progress);
-        mStatus = (TextView) rootView.findViewById(R.id.status);
+        mProgress = rootView.findViewById(R.id.progress);
+        mStatus = rootView.findViewById(R.id.status);
 
-        FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        FloatingActionButton fab = rootView.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -105,7 +107,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
             }
         });
 
-        mBucket = (Bucket) getArguments().getSerializable(BUCKET);
+        mBucket = (BucketInfo) getArguments().getSerializable(BUCKET);
         listFiles(mBucket);
 
         return rootView;
@@ -116,7 +118,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
         recyclerView.setAdapter(mListAdapter);
     }
 
-    private void listFiles(final Bucket bucket) {
+    private void listFiles(final BucketInfo bucketInfo) {
         mProgress.setVisibility(View.VISIBLE);
         mList.setVisibility(View.GONE);
         mStatus.setVisibility(View.GONE);
@@ -125,15 +127,12 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                try {
-                    try {
-                        StorjAndroid.getInstance(getContext(), Fragments.URL)
-                                .listFiles(bucket, FilesFragment.this);
-                    } catch (MalformedURLException e) {
-                        onError(bucket.getId(), Storj.CURLE_URL_MALFORMAT, "Invalid Bridge URL: " + Fragments.URL);
-                    }
-                } catch (KeysNotFoundException e) {
-                    showKeysError();
+                try (Uplink uplink = new Uplink();
+                     Project project = uplink.openProject(Scope.parse(SCOPE));
+                     Bucket bucket = project.openBucket(bucketInfo.getName(), Scope.parse(SCOPE))) {
+                    onFilesReceived(bucket.listObjects());
+                } catch (StorjException e) {
+                    onError(e.getMessage());
                 }
             }
         }.start();
@@ -201,21 +200,19 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
         }
     }
 
-    @Override
-    public void onFilesReceived(final String bucketId, final File[] files) {
+    public void onFilesReceived(final Iterable<ObjectInfo> files) {
         Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mProgress.setVisibility(View.GONE);
-                    if (files.length == 0) {
+                    if (!files.iterator().hasNext()) {
                         mStatus.setText(R.string.browse_no_files);
                         mStatus.setVisibility(View.VISIBLE);
                     } else {
                         mList.setVisibility(View.VISIBLE);
                     }
-                    Arrays.sort(files);
                     mListAdapter.setFiles(files);
                     mListAdapter.notifyDataSetChanged();
                 }
@@ -223,8 +220,7 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
         }
     }
 
-    @Override
-    public void onError(final String bucketId, final int code, final String message) {
+    public void onError(final String message) {
         Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
@@ -257,11 +253,11 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>
             implements View.OnClickListener {
 
-        private File[] mFiles;
+        private List<ObjectInfo> mFiles;
 
         SimpleItemRecyclerViewAdapter()
         {
-            mFiles = new File[0];
+            mFiles = new ArrayList<>();
         }
 
         @Override
@@ -274,33 +270,31 @@ public class FilesFragment extends Fragment implements ListFilesCallback {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, final int position) {
-            File file = mFiles[position];
-            holder.mName.setText(file.getName());
-
-            try {
-                Date date = SimpleDateFormat.getDateTimeInstance().parse(file.getCreated());
-                holder.mInfo.setText(getContext().getString(R.string.file_list_info,
-                        Formatter.formatFileSize(getContext(), file.getSize()),
-                        new PrettyTime().format(date)));
-            } catch (ParseException e) {
-                holder.mInfo.setText(e.getMessage());
-            }
+            ObjectInfo file = mFiles.get(position);
+            holder.mName.setText(new File(file.getPath()).getName());
+            holder.mInfo.setText(getContext().getString(R.string.file_list_info,
+                    Formatter.formatFileSize(getContext(), file.getSize()),
+                    new PrettyTime().format(file.getCreated())));
         }
 
         @Override
         public int getItemCount() {
-            return mFiles.length;
+            return mFiles.size();
         }
 
-        public void setFiles(File[] files) {
-            mFiles = files;
+        void setFiles(Iterable<ObjectInfo> files) {
+            mFiles.clear();
+            for (ObjectInfo file : files) {
+                mFiles.add(file);
+            }
+            Collections.sort(mFiles);
         }
 
         @Override
         public void onClick(View v) {
             int position = mList.getChildAdapterPosition(v);
             if (position != RecyclerView.NO_POSITION) {
-                File file = mFiles[position];
+                ObjectInfo file = mFiles.get(position);
                 Bundle args = new Bundle();
                 args.putSerializable(BUCKET, mBucket);
                 args.putSerializable(FileInfoFragment.FILE, file);
