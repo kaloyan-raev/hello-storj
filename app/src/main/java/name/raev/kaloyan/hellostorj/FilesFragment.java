@@ -50,6 +50,7 @@ import java.util.List;
 import io.storj.Bucket;
 import io.storj.BucketInfo;
 import io.storj.ObjectInfo;
+import io.storj.ObjectListOption;
 import io.storj.Project;
 import io.storj.Scope;
 import io.storj.StorjException;
@@ -64,7 +65,6 @@ import static android.app.Activity.RESULT_OK;
 public class FilesFragment extends Fragment {
 
     public static final String BUCKET = "bucket";
-
 
     private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
     private static final int READ_REQUEST_CODE = 1;
@@ -130,7 +130,7 @@ public class FilesFragment extends Fragment {
                 try (Uplink uplink = new Uplink();
                      Project project = uplink.openProject(Scope.parse(SCOPE));
                      Bucket bucket = project.openBucket(bucketInfo.getName(), Scope.parse(SCOPE))) {
-                    onFilesReceived(bucket.listObjects());
+                    onFilesReceived(bucket.listObjects(ObjectListOption.recursive(true)));
                 } catch (StorjException e) {
                     onError(e.getMessage());
                 }
@@ -271,7 +271,7 @@ public class FilesFragment extends Fragment {
         @Override
         public void onBindViewHolder(final ViewHolder holder, final int position) {
             ObjectInfo file = mFiles.get(position);
-            holder.mName.setText(new File(file.getPath()).getName());
+            holder.mName.setText(file.getPath());
             holder.mInfo.setText(getContext().getString(R.string.file_list_info,
                     Formatter.formatFileSize(getContext(), file.getSize()),
                     new PrettyTime().format(file.getCreated())));
@@ -296,7 +296,6 @@ public class FilesFragment extends Fragment {
             if (position != RecyclerView.NO_POSITION) {
                 ObjectInfo file = mFiles.get(position);
                 Bundle args = new Bundle();
-                args.putSerializable(BUCKET, mBucket);
                 args.putSerializable(FileInfoFragment.FILE, file);
 
                 DialogFragment dialog = new FileInfoFragment();
@@ -311,8 +310,8 @@ public class FilesFragment extends Fragment {
 
             ViewHolder(View view) {
                 super(view);
-                mName = (TextView) itemView.findViewById(android.R.id.text1);
-                mInfo = (TextView) itemView.findViewById(android.R.id.text2);
+                mName = itemView.findViewById(android.R.id.text1);
+                mInfo = itemView.findViewById(android.R.id.text2);
             }
 
             @Override

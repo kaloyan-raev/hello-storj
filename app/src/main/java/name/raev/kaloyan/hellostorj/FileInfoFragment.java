@@ -34,13 +34,12 @@ public class FileInfoFragment extends DialogFragment {
     public static final String FILE = "file";
 
     interface DownloadListener {
-        void onDownload(BucketInfo bucket, ObjectInfo file);
+        void onDownload(ObjectInfo file);
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final BucketInfo bucket = (BucketInfo) getArguments().getSerializable(FilesFragment.BUCKET);
         final ObjectInfo file = (ObjectInfo) getArguments().getSerializable(FILE);
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -57,7 +56,7 @@ public class FileInfoFragment extends DialogFragment {
                                           file.getVersion()))
                 .setPositiveButton(R.string.button_download, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        ((DownloadListener) getActivity()).onDownload(bucket, file);
+                        ((DownloadListener) getActivity()).onDownload(file);
                     }
                 });
         // Create the AlertDialog object and return it
