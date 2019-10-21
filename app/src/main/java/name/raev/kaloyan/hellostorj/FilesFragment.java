@@ -42,7 +42,6 @@ import android.widget.TextView;
 
 import org.ocpsoft.prettytime.PrettyTime;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -239,8 +238,8 @@ public class FilesFragment extends Fragment {
         if (requestCode == READ_REQUEST_CODE && resultCode == RESULT_OK) {
             Uri uri = data.getData();
             String path = FileUtils.getPath(getContext(), uri);
-            if (path != null && FileUtils.isLocal(path)) {
-                new FileUploader(getActivity(), mBucket, path).upload();
+            if (FileUtils.isLocal(path)) {
+                new UploadTask(getActivity(), mBucket, path).execute();
             } else {
                 Snackbar.make(getActivity().findViewById(R.id.browse_list),
                         R.string.upload_not_supported,
