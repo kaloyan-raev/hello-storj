@@ -34,9 +34,9 @@ import io.storj.StorjException;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class KeysFragment extends Fragment {
+public class ScopeFragment extends Fragment {
 
-    private static final String TAG = "KeyFragment";
+    private static final String TAG = "ScopeFragment";
 
     private Button button;
     private ProgressBar progress;
@@ -46,46 +46,28 @@ public class KeysFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public KeysFragment() {
+    public ScopeFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.content_keys, container, false);
+        View rootView = inflater.inflate(R.layout.content_scope, container, false);
 
-        final EditText satelliteAddressEdit = rootView.findViewById(R.id.edit_satellite_addr);
-        final EditText apiKeyEdit = rootView.findViewById(R.id.edit_api_key);
-        final EditText passphraseEdit = rootView.findViewById(R.id.edit_passphrase);
+        final EditText serializedScopeEdit = rootView.findViewById(R.id.edit_serialized_scope);
 
         button = rootView.findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String satelliteAddress = satelliteAddressEdit.getText().toString();
-                String serializedApiKey = apiKeyEdit.getText().toString();
-                String passphrase = passphraseEdit.getText().toString();
+                String serializedScope = serializedScopeEdit.getText().toString();
 
                 boolean error = false;
 
-                if (isEmpty(satelliteAddress)) {
-                    satelliteAddressEdit.setError(getText(R.string.error_keys_satellite_addr));
+                if (isEmpty(serializedScope)) {
+                    serializedScopeEdit.setError(getText(R.string.error_scope_serialized));
                     error = true;
                 } else {
-                    satelliteAddressEdit.setError(null);
-                }
-
-                if (isEmpty(serializedApiKey)) {
-                    apiKeyEdit.setError(getText(R.string.error_keys_api_key));
-                    error = true;
-                } else {
-                    apiKeyEdit.setError(null);
-                }
-
-                if (isEmpty(passphrase)) {
-                    passphraseEdit.setError(getText(R.string.error_keys_passphrase));
-                    error = true;
-                } else {
-                    passphraseEdit.setError(null);
+                    serializedScopeEdit.setError(null);
                 }
 
                 if (error) {
@@ -94,7 +76,7 @@ public class KeysFragment extends Fragment {
 
                 button.setEnabled(false);
                 progress.setVisibility(View.VISIBLE);
-                new ImportKeysTask().execute(satelliteAddress, serializedApiKey, passphrase);
+                new ImportScopeTask().execute(serializedScope);
             }
         });
 
@@ -109,21 +91,19 @@ public class KeysFragment extends Fragment {
         return pass == null || pass.length() == 0;
     }
 
-    private class ImportKeysTask extends AsyncTask<String, Void, String> {
+    private class ImportScopeTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... params) {
-            String satelliteAddress = params[0];
-            String serializedApiKey = params[1];
-            String passphrase = params[2];
+            String serializedScope = params[0];
 
             try {
-                ScopeManager.setScope(getContext(), satelliteAddress, serializedApiKey, passphrase);
+                ScopeManager.setScope(getContext(), serializedScope);
             } catch (StorjException e) {
-                Log.e(TAG, "Error importing keys", e);
-                return "Error importing keys: " + e.getMessage();
+                Log.e(TAG, "Error importing scope", e);
+                return "Error importing scope: " + e.getMessage();
             }
 
-            return "Keys imported";
+            return "Scope imported";
         }
 
         @Override

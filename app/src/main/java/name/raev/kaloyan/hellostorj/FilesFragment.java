@@ -16,8 +16,6 @@
  */
 package name.raev.kaloyan.hellostorj;
 
-import static name.raev.kaloyan.hellostorj.Fragments.SCOPE;
-
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -51,7 +49,6 @@ import io.storj.BucketInfo;
 import io.storj.ObjectInfo;
 import io.storj.ObjectListOption;
 import io.storj.Project;
-import io.storj.Scope;
 import io.storj.StorjException;
 import io.storj.Uplink;
 import name.raev.kaloyan.hellostorj.utils.FileUtils;
@@ -127,11 +124,13 @@ public class FilesFragment extends Fragment {
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try (Uplink uplink = new Uplink();
-                     Project project = uplink.openProject(Scope.parse(SCOPE));
-                     Bucket bucket = project.openBucket(bucketInfo.getName(), Scope.parse(SCOPE))) {
+                     Project project = uplink.openProject(ScopeManager.getScope(getContext()));
+                     Bucket bucket = project.openBucket(bucketInfo.getName(), ScopeManager.getScope(getContext()))) {
                     onFilesReceived(bucket.listObjects(ObjectListOption.recursive(true)));
                 } catch (StorjException e) {
                     onError(e.getMessage());
+                } catch (ScopeNotFoundException e) {
+                    showScopeError();
                 }
             }
         }.start();
@@ -141,7 +140,7 @@ public class FilesFragment extends Fragment {
         startActivityForResult(FileUtils.createGetContentIntent(), READ_REQUEST_CODE);
     }
 
-    private void showKeysError() {
+    private void showScopeError() {
         final Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
@@ -162,7 +161,7 @@ public class FilesFragment extends Fragment {
                             } else {
                                 Context context = v.getContext();
                                 Intent intent = new Intent(context, DetailActivity.class);
-                                intent.putExtra(DetailActivity.EXTRA_INDEX, Fragments.KEYS.ordinal());
+                                intent.putExtra(DetailActivity.EXTRA_INDEX, Fragments.SCOPE.ordinal());
                                 context.startActivity(intent);
                             }
                         }

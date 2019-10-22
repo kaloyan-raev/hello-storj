@@ -23,14 +23,12 @@ import io.storj.Bucket;
 import io.storj.ObjectInfo;
 import io.storj.ObjectInputStream;
 import io.storj.Project;
-import io.storj.Scope;
 import io.storj.StorjException;
 import io.storj.Uplink;
 
-import static name.raev.kaloyan.hellostorj.Fragments.SCOPE;
-
 public class DownloadTask extends AsyncTask<Void, Long, Throwable> {
 
+    private Activity mActivity;
     private ObjectInfo mFile;
     private File mLocalFile;
     private String mAppName;
@@ -44,6 +42,7 @@ public class DownloadTask extends AsyncTask<Void, Long, Throwable> {
     private ObjectInputStream mInputStream;
 
     DownloadTask(Activity activity, ObjectInfo file) {
+        mActivity = activity;
         mFile = file;
 
         File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -53,20 +52,24 @@ public class DownloadTask extends AsyncTask<Void, Long, Throwable> {
         mAppName = activity.getResources().getString(R.string.app_name);
         mDownloadManager = (DownloadManager) activity.getSystemService(Context.DOWNLOAD_SERVICE);
         mNotificationId = mFile.hashCode();
+    }
+
+    @Override
+    protected void onPreExecute() {
         CancelDownloadReceiver.tasks.put(mNotificationId, this);
         // show snackbar for user to watch for download notifications
-        Snackbar.make(activity.findViewById(R.id.browse_list),
+        Snackbar.make(mActivity.findViewById(R.id.browse_list),
                 R.string.download_in_progress,
                 Snackbar.LENGTH_LONG).show();
         // intent for cancel action
-        Intent intent = new Intent(activity, CancelDownloadReceiver.class);
+        Intent intent = new Intent(mActivity, CancelDownloadReceiver.class);
         intent.putExtra(CancelDownloadReceiver.NOTIFICATION_ID, mNotificationId);
-        PendingIntent cancelIntent = PendingIntent.getBroadcast(activity, mNotificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent cancelIntent = PendingIntent.getBroadcast(mActivity, mNotificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         // init the download notification
-        mNotifyManager = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
-        mBuilder = new NotificationCompat.Builder(activity, FileTransferChannel.ID)
+        mNotifyManager = (NotificationManager) mActivity.getSystemService(Context.NOTIFICATION_SERVICE);
+        mBuilder = new NotificationCompat.Builder(mActivity, FileTransferChannel.ID)
                 .setSmallIcon(android.R.drawable.stat_sys_download)
-                .setColor(ContextCompat.getColor(activity, R.color.colorNotification))
+                .setColor(ContextCompat.getColor(mActivity, R.color.colorNotification))
                 .setContentTitle(mFile.getPath())
                 .setContentText(mAppName)
                 .setOnlyAlertOnce(true)
@@ -78,8 +81,8 @@ public class DownloadTask extends AsyncTask<Void, Long, Throwable> {
     @Override
     protected Exception doInBackground(Void... params) {
         try (Uplink uplink = new Uplink();
-             Project project = uplink.openProject(Scope.parse(SCOPE));
-             Bucket bucket = project.openBucket(mFile.getBucket(), Scope.parse(SCOPE));
+             Project project = uplink.openProject(ScopeManager.getScope(mActivity));
+             Bucket bucket = project.openBucket(mFile.getBucket(), ScopeManager.getScope(mActivity));
              ObjectInputStream in = new ObjectInputStream(bucket, mFile.getPath());
              OutputStream out = new FileOutputStream(mLocalFile)) {
             mInputStream = in;

@@ -16,8 +16,6 @@
  */
 package name.raev.kaloyan.hellostorj;
 
-import static name.raev.kaloyan.hellostorj.Fragments.SCOPE;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -43,7 +41,6 @@ import java.util.List;
 
 import io.storj.BucketInfo;
 import io.storj.Project;
-import io.storj.Scope;
 import io.storj.StorjException;
 import io.storj.Uplink;
 
@@ -108,10 +105,12 @@ public class BucketsFragment extends Fragment {
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try (Uplink uplink = new Uplink();
-                     Project project = uplink.openProject(Scope.parse(SCOPE))) {
+                     Project project = uplink.openProject(ScopeManager.getScope(getContext()))) {
                     onBucketsReceived(project.listBuckets());
                 } catch (StorjException e) {
                     onError(0, e.getMessage());
+                } catch (ScopeNotFoundException e) {
+                    showScopeError();
                 }
             }
         }.start();
@@ -127,16 +126,18 @@ public class BucketsFragment extends Fragment {
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 try (Uplink uplink = new Uplink();
-                     Project project = uplink.openProject(Scope.parse(SCOPE))) {
+                     Project project = uplink.openProject(ScopeManager.getScope(getContext()))) {
                     onBucketCreated(project.createBucket(name));
                 } catch (StorjException e) {
                     onError(0, e.getMessage());
+                } catch (ScopeNotFoundException e) {
+                    showScopeError();
                 }
             }
         }.start();
     }
 
-    private void showKeysError() {
+    private void showScopeError() {
         final Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
@@ -157,7 +158,7 @@ public class BucketsFragment extends Fragment {
                             } else {
                                 Context context = v.getContext();
                                 Intent intent = new Intent(context, DetailActivity.class);
-                                intent.putExtra(DetailActivity.EXTRA_INDEX, Fragments.KEYS.ordinal());
+                                intent.putExtra(DetailActivity.EXTRA_INDEX, Fragments.SCOPE.ordinal());
                                 context.startActivity(intent);
                             }
                         }

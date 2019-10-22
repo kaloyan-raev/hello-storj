@@ -20,12 +20,9 @@ import io.storj.Bucket;
 import io.storj.BucketInfo;
 import io.storj.ObjectOutputStream;
 import io.storj.Project;
-import io.storj.Scope;
 import io.storj.StorjException;
 import io.storj.Uplink;
 import io.storj.UplinkOption;
-
-import static name.raev.kaloyan.hellostorj.Fragments.SCOPE;
 
 public class UploadTask extends AsyncTask<Void, Long, Throwable> {
 
@@ -79,8 +76,8 @@ public class UploadTask extends AsyncTask<Void, Long, Throwable> {
     protected Exception doInBackground(Void... params) {
         String tempDir = mActivity.getCacheDir().getPath();
         try (Uplink uplink = new Uplink(UplinkOption.tempDir(tempDir));
-             Project project = uplink.openProject(Scope.parse(SCOPE));
-             Bucket bucket = project.openBucket(mBucket.getName(), Scope.parse(SCOPE));
+             Project project = uplink.openProject(ScopeManager.getScope(mActivity));
+             Bucket bucket = project.openBucket(mBucket.getName(), ScopeManager.getScope(mActivity));
              InputStream in = new FileInputStream(mFilePath);
              ObjectOutputStream out = new ObjectOutputStream(bucket, new File(mFilePath).getName())) {
             mOutputStream = out;

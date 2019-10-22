@@ -23,9 +23,8 @@ import android.util.Log;
 public enum Fragments {
 
     BROWSE(R.string.title_buckets, BucketsFragment.class),
-    KEYS(R.string.title_keys, KeysFragment.class);
-
-    public static String SCOPE = "1BzwvcREnhzC7qsXwZFqhKCkX6bqs7uvNpgSciVYwwyTwhY69S6SWUKGBDVZ2UFVmvpex7D9LiJTx7F6zu2fLqpYD4wV79BSX8KCZ6RFvP3gJeuku7VyhF61gt5mGhyVhMWRZToDEuUfgnjnEbsSLURfnXXNX97UW5RRMY73bY1xFmTM3yJvPFuxtdQShd65Jt2gtivv";
+    KEYS(R.string.title_keys, KeysFragment.class),
+    SCOPE(R.string.title_scope, ScopeFragment.class);
 
     private static final String TAG = "Fragments";
 
