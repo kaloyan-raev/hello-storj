@@ -115,7 +115,6 @@ public class UploadTask extends AsyncTask<Void, Long, Throwable> {
         if (progress == 100 || mLastNotifiedTime == 0 || now > mLastNotifiedTime + 1150) {
             mBuilder.setProgress(100, progress, false);
             mNotifyManager.notify(mNotificationId, mBuilder.build());
-            // update last notified map
             mLastNotifiedTime = now;
         }
     }
