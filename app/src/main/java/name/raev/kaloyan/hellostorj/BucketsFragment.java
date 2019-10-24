@@ -35,24 +35,19 @@ import android.widget.TextView;
 
 import org.ocpsoft.prettytime.PrettyTime;
 
-import java.net.MalformedURLException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import io.storj.libstorj.Bucket;
-import io.storj.libstorj.CreateBucketCallback;
-import io.storj.libstorj.GetBucketsCallback;
-import io.storj.libstorj.KeysNotFoundException;
-import io.storj.libstorj.Storj;
-import io.storj.libstorj.android.StorjAndroid;
+import io.storj.BucketInfo;
+import io.storj.Project;
+import io.storj.StorjException;
+import io.storj.Uplink;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class BucketsFragment extends Fragment implements GetBucketsCallback, CreateBucketCallback {
+public class BucketsFragment extends Fragment {
 
     private static final int NEW_BUCKET_FRAGMENT = 1;
 
@@ -74,13 +69,13 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.content_browse, container, false);
 
-        mList = (RecyclerView) rootView.findViewById(R.id.browse_list);
+        mList = rootView.findViewById(R.id.browse_list);
         setupRecyclerView(mList);
 
-        mProgress = (ProgressBar) rootView.findViewById(R.id.progress);
-        mStatus = (TextView) rootView.findViewById(R.id.status);
+        mProgress = rootView.findViewById(R.id.progress);
+        mStatus = rootView.findViewById(R.id.status);
 
-        FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        FloatingActionButton fab = rootView.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -109,15 +104,13 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                try {
-                    try {
-                        StorjAndroid.getInstance(getContext(), Fragments.URL)
-                                .getBuckets(BucketsFragment.this);
-                    } catch (MalformedURLException e) {
-                        onError(0, "Invalid Bridge URL: " + Fragments.URL);
-                    }
-                } catch (KeysNotFoundException e) {
-                    showKeysError();
+                try (Uplink uplink = new Uplink();
+                     Project project = uplink.openProject(ScopeManager.getScope(getContext()))) {
+                    onBucketsReceived(project.listBuckets());
+                } catch (StorjException e) {
+                    onError(0, e.getMessage());
+                } catch (ScopeNotFoundException e) {
+                    showScopeError();
                 }
             }
         }.start();
@@ -132,21 +125,19 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                try {
-                    try {
-                        StorjAndroid.getInstance(getContext(), Fragments.URL)
-                                .createBucket(name, BucketsFragment.this);
-                    } catch (MalformedURLException e) {
-                        onError(Storj.CURLE_URL_MALFORMAT, "Invalid Bridge URL: " + Fragments.URL);
-                    }
-                } catch (KeysNotFoundException e) {
-                    showKeysError();
+                try (Uplink uplink = new Uplink();
+                     Project project = uplink.openProject(ScopeManager.getScope(getContext()))) {
+                    onBucketCreated(project.createBucket(name));
+                } catch (StorjException e) {
+                    onError(0, e.getMessage());
+                } catch (ScopeNotFoundException e) {
+                    showScopeError();
                 }
             }
         }.start();
     }
 
-    private void showKeysError() {
+    private void showScopeError() {
         final Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
@@ -167,7 +158,7 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
                             } else {
                                 Context context = v.getContext();
                                 Intent intent = new Intent(context, DetailActivity.class);
-                                intent.putExtra(DetailActivity.EXTRA_INDEX, Fragments.KEYS.ordinal());
+                                intent.putExtra(DetailActivity.EXTRA_INDEX, Fragments.SCOPE.ordinal());
                                 context.startActivity(intent);
                             }
                         }
@@ -178,21 +169,19 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
         }
     }
 
-    @Override
-    public void onBucketsReceived(final Bucket[] buckets) {
+    public void onBucketsReceived(final Iterable<BucketInfo> buckets) {
         Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mProgress.setVisibility(View.GONE);
-                    if (buckets.length == 0) {
+                    if (!buckets.iterator().hasNext()) {
                         mStatus.setText(R.string.browse_no_buckets);
                         mStatus.setVisibility(View.VISIBLE);
                     } else {
                         mList.setVisibility(View.VISIBLE);
                     }
-                    Arrays.sort(buckets);
                     mListAdapter.setBuckets(buckets);
                     mListAdapter.notifyDataSetChanged();
                 }
@@ -200,8 +189,7 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
         }
     }
 
-    @Override
-    public void onBucketCreated(final Bucket bucket) {
+    public void onBucketCreated(final BucketInfo bucket) {
         Activity activity = getActivity();
         if (activity != null) {
             activity.runOnUiThread(new Runnable() {
@@ -213,12 +201,10 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
         }
     }
 
-    @Override
     public void onError(final String bucketName, final int code, final String message) {
         onError(code, message);
     }
 
-    @Override
     public void onError(final int code, final String message) {
         Activity activity = getActivity();
         if (activity != null) {
@@ -233,7 +219,7 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
         }
     }
 
-    private void openBucket(Bucket bucket) {
+    private void openBucket(BucketInfo bucket) {
         if (getResources().getBoolean(R.bool.twoPaneMode)) {
             FilesFragment fragment = new FilesFragment();
             Bundle bundle = new Bundle();
@@ -266,11 +252,11 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>
             implements View.OnClickListener {
 
-        private Bucket[] mBuckets;
+        private List<BucketInfo> mBuckets;
 
         SimpleItemRecyclerViewAdapter()
         {
-            mBuckets = new Bucket[0];
+            mBuckets = new ArrayList<>();
         }
 
         @Override
@@ -283,31 +269,29 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, final int position) {
-            Bucket bucket = mBuckets[position];
+            BucketInfo bucket = mBuckets.get(position);
             holder.mName.setText(bucket.getName());
-
-            try {
-                Date date = SimpleDateFormat.getDateTimeInstance().parse(bucket.getCreated());
-                holder.mCreated.setText(new PrettyTime().format(date));
-            } catch (ParseException e) {
-                holder.mCreated.setText(e.getMessage());
-            }
+            holder.mCreated.setText(new PrettyTime().format(bucket.getCreated()));
         }
 
         @Override
         public int getItemCount() {
-            return mBuckets.length;
+            return mBuckets.size();
         }
 
-        public void setBuckets(Bucket[] buckets) {
-            mBuckets = buckets;
+        void setBuckets(Iterable<BucketInfo> buckets) {
+            mBuckets.clear();
+            for (BucketInfo bucket : buckets) {
+                mBuckets.add(bucket);
+            }
+            Collections.sort(mBuckets);
         }
 
         @Override
         public void onClick(View v) {
             int position = mList.getChildAdapterPosition(v);
             if (position != RecyclerView.NO_POSITION) {
-                openBucket(mBuckets[position]);
+                openBucket(mBuckets.get(position));
             }
         }
 
@@ -317,8 +301,8 @@ public class BucketsFragment extends Fragment implements GetBucketsCallback, Cre
 
             ViewHolder(View view) {
                 super(view);
-                mName = (TextView) itemView.findViewById(android.R.id.text1);
-                mCreated = (TextView) itemView.findViewById(android.R.id.text2);
+                mName = itemView.findViewById(android.R.id.text1);
+                mCreated = itemView.findViewById(android.R.id.text2);
             }
 
             @Override

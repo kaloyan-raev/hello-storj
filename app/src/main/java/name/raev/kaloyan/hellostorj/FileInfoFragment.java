@@ -24,39 +24,39 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.text.format.Formatter;
 
-import io.storj.libstorj.Bucket;
-import io.storj.libstorj.File;
+import java.util.Locale;
+
+import io.storj.BucketInfo;
+import io.storj.ObjectInfo;
 
 public class FileInfoFragment extends DialogFragment {
 
     public static final String FILE = "file";
 
     interface DownloadListener {
-        void onDownload(Bucket bucket, File file);
+        void onDownload(ObjectInfo file);
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final Bucket bucket = (Bucket) getArguments().getSerializable(FilesFragment.BUCKET);
-        final File file = (File) getArguments().getSerializable(FILE);
+        final ObjectInfo file = (ObjectInfo) getArguments().getSerializable(FILE);
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.title_fileinfo)
-                .setMessage(String.format("ID: %s\nBucket: %s\nName: %s\nCreated: %s\nDecrypted: %b\nSize: %s\nMIME Type: %s\nErasure: %s\nIndex: %s\nHMAC: %s",
-                                          file.getId(),
-                                          file.getBucketId(),
-                                          file.getName(),
-                                          file.getCreated(),
-                                          file.isDecrypted(),
+                .setMessage(String.format(Locale.getDefault(),
+                                          "Bucket: %s\nPath: %s\nSize: %s\nContent Type: %s\nCreated: %s\nModified: %s\nExpires: %s\nVersion: %d",
+                                          file.getBucket(),
+                                          file.getPath(),
                                           Formatter.formatFileSize(getContext(), file.getSize()),
-                                          file.getMimeType(),
-                                          file.getErasure(),
-                                          file.getIndex(),
-                                          file.getHMAC()))
+                                          file.getContentType(),
+                                          file.getCreated(),
+                                          file.getModified(),
+                                          file.getExpires(),
+                                          file.getVersion()))
                 .setPositiveButton(R.string.button_download, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        ((DownloadListener) getActivity()).onDownload(bucket, file);
+                        ((DownloadListener) getActivity()).onDownload(file);
                     }
                 });
         // Create the AlertDialog object and return it

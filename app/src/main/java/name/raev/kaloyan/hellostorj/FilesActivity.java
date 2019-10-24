@@ -24,8 +24,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import io.storj.libstorj.Bucket;
-import io.storj.libstorj.File;
+import io.storj.BucketInfo;
+import io.storj.ObjectInfo;
 
 public class FilesActivity extends AppCompatActivity implements FileInfoFragment.DownloadListener {
 
@@ -58,7 +58,7 @@ public class FilesActivity extends AppCompatActivity implements FileInfoFragment
             // using a fragment transaction.
             Bundle extras = getIntent().getExtras();
             if (extras != null) {
-                Bucket bucket = (Bucket) extras.getSerializable(FilesFragment.BUCKET);
+                BucketInfo bucket = (BucketInfo) extras.getSerializable(FilesFragment.BUCKET);
                 setTitle(bucket.getName());
 
                 FilesFragment fragment = new FilesFragment();
@@ -104,8 +104,8 @@ public class FilesActivity extends AppCompatActivity implements FileInfoFragment
     }
 
     @Override
-    public void onDownload(Bucket bucket, File file) {
-        mDownloader = new FileDownloader(this, bucket, file);
+    public void onDownload(ObjectInfo file) {
+        mDownloader = new FileDownloader(this, file);
         mDownloader.download();
     }
 }

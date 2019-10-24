@@ -21,33 +21,27 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
-import java.net.MalformedURLException;
-
-import io.storj.libstorj.android.StorjAndroid;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CancelDownloadReceiver extends BroadcastReceiver {
 
-    public static final String NOTIFICATION_ID = "notificationId";
-    public static final String DOWNLOAD_STATE = "downloadState";
+    static final String NOTIFICATION_ID = "notificationId";
+    static ConcurrentHashMap<Integer, DownloadTask> tasks = new ConcurrentHashMap<>();
 
     @Override
     public void onReceive(Context context, Intent intent) {
         Bundle extras = intent.getExtras();
         if (extras != null) {
             int id = extras.getInt(NOTIFICATION_ID);
-            long state = extras.getLong(DOWNLOAD_STATE);
-
-            try {
-                StorjAndroid.getInstance(context, Fragments.URL).cancelDownload(state);
-                NotificationManager notifyManager = (NotificationManager)
-                        context.getSystemService(Context.NOTIFICATION_SERVICE);
-                if (notifyManager != null) {
-                    notifyManager.cancel(id);
-                }
-            } catch (Exception e) {
-                Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+            NotificationManager notifyManager = (NotificationManager)
+                    context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notifyManager != null) {
+                notifyManager.cancel(id);
+            }
+            DownloadTask task = tasks.get(id);
+            if (task != null) {
+                task.cancel();
             }
         }
     }
