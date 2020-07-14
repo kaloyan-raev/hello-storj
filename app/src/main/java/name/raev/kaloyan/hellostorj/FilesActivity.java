@@ -104,8 +104,8 @@ public class FilesActivity extends AppCompatActivity implements FileInfoFragment
     }
 
     @Override
-    public void onDownload(ObjectInfo file) {
-        mDownloader = new FileDownloader(this, file);
+    public void onDownload(String bucket, ObjectInfo file) {
+        mDownloader = new FileDownloader(this, bucket, file);
         mDownloader.download();
     }
 }

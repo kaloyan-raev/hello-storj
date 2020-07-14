@@ -31,10 +31,12 @@ class FileDownloader {
     static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private Activity mActivity;
+    private String mBucket;
     private ObjectInfo mFile;
 
-    FileDownloader(Activity activity, ObjectInfo file) {
+    FileDownloader(Activity activity, String bucket, ObjectInfo file) {
         mActivity = activity;
+        mBucket = bucket;
         mFile = file;
     }
 
@@ -68,7 +70,7 @@ class FileDownloader {
     }
 
     private void doDownload() {
-        new DownloadTask(mActivity, mFile).execute();
+        new DownloadTask(mActivity, mBucket, mFile).execute();
     }
 
 }

@@ -24,7 +24,7 @@ public enum Fragments {
 
     BROWSE(R.string.title_buckets, BucketsFragment.class),
     KEYS(R.string.title_keys, KeysFragment.class),
-    SCOPE(R.string.title_scope, ScopeFragment.class);
+    ACCESS(R.string.title_access, AccessFragment.class);
 
     private static final String TAG = "Fragments";
 

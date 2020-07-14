@@ -10,13 +10,13 @@ import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import io.storj.Bucket;
 import io.storj.BucketInfo;
 import io.storj.ObjectOutputStream;
 import io.storj.Project;
@@ -25,6 +25,8 @@ import io.storj.Uplink;
 import io.storj.UplinkOption;
 
 public class UploadTask extends AsyncTask<Void, Long, Throwable> {
+
+    private static final String TAG = "UploadTask";
 
     private Activity mActivity;
     private BucketInfo mBucket;
@@ -75,25 +77,30 @@ public class UploadTask extends AsyncTask<Void, Long, Throwable> {
     @Override
     protected Exception doInBackground(Void... params) {
         String tempDir = mActivity.getCacheDir().getPath();
-        try (Uplink uplink = new Uplink(UplinkOption.tempDir(tempDir));
-             Project project = uplink.openProject(ScopeManager.getScope(mActivity));
-             Bucket bucket = project.openBucket(mBucket.getName(), ScopeManager.getScope(mActivity));
+        Uplink uplink = new Uplink(UplinkOption.tempDir(tempDir));
+        try (Project project = uplink.openProject(AccessManager.getAccess(mActivity));
              InputStream in = new FileInputStream(mFilePath);
-             ObjectOutputStream out = new ObjectOutputStream(bucket, new File(mFilePath).getName())) {
+             ObjectOutputStream out = project.uploadObject(mBucket.getName(), new File(mFilePath).getName())) {
             mOutputStream = out;
             byte[] buffer = new byte[128 * 1024];
             int len;
-            while ((len = in.read(buffer)) != -1) {
-                if (isCancelled()) {
-                    out.cancel();
-                    return null;
+            try {
+                while ((len = in.read(buffer)) != -1) {
+                    if (isCancelled()) {
+                        out.abort();
+                        return null;
+                    }
+                    out.write(buffer, 0, len);
+                    if (isCancelled()) {
+                        out.abort();
+                        return null;
+                    }
+                    publishProgress((long) len);
                 }
-                out.write(buffer, 0, len);
-                if (isCancelled()) {
-                    out.cancel();
-                    return null;
-                }
-                publishProgress((long) len);
+                out.commit();
+            } catch (IOException e) {
+//                out.abort();
+                throw e;
             }
         } catch (StorjException | IOException e) {
             return e;
@@ -109,7 +116,7 @@ public class UploadTask extends AsyncTask<Void, Long, Throwable> {
 
         long now = System.currentTimeMillis();
 
-        int progress = (int) ((mUploadedBytes * 100) / mFileSize);
+        int progress = (mFileSize == 0) ? 100 : (int) ((mUploadedBytes * 100) / mFileSize);
 
         // check if 1 second elapsed since last notification or progress is at 100%
         if (progress == 100 || mLastNotifiedTime == 0 || now > mLastNotifiedTime + 1150) {
@@ -156,7 +163,11 @@ public class UploadTask extends AsyncTask<Void, Long, Throwable> {
 
     void cancel() {
         this.cancel(false);
-        mOutputStream.cancel();
+        try {
+            mOutputStream.abort();
+        } catch (IOException e) {
+            Log.e(TAG, "Error aborting upload", e);
+        }
     }
 
     @SuppressLint("RestrictedApi")

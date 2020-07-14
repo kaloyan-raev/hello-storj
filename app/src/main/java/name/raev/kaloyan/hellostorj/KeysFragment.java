@@ -117,7 +117,7 @@ public class KeysFragment extends Fragment {
             String passphrase = params[2];
 
             try {
-                ScopeManager.setScope(getContext(), satelliteAddress, serializedApiKey, passphrase);
+                AccessManager.setAccess(getContext(), satelliteAddress, serializedApiKey, passphrase);
             } catch (StorjException e) {
                 Log.e(TAG, "Error importing keys", e);
                 return "Error importing keys: " + e.getMessage();

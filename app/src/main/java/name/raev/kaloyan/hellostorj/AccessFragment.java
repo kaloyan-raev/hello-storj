@@ -34,9 +34,9 @@ import io.storj.StorjException;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class ScopeFragment extends Fragment {
+public class AccessFragment extends Fragment {
 
-    private static final String TAG = "ScopeFragment";
+    private static final String TAG = "AccessFragment";
 
     private Button button;
     private ProgressBar progress;
@@ -46,28 +46,28 @@ public class ScopeFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public ScopeFragment() {
+    public AccessFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.content_scope, container, false);
+        View rootView = inflater.inflate(R.layout.content_access, container, false);
 
-        final EditText serializedScopeEdit = rootView.findViewById(R.id.edit_serialized_scope);
+        final EditText serializedAccessEdit = rootView.findViewById(R.id.edit_serialized_scope);
 
         button = rootView.findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String serializedScope = serializedScopeEdit.getText().toString();
+                String serializedAccess = serializedAccessEdit.getText().toString();
 
                 boolean error = false;
 
-                if (isEmpty(serializedScope)) {
-                    serializedScopeEdit.setError(getText(R.string.error_scope_serialized));
+                if (isEmpty(serializedAccess)) {
+                    serializedAccessEdit.setError(getText(R.string.error_access_serialized));
                     error = true;
                 } else {
-                    serializedScopeEdit.setError(null);
+                    serializedAccessEdit.setError(null);
                 }
 
                 if (error) {
@@ -76,7 +76,7 @@ public class ScopeFragment extends Fragment {
 
                 button.setEnabled(false);
                 progress.setVisibility(View.VISIBLE);
-                new ImportScopeTask().execute(serializedScope);
+                new ImportScopeTask().execute(serializedAccess);
             }
         });
 
@@ -97,7 +97,7 @@ public class ScopeFragment extends Fragment {
             String serializedScope = params[0];
 
             try {
-                ScopeManager.setScope(getContext(), serializedScope);
+                AccessManager.setAccess(getContext(), serializedScope);
             } catch (StorjException e) {
                 Log.e(TAG, "Error importing scope", e);
                 return "Error importing scope: " + e.getMessage();
