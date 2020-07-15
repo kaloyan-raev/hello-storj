@@ -87,19 +87,16 @@ public class UploadTask extends AsyncTask<Void, Long, Throwable> {
             try {
                 while ((len = in.read(buffer)) != -1) {
                     if (isCancelled()) {
-                        out.abort();
                         return null;
                     }
                     out.write(buffer, 0, len);
                     if (isCancelled()) {
-                        out.abort();
                         return null;
                     }
                     publishProgress((long) len);
                 }
                 out.commit();
             } catch (IOException e) {
-//                out.abort();
                 throw e;
             }
         } catch (StorjException | IOException e) {
@@ -164,7 +161,7 @@ public class UploadTask extends AsyncTask<Void, Long, Throwable> {
     void cancel() {
         this.cancel(false);
         try {
-            mOutputStream.abort();
+            mOutputStream.close();
         } catch (IOException e) {
             Log.e(TAG, "Error aborting upload", e);
         }
