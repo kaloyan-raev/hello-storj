@@ -1,4 +1,3 @@
 include ':app'
-//include ':app', ':uplink-android', ':libuplink'
-//project(':uplink-android').projectDir=new File('/home/kaloyan/git/uplink-android/libuplink-android')
-//project(':libuplink').projectDir=new File('/home/kaloyan/git/uplink-android/libuplink')
+//include ':app', ':uplink-android'
+//project(':uplink-android').projectDir=new File('/home/kaloyan/git/uplink-android/uplink-android')
