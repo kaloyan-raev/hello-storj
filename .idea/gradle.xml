@@ -11,8 +11,6 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/../uplink-android/libuplink" />
-            <option value="$PROJECT_DIR$/../uplink-android/libuplink-android" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

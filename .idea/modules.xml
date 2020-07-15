@@ -4,8 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="hello-storj/app" />
       <module fileurl="file://$PROJECT_DIR$/hello-storj.iml" filepath="$PROJECT_DIR$/hello-storj.iml" group="hello-storj" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-19215006/libuplink.iml" filepath="$PROJECT_DIR$/.idea/modules/-19215006/libuplink.iml" group="hello-storj/libuplink" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/590177540/uplink-android.iml" filepath="$PROJECT_DIR$/.idea/modules/590177540/uplink-android.iml" group="hello-storj/uplink-android" />
     </modules>
   </component>
 </project>
