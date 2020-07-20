@@ -12,6 +12,7 @@ import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,7 +20,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLConnection;
 
-import io.storj.Bucket;
 import io.storj.ObjectInfo;
 import io.storj.ObjectInputStream;
 import io.storj.Project;
@@ -28,7 +28,10 @@ import io.storj.Uplink;
 
 public class DownloadTask extends AsyncTask<Void, Long, Throwable> {
 
+    private static final String TAG = "DownloadTask";
+
     private Activity mActivity;
+    private String mBucket;
     private ObjectInfo mFile;
     private File mLocalFile;
     private String mAppName;
@@ -41,12 +44,13 @@ public class DownloadTask extends AsyncTask<Void, Long, Throwable> {
 
     private ObjectInputStream mInputStream;
 
-    DownloadTask(Activity activity, ObjectInfo file) {
+    DownloadTask(Activity activity, String bucket, ObjectInfo file) {
         mActivity = activity;
+        mBucket = bucket;
         mFile = file;
 
         File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        String fileName = new File(mFile.getPath()).getName();
+        String fileName = new File(mFile.getKey()).getName();
         mLocalFile = new File(downloadDir, fileName);
 
         mAppName = activity.getResources().getString(R.string.app_name);
@@ -70,7 +74,7 @@ public class DownloadTask extends AsyncTask<Void, Long, Throwable> {
         mBuilder = new NotificationCompat.Builder(mActivity, FileTransferChannel.ID)
                 .setSmallIcon(android.R.drawable.stat_sys_download)
                 .setColor(ContextCompat.getColor(mActivity, R.color.colorNotification))
-                .setContentTitle(mFile.getPath())
+                .setContentTitle(mFile.getKey())
                 .setContentText(mAppName)
                 .setOnlyAlertOnce(true)
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Cancel", cancelIntent)
@@ -80,22 +84,20 @@ public class DownloadTask extends AsyncTask<Void, Long, Throwable> {
 
     @Override
     protected Exception doInBackground(Void... params) {
-        try (Uplink uplink = new Uplink();
-             Project project = uplink.openProject(ScopeManager.getScope(mActivity));
-             Bucket bucket = project.openBucket(mFile.getBucket(), ScopeManager.getScope(mActivity));
-             ObjectInputStream in = new ObjectInputStream(bucket, mFile.getPath());
+        try (Project project = new Uplink().openProject(AccessManager.getAccess(mActivity));
+             ObjectInputStream in = project.downloadObject(mBucket, mFile.getKey());
              OutputStream out = new FileOutputStream(mLocalFile)) {
             mInputStream = in;
             byte[] buffer = new byte[128 * 1024];
             int len;
             while ((len = in.read(buffer)) != -1) {
                 if (isCancelled()) {
-                    in.cancel();
+                    // exiting the try-with-resource block aborts the download process
                     return null;
                 }
                 out.write(buffer, 0, len);
                 if (isCancelled()) {
-                    in.cancel();
+                    // exiting the try-with-resource block aborts the download process
                     return null;
                 }
                 publishProgress((long) len);
@@ -114,7 +116,8 @@ public class DownloadTask extends AsyncTask<Void, Long, Throwable> {
 
         long now = System.currentTimeMillis();
 
-        int progress = (int) ((mDownloadedBytes * 100) / mFile.getSize());
+        long size = mFile.getSystemMetadata().getContentLength();
+        int progress = (size == 0) ? 100 : (int) ((mDownloadedBytes * 100) / size);
 
         // check if 1 second elapsed since last notification or progress is at 100%
         if (progress == 100 || mLastNotifiedTime == 0 || now > mLastNotifiedTime + 1150) {
@@ -141,7 +144,7 @@ public class DownloadTask extends AsyncTask<Void, Long, Throwable> {
                 true,
                 getMimeType(mLocalFile),
                 mLocalFile.getPath(),
-                mFile.getSize(),
+                mFile.getSystemMetadata().getContentLength(),
                 true);
     }
 
@@ -152,7 +155,11 @@ public class DownloadTask extends AsyncTask<Void, Long, Throwable> {
 
     void cancel() {
         this.cancel(false);
-        mInputStream.cancel();
+        try {
+            mInputStream.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Error aborting download", e);
+        }
     }
 
     private String getMimeType(java.io.File file) {

@@ -27,6 +27,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,6 +41,7 @@ import java.util.Collections;
 import java.util.List;
 
 import io.storj.BucketInfo;
+import io.storj.BucketIterator;
 import io.storj.Project;
 import io.storj.StorjException;
 import io.storj.Uplink;
@@ -49,11 +51,15 @@ import io.storj.Uplink;
  */
 public class BucketsFragment extends Fragment {
 
+    private static final String TAG = "BucketsFragment";
     private static final int NEW_BUCKET_FRAGMENT = 1;
 
     private RecyclerView mList;
     private ProgressBar mProgress;
     private TextView mStatus;
+
+    private Project mProject;
+    private BucketIterator mBuckets;
 
     private SimpleItemRecyclerViewAdapter mListAdapter;
 
@@ -90,6 +96,34 @@ public class BucketsFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onDestroyView() {
+        new Thread() {
+            @Override
+            public void run() {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                if (mBuckets != null) {
+                    try {
+                        mBuckets.close();
+                        mBuckets = null;
+                    } catch (StorjException e) {
+                        Log.e(TAG, "Error closing iterator", e);
+                    }
+                }
+                if (mProject != null) {
+                    try {
+                        mProject.close();
+                        mProject = null;
+                    } catch (StorjException e) {
+                        Log.e(TAG, "Error closing project", e);
+                    }
+                }
+            }
+        }.start();
+
+        super.onDestroyView();
+    }
+
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         mListAdapter = new SimpleItemRecyclerViewAdapter();
         recyclerView.setAdapter(mListAdapter);
@@ -104,9 +138,10 @@ public class BucketsFragment extends Fragment {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                try (Uplink uplink = new Uplink();
-                     Project project = uplink.openProject(ScopeManager.getScope(getContext()))) {
-                    onBucketsReceived(project.listBuckets());
+                try {
+                    mProject = new Uplink().openProject(AccessManager.getAccess(getContext()));
+                    mBuckets = mProject.listBuckets();
+                    onBucketsReceived(mBuckets);
                 } catch (StorjException e) {
                     onError(0, e.getMessage());
                 } catch (ScopeNotFoundException e) {
@@ -125,8 +160,7 @@ public class BucketsFragment extends Fragment {
             @Override
             public void run() {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-                try (Uplink uplink = new Uplink();
-                     Project project = uplink.openProject(ScopeManager.getScope(getContext()))) {
+                try (Project project = new Uplink().openProject(AccessManager.getAccess(getContext()))) {
                     onBucketCreated(project.createBucket(name));
                 } catch (StorjException e) {
                     onError(0, e.getMessage());
@@ -158,7 +192,7 @@ public class BucketsFragment extends Fragment {
                             } else {
                                 Context context = v.getContext();
                                 Intent intent = new Intent(context, DetailActivity.class);
-                                intent.putExtra(DetailActivity.EXTRA_INDEX, Fragments.SCOPE.ordinal());
+                                intent.putExtra(DetailActivity.EXTRA_INDEX, Fragments.ACCESS.ordinal());
                                 context.startActivity(intent);
                             }
                         }
@@ -172,11 +206,12 @@ public class BucketsFragment extends Fragment {
     public void onBucketsReceived(final Iterable<BucketInfo> buckets) {
         Activity activity = getActivity();
         if (activity != null) {
+            final boolean empty = !buckets.iterator().hasNext();
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mProgress.setVisibility(View.GONE);
-                    if (!buckets.iterator().hasNext()) {
+                    if (empty) {
                         mStatus.setText(R.string.browse_no_buckets);
                         mStatus.setVisibility(View.VISIBLE);
                     } else {

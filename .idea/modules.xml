@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/hello-storj.iml" filepath="$PROJECT_DIR$/hello-storj.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="hello-storj/app" />
+      <module fileurl="file://$PROJECT_DIR$/hello-storj.iml" filepath="$PROJECT_DIR$/hello-storj.iml" group="hello-storj" />
     </modules>
   </component>
 </project>
